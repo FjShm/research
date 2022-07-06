@@ -1,0 +1,12 @@
+"AA":
+  "type": "bond"
+  "function_type": "harmonic"
+  "P_target_path": "target/tar_bond-AA.dat"
+  "P_CG_path": "step_n/CG_bond-AA.dat"
+  "previous_params_filepath": "step_n/bond-AA.param"
+  "min": 2
+  "max": 5
+  "ratio": 0.01
+  "bounds":
+    - [0, 10]
+    - [2, 30]
