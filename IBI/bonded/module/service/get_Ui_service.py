@@ -8,12 +8,12 @@ class GetUi:
     U: Union[list, None]
     InputData: dict
 
-    def __init__(self, InputData: dict):
+    def __init__(self, InputData: dict) -> None:
         self.x = []
         self.U = []
         self.InputData = InputData
 
-    def get_Ui(self):
+    def get_Ui(self) -> None:
         self.x, self.U = GetUiAdapter(
             function_type=self.InputData["function_type"],
             previous_params_filepath=self.InputData["previous_params_filepath"],

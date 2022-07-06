@@ -11,7 +11,7 @@ class GetUiAdapter:
     Min: float
     Max: float
 
-    def __init__(self, function_type, previous_params_filepath, Min, Max):
+    def __init__(self, function_type: str, previous_params_filepath: str, Min: float, Max: float) -> None:
         self.function_type = function_type
         self.previous_params_filepath = previous_params_filepath
         self.Min = Min
@@ -19,9 +19,9 @@ class GetUiAdapter:
 
     def request(self):
         if self.previous_params_filepath is None:
-            x, U = GetUiNoneFacade()
+            x, U = GetUiNoneFacade()()
         elif self.function_type == "table":
-            x, U = GetUiTableFacade(self)
+            x, U = GetUiTableFacade()(self)
         else:
-            x, U = GetUiFunctionFacade(self)
+            x, U = GetUiFunctionFacade()(self)
         return x, U

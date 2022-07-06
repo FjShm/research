@@ -1,4 +1,3 @@
-from typing import Union
 from module.facade.get_distribution_facade import GetDistributionFacade
 from module.facade.get_distribution_none_facade import GetDistributionNoneFacade
 
@@ -8,13 +7,13 @@ class GetDistributionAdapter:
     path: str
     ratio: float
 
-    def __init__(self, path, ratio):
+    def __init__(self, path: str, ratio: float) -> None:
         self.path = path
         self.ratio = ratio
 
     def request(self):
         if self.path is None:
-            x, P = GetDistributionNoneFacade()
+            x, P = GetDistributionNoneFacade()()
         else:
-            x, P = GetDistributionFacade(self)
+            x, P = GetDistributionFacade()(self)
         return x, P

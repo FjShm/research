@@ -13,6 +13,6 @@ class GetUiFunctionFacade:
                 coeff = [float(val) for val in line.split(" ")]
                 break
         x = np.linspace(Min, Max, num=500)
-        func = PotentialFunctions(function_type)
+        func = PotentialFunctions()(function_type)
         U = func(x, *coeff)
         return list(x), list(U)

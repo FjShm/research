@@ -20,7 +20,7 @@ class CalcUip1:
     table: str
     InputData: dict
 
-    def __init__(self, InputData: dict, dist: GetDistribution, Ui: GetUi):
+    def __init__(self, InputData: dict, dist: GetDistribution, Ui: GetUi) -> None:
         self.__P_target = dist.target
         self.__P_CG = dist.CG
         self.__x_target = dist.x_target
@@ -29,7 +29,7 @@ class CalcUip1:
         self.__x_Ui = Ui.x
         self.InputData = InputData
 
-    def calc_Uip1(self):
+    def calc_Uip1(self) -> None:
         (
             self.x_new,
             self.Uip1,
