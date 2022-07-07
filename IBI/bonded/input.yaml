@@ -1,6 +1,8 @@
 "AA":
   "type": "bond"
   "function_type": "harmonic_bond"
+  "eval_type": "bonded"
+  "eval_sigma": 1
   "P_target_path": "target_distribution/bond_1.dat"
   "P_CG_path": "step_i/CG-Bond_1.hist.dat"
   "previous_params_filepath": "step_i/bond_1.param"

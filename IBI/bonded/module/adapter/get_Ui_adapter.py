@@ -1,4 +1,3 @@
-from typing import Union
 from module.facade.get_Ui_table_facade import GetUiTableFacade
 from module.facade.get_Ui_function_facade import GetUiFunctionFacade
 from module.facade.get_Ui_none_facade import GetUiNoneFacade
