@@ -18,18 +18,20 @@ class CalcUip1FunctionFacade:
         # fitting
         x = np.array(Uip1_adapter.x_new)
         func = PotentialFunctions()(Uip1_adapter.function_type)
-        popt, pcov = curve_fit(func, x, np.array(Uip1), bounds=Uip1_adapter.bounds)
+        popt, pcov = curve_fit(
+            func, x, np.array(Uip1), bounds=Uip1_adapter.bounds, maxfev=10000
+        )
         Uip1_fitting = list(func(x, *popt))
 
         # create LAMMPS table
         dfunc = PotentialFunctions()(Uip1_adapter.function_type, d=True)
         F = list(-dfunc(x, *popt))
 
-        table = LAMMPSPotentialTableIO("", "")
+        table = LAMMPSPotentialTableIO("", Uip1_adapter.section_name)
         table.x = list(x)
         table.E = Uip1_fitting
         table.F = F
-        table.create_table()
+        table.create_table(Min_=Uip1_adapter.Min, Max_=Uip1_adapter.Max)
         return Uip1, Uip1_fitting, popt, table.table
 
     def __IBI(self, Ui, P_target, P_CG):

@@ -1,3 +1,7 @@
+import numpy as np
+from typing import Union
+
+
 class LAMMPSPotentialTableIO:
 
     x: list
@@ -30,19 +34,31 @@ class LAMMPSPotentialTableIO:
                 if line == self.section_name:
                     ok = True
 
-    def create_table(self):
+    def create_table(
+        self, Min_: Union[float, None] = None, Max_: Union[float, None] = None
+    ):
         if len(self.x) == 0:
             print("There is no data to create as LAMMPS potential Table.")
         else:
+            x, E, F = self.x, self.E, self.F
             Min = min(self.x)
             Max = max(self.x)
-            N = len(self.x)
+            # linear extrapolation
+            if (Min_ is not None) and Min_ < Min:
+                E0 = F[0] * (x[0] - Min_) + E[0]
+                x, E, F = [Min_] + x, [E0] + E, [F[0]] + F
+                Min = Min_
+            if (Max_ is not None) and Max_ > Max:
+                En = F[-1] * (x[-1] - Max_) + E[-1]
+                x, E, F = x + [Max_], E + [En], F + [F[-1]]
+                Max = Max_
+            N = len(x)
             table = "# LAMMPS POTENTIAL TABLE\n\n"
             table += f"{self.section_name}\n"
             table += f"N {N} R {Min} {Max}\n"
             for i in range(N):
                 n = i + 1
-                table += f"{n} {self.x[i]} {self.E[i]} {self.F[i]}\n"
+                table += f"{n} {x[i]} {E[i]} {F[i]}\n"
             self.table = table
 
     def write(self):

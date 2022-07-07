@@ -12,8 +12,22 @@ class CalcUip1Adapter:
     P_CG: list
     Ui: list
 
-    def __init__(self, function_type: str, bounds: tuple, x_target: list, x_CG: Union[list, None], x_Ui: Union[list, None], P_target: list, P_CG: Union[list, None], Ui: Union[list, None]):
+    def __init__(
+        self,
+        function_type: str,
+        section_name: str,
+        bounds: tuple,
+        x_target: list,
+        x_CG: Union[list, None],
+        x_Ui: Union[list, None],
+        P_target: list,
+        P_CG: Union[list, None],
+        Ui: Union[list, None],
+        Min: Union[float, None],
+        Max: Union[float, None],
+    ) -> None:
         self.function_type = function_type
+        self.section_name = section_name
         self.P_target = P_target
         self.P_CG = P_CG
         self.Ui = Ui
@@ -21,6 +35,8 @@ class CalcUip1Adapter:
         self.x_CG = x_CG
         self.x_Ui = x_Ui
         self.bounds = bounds
+        self.Min = Min
+        self.Max = Max
 
     def request(self):
         # x-axisが揃うように線形補間

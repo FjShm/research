@@ -1,4 +1,9 @@
-from module.contents.functions.harmonic import harmonic, dharmonic
+from module.contents.functions.harmonic import (
+    harmonic_bond,
+    harmonic_angle,
+    dharmonic_bond,
+    dharmonic_angle,
+)
 from module.contents.functions.gaussian import gaussian, dgaussian
 from module.contents.functions.nharmonic5 import nharmonic5, dnharmonic5
 from module.contents.functions.nharmonic7 import nharmonic7, dnharmonic7
@@ -6,11 +11,16 @@ from module.contents.functions.nharmonic7 import nharmonic7, dnharmonic7
 
 class PotentialFunctions:
     def __call__(self, func_name: str, d=False):
-        if func_name == "harmonic":
+        if func_name == "harmonic_angle":
             if d:
-                return dharmonic
+                return dharmonic_angle
             else:
-                return harmonic
+                return harmonic_angle
+        if func_name == "harmonic_bond":
+            if d:
+                return dharmonic_bond
+            else:
+                return harmonic_bond
         elif func_name == "gaussian":
             if d:
                 return dgaussian

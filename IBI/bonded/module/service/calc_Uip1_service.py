@@ -38,6 +38,7 @@ class CalcUip1:
             self.table,
         ) = CalcUip1Adapter(
             function_type=self.InputData["function_type"],
+            section_name=self.InputData["section_name"],
             bounds=tuple(self.InputData["bounds"]),
             x_target=self.__x_target,
             x_CG=self.__x_CG,
@@ -45,4 +46,6 @@ class CalcUip1:
             P_target=self.__P_target,
             P_CG=self.__P_CG,
             Ui=self.__Ui,
+            Min=self.InputData["min"],
+            Max=self.InputData["max"],
         ).request()

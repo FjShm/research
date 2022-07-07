@@ -18,7 +18,7 @@ class CalcUip1TableFacade:
         # create LAMMPS table
         F = self.__deriv(x, Uip1)
 
-        table = LAMMPSPotentialTableIO("", "")
+        table = LAMMPSPotentialTableIO("", Uip1_adapter.section_name)
         table.x = list(x)
         table.E = Uip1
         table.F = F

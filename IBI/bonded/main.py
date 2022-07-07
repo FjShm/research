@@ -45,6 +45,7 @@ if __name__ == "__main__":
         for key, val in InputData_.items():
             if val is not None:
                 InputData[key] = val
+        InputData["section_name"] = f"{InputData['type']}-{pair_name}"
 
         # get P_target, P_CG
         dist = GetDistribution(InputData)
@@ -62,22 +63,28 @@ if __name__ == "__main__":
         output_dir = InputData["output_dir"]
         os.makedirs(output_dir, exist_ok=True)
         if InputData["function_type"] != "table":
-            output_coeff_fname = os.path.basename(InputData["previous_params_filepath"])
+            if InputData["previous_params_filepath"] is not None:
+                output_coeff_fname = os.path.basename(
+                    InputData["previous_params_filepath"]
+                )
+            else:
+                output_coeff_fname = f"{InputData['section_name']}.param"
             with open(os.path.join(output_dir, output_coeff_fname), mode="w") as f:
                 out_str = ""
                 for coeff in Uip1.coeff:
                     out_str += f"{coeff} "
                 out_str = out_str[:-1]
                 f.write(out_str)
-        else:
-            with open(os.path.join(output_dir, f"{pair_name}.table"), mode="w") as f:
-                f.write(Uip1.table)
+        # else:
+        with open(os.path.join(output_dir, f"{pair_name}.table"), mode="w") as f:
+            f.write(Uip1.table)
 
         # plot
         fig = plt.figure()
         ax = fig.add_subplot(111)
         if InputData["function_type"] != "table":
-            ax.plot(Ui.x, Ui.U, color="k", label=r"$U_i$")
+            if Ui.U is not None:
+                ax.plot(Ui.x, Ui.U, color="k", label=r"$U_i$")
             ax.plot(
                 Uip1.x_new, Uip1.Uip1, color="g", label=r"$U_{i+1}$", linestyle="dashed"
             )
@@ -88,9 +95,11 @@ if __name__ == "__main__":
                 label=r"$U_{i+1}{\rm -fitting}$",
             )
         else:
-            ax.plot(Ui.x, Ui.U, color="k", label=r"$U_i$")
+            if Ui.U is not None:
+                ax.plot(Ui.x, Ui.U, color="k", label=r"$U_i$")
             ax.plot(Uip1.x_new, Uip1.Uip1, color="r", label=r"$U_{i+1}$")
         ax.legend()
         fig.savefig(
-            os.path.join(output_dir, f"{InputData['type']}-{pair_name}.png"), bbox_inches="tight"
+            os.path.join(output_dir, f"{InputData['type']}-{pair_name}.png"),
+            bbox_inches="tight",
         )
