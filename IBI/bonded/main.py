@@ -7,6 +7,7 @@ import pprint
 
 from module.service.get_distribution_service import GetDistribution
 from module.service.get_Ui_service import GetUi
+from module.service.evaluate_function_service import EvaluateFunction
 from module.service.calc_Uip1_service import CalcUip1
 
 
@@ -20,6 +21,8 @@ def default_input_data():
     InputData = {
         "type": None,
         "function_type": None,
+        "eval_type": "bonded",
+        "eval_sigma": 1,
         "P_target_path": None,
         "P_CG_path": None,
         "previous_params_filepath": None,
@@ -50,6 +53,12 @@ if __name__ == "__main__":
         # get P_target, P_CG
         dist = GetDistribution(InputData)
         dist.get_distribution()
+
+        # evaluate function
+        evaluater = EvaluateFunction(InputData, dist).evaluate()
+        if evaluater.f is not None:
+            print(f"\nevaluation function type: {InputData['eval_type']}")
+            print(f"The evaluation function f for P_i and P_target is {evaluater.f}")
 
         # get_Ui
         Ui = GetUi(InputData)
@@ -103,3 +112,6 @@ if __name__ == "__main__":
             os.path.join(output_dir, f"{InputData['type']}-{pair_name}.png"),
             bbox_inches="tight",
         )
+
+
+    print("\n\n--- Succeeded!! ---\n")
