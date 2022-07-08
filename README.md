@@ -1,9 +1,9 @@
 # research/IBI program
 
 ## IBI program
-Program to **calculate the potential of step_i+1** from the distribution P of step_i.\
+Program to **calculate the potential of ${\rm step}\ i+1$** from the distribution P of ${\rm step}\ i$.\
 **BI** as well as **IBI** are possible.\
-P_i and P_target **agreement** can also be evaluated.
+$P_i$ and $P_{\rm target}$ **agreement** can also be evaluated.
 
 ### How to use
 - Preparations
@@ -86,7 +86,7 @@ P_i and P_target **agreement** can also be evaluated.
     - [nharmonic5](https://docs.lammps.org/dihedral_nharmonic.html)
     - [nharmonic7](https://docs.lammps.org/dihedral_nharmonic.html)
 - pair
-    - polynominal (coming soon)
+    - polynominal
 
 ---
 
@@ -156,19 +156,16 @@ This program truncates values less than (ratio) × (the maximum value of the his
 #### main
 ```python=
 # get P_target, P_CG
-dist = GetDistribution(InputData)
-dist.get_distribution()
+dist = GetDistribution(InputData).get_distribution()
 
 # get_Ui
-Ui = GetUi(InputData)
-Ui.get_Ui()
+Ui = GetUi(InputData).get_Ui()
 
 # evaluation function
-# <not yet installed>
+evaluater = EvaluateFunction(InputData, dist).evaluate()
 
 # IBI
-Uip1 = CalcUip1(InputData, dist, Ui)
-Uip1.calc_Uip1()
+Uip1 = CalcUip1(InputData, dist, Ui).calc_Uip1()
 
 # save potential coefficients and table
 # plot U_i, U_(i+1), U_(i+1)-fitting
@@ -185,17 +182,17 @@ class GetDistribution{
     x_CG: list
     target: list
     CG: list
-    get_distribution(self)
+    get_distribution()
 }
 
 class GetDistributionAdapter{
     path: str
     ratio: float
-    request(self)
+    request()
 }
 
 class GetDistributionFacade{
-    __call__(self, adapter)
+    __call__(adapter)
 }
 
 class GetDistributionNoneFacade{
@@ -223,15 +220,15 @@ class GetUiAdapter{
     privious_params_filepath: str
     Min: float
     Max: float
-    request(self)
+    request()
 }
 
 class GetUiTableFacade{
-    __call__(self, adapter)
+    __call__(adapter)
 }
 
 class GetUiFunctionFacade{
-    __call__(self, adapter)
+    __call__(adapter)
 }
 
 class GetUiNoneFacade{
@@ -246,9 +243,12 @@ GetUiAdapter --> GetUiNoneFacade
 
 #### Evaluate Function Service
 $$
-f_{\rm non-bond}=\int_r \exp{(-r/\sigma)}\left(P_{\rm target}(r)-P_{\rm CG}(r)\right)^2{\rm d}r \\
+f_{\rm non-bond}=\int_r \exp{(-r/\sigma)}\left(P_{\rm target}(r)-P_{\rm CG}(r)\right)^2{\rm d}r
+$$
+$$
 f_{\rm bond}=\int_x \left(P_{\rm target}(x)-P_{\rm CG}(x)\right)^2{\rm d}x
 $$
+
 ```mermaid
 classDiagram
 
@@ -262,11 +262,11 @@ class EvaluateFunctionAdapter{
     dist: GetDistribution
     eval_type: str
     sigma: float
-    request(self)
+    request()
 }
 
 class EvaluateFunctionFacade{
-    __call__(self, adapter)
+    __call__(adapter)
 }
 
 class EvaluateFunctionNoneFacade{
@@ -313,16 +313,19 @@ class CalcUip1Adapter{
 }
 
 class CalcUip1TableFacade{
-    calc_dEdx()
-    create_table(x, E, -dE/dx)
+    __call__()
 }
 
 class CalcUip1FunctionFacade{
-    fitting()
-    create_table(x, E, -dE/dx)
+    __call__()
+}
+
+class CalcUip1PolynominalFacade{
+    __call__()
 }
 
 CalcUip1 --> CalcUip1Adapter
 CalcUip1Adapter --> CalcUip1TableFacade
 CalcUip1Adapter --> CalcUip1FunctionFacade
+CalcUip1Adapter --> CalcUip1PolynominalFacade
 ```
