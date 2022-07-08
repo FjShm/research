@@ -61,14 +61,17 @@
 ### about: `function_type`
 - table
 - [harmonic_bond](https://docs.lammps.org/bond_harmonic.html)
+    
     $$
     U_{\rm bond}=K(l-l_0)^2
     $$
 - [harmonic_angle](https://docs.lammps.org/angle_harmonic.html)
+    
     $$
     U_{\rm angle}=K(\theta-\theta_0)^2\ (K\ {\rm [energy]},\ \theta\ [{\rm degree}])
     $$
 - [gaussian](https://docs.lammps.org/angle_gaussian.html)
+    
     $$
     U=-k_{\rm B}T\ln{\left[
     \sum_{i=1}^2{\frac{a_i}{w_i\sqrt{\pi/2}}\exp{
@@ -79,6 +82,7 @@
     \right]}\ (\theta\ {\rm [degree]})
     $$
 - [nharmonic5](https://docs.lammps.org/dihedral_nharmonic.html)
+    
     $$
     U=
     $$
@@ -96,6 +100,7 @@ As explained in Section "How to use/preparation".
 
 ### about: `eval_type`, `eval_sigma`
 for bonded evaluate function (`eval_sigma` is $\sigma$ below)
+
 $$
 f_{\rm non-bond}=\int_r \exp{(-r/\sigma)}\left(P_{\rm target}(r)-P_{\rm CG}(r)\right)^2{\rm d}r
 $$
