@@ -73,20 +73,19 @@
 - [gaussian](https://docs.lammps.org/angle_gaussian.html)
     
     $$
-    U=-k_{\rm B}T\ln{\left[
-    \sum_{i=1}^2{\frac{a_i}{w_i\sqrt{\pi/2}}\exp{
-    \left\{
-    -2\left(\frac{\theta-\theta_i}{w_i}\right)
-    \right\}
-    }}
-    \right]}\ (\theta\ {\rm [degree]})
+    U=-k_{\rm B}T\ln\left[
+    \right]\ (\theta\ {\rm [degree]})
     $$
 - [nharmonic5](https://docs.lammps.org/dihedral_nharmonic.html)
     
     $$
-    U=
+    U=\sum_{i=1}^5 a_n\cos^{n-1}{\phi}
     $$
 - [nharmonic7](https://docs.lammps.org/dihedral_nharmonic.html)
+
+    $$
+    U=\sum_{i=1}^7 a_n\cos^{n-1}{\phi}
+    $$
 - pair_polynominal
 
 ---
