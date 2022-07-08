@@ -87,7 +87,7 @@ if __name__ == "__main__":
             f.write(Uip1.table)
 
         # plot
-        fig = plt.figure()
+        fig = plt.figure(dpi=520)
         ax = fig.add_subplot(111, ylim=(-1.5, 2))
         if InputData["function_type"] != "table":
             if Ui.U is not None:

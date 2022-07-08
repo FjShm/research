@@ -1,16 +1,19 @@
 import numpy as np
+from typing import Union
 
 
-def nharmonic5(phi, a1, a2, a3, a4, a5):
+def nharmonic5(
+    phi: Union[float, np.array], a1: float, a2: float, a3: float, a4: float, a5: float
+) -> Union[float, np.array]:
     """
     Parameters:
     ----------
-        phi : float or numpy.array or pandas.DataFrame, [degree]
-        a1, a2, ..., a5 : float, [kcal/mol]
+        phi : [degree]
+        a1, a2, ..., a5 : [kcal/mol]
 
     Returns:
     ----------
-        U : float or numpy.array or pandas.DataFrame, [kcal/mol]
+        U : [kcal/mol]
     """
     Sum = 0
     a = (a1, a2, a3, a4, a5)
@@ -19,7 +22,9 @@ def nharmonic5(phi, a1, a2, a3, a4, a5):
     return Sum
 
 
-def dnharmonic5(phi, a1, a2, a3, a4, a5):
+def dnharmonic5(
+    phi: Union[float, np.array], a1: float, a2: float, a3: float, a4: float, a5: float
+) -> Union[float, np.array]:
     Sum = 0
     a = (a1, a2, a3, a4, a5)
     for i in range(len(a)):

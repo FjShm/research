@@ -13,13 +13,17 @@ class CalcUip1PolynominalFacade:
         else:
             Uip1 = self.__IBI(Ui, P_target, P_CG)
         Uip1 = self.__std_at_rcut(Uip1_adapter.x_new, Uip1)
+        r = np.array(Uip1_adapter.x_new) - PRM.rcut
+
+        # Truncate values above the upper limit
+        r_, Uip1_ = self.__truncate_values_above_upper_limit(r, Uip1)
 
         # fitting
-        r = np.array(Uip1_adapter.x_new) - PRM.rcut
         ok = False
-        deg = 25
+        deg = 30
         while not ok:
-            z = np.polyfit(r, Uip1, deg)
+            print(f"maximum degree of polynominal function: {deg}")
+            z = np.polyfit(r_, Uip1_, deg, rcond=1e-50)
             if (deg % 2 == 0) and (z[0] < 0):
                 deg -= 1
                 continue
@@ -56,3 +60,9 @@ class CalcUip1PolynominalFacade:
     def __std_at_rcut(self, r: list, U: list) -> list:
         idx = np.abs(np.array(r) - PRM.rcut).argmin()
         return list(np.array(U) - U[idx])
+
+    def __truncate_values_above_upper_limit(self, r: list, U: list) -> list:
+        r, U = np.array(r), np.array(U)
+        flg_array = U < 5.0
+        r, U = list(r[flg_array]), list(U[flg_array])
+        return r, U

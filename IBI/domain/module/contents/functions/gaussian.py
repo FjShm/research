@@ -1,23 +1,26 @@
 import numpy as np
+from typing import Union
 from module.contents.parameters import PRM
 
 
-def gaussian(theta, a1, w1, theta1, a2, w2, theta2) -> float:
+def gaussian(
+    theta: Union[float, np.array],
+    a1: float,
+    w1: float,
+    theta1: float,
+    a2: float,
+    w2: float,
+    theta2: float,
+) -> Union[float, np.array]:
     """
-                              a1                   theta - theta1                 a2                   theta - theta2
-    U(theta) = -kBT ln[ --------------- exp{ -2 ( ---------------- )**2 } + --------------- exp{ -2 ( ---------------- )**2 } ]
-                         w1*sqrt(pi/2)                   w1                  w2*sqrt(pi/2)                   w2
-
-    units for LAMMPS units "real"
-
     Parameters:
     ----------
-        theta : float or numpy.array or pandas.DataFrame, [degree]
-        a1,a2,w1,w2,theta1,theta2 : float
+        theta : [degree]
+        a1,a2,w1,w2,theta1,theta2 : [degree] or [rad]
 
     Returns:
     ----------
-        U : float or numpy.array or pandas.DataFrame, [kcal/mol]
+        U : [kcal/mol]
     """
     kBT = PRM.kBT
     a = (a1, a2)
@@ -31,5 +34,14 @@ def gaussian(theta, a1, w1, theta1, a2, w2, theta2) -> float:
     return -kBT * np.log(Sum)
 
 
-def dgaussian(theta, a1, w1, theta1, a2, w2, theta2) -> float:
+def dgaussian(
+    theta: Union[float, np.array],
+    a1: float,
+    w1: float,
+    theta1: float,
+    a2: float,
+    w2: float,
+    theta2: float,
+) -> Union[float, np.array]:
+    # not yet
     return theta * 0

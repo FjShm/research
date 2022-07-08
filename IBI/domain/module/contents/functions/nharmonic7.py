@@ -1,16 +1,26 @@
 import numpy as np
+from typing import Union
 
 
-def nharmonic7(phi, a1, a2, a3, a4, a5, a6, a7):
+def nharmonic7(
+    phi: Union[float, np.array],
+    a1: float,
+    a2: float,
+    a3: float,
+    a4: float,
+    a5: float,
+    a6: float,
+    a7: float,
+) -> Union[float, np.array]:
     """
     Parameters:
     ----------
-        phi : float or numpy.array or pandas.DataFrame, [degree]
-        a1, a2, ..., a7 : float, [kcal/mol]
+        phi : [degree]
+        a1, a2, ..., a7 : [kcal/mol]
 
     Returns:
     ----------
-        U : float or numpy.array or pandas.DataFrame, [kcal/mol]
+        U : [kcal/mol]
     """
     Sum = 0
     a = (a1, a2, a3, a4, a5, a6, a7)
@@ -19,7 +29,16 @@ def nharmonic7(phi, a1, a2, a3, a4, a5, a6, a7):
     return Sum
 
 
-def dnharmonic7(phi, a1, a2, a3, a4, a5, a6, a7):
+def dnharmonic7(
+    phi: Union[float, np.array],
+    a1: float,
+    a2: float,
+    a3: float,
+    a4: float,
+    a5: float,
+    a6: float,
+    a7: float,
+) -> Union[float, np.array]:
     Sum = 0
     a = (a1, a2, a3, a4, a5, a6, a7)
     for i in range(len(a)):
