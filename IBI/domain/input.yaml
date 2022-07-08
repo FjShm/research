@@ -50,10 +50,7 @@
   "P_target_path": "target_distribution/rdf.AA"
   "P_CG_path": "step_i/rdf.AA"
   "previous_params_filepath": "step_i/pair-AA-11.param_"
-  "min": 2
-  "max": 5
+  "min": 0.1
+  "max": 20
   "ratio": 0.01
-  "bounds":
-    - [95, 2.4]
-    - [105, 2.5]
   "output_dir": "step_ip1"

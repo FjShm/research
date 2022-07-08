@@ -20,10 +20,10 @@ class CalcUip1PolynominalFacade:
         deg = 25
         while not ok:
             z = np.polyfit(r, Uip1, deg)
-            if (z[0] % 2 == 1) and (z[0] < 0):
+            if (deg % 2 == 0) and (z[0] < 0):
                 deg -= 1
                 continue
-            elif (z[0] % 2 == 0) and (z[0] > 0):
+            elif (deg % 2 == 1) and (z[0] > 0):
                 deg -= 1
                 continue
             else:

@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
         # plot
         fig = plt.figure()
-        ax = fig.add_subplot(111)
+        ax = fig.add_subplot(111, ylim=(-1.5, 2))
         if InputData["function_type"] != "table":
             if Ui.U is not None:
                 ax.plot(Ui.x, Ui.U, color="k", label=r"$U_i$")
