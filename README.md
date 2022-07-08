@@ -27,6 +27,7 @@
 
 - Run
     ```bash
+    cd IBI/domain
     python main.py -in input.yaml
     ```
 
