@@ -7,6 +7,10 @@ from module.contents.functions.harmonic import (
 from module.contents.functions.gaussian import gaussian, dgaussian
 from module.contents.functions.nharmonic5 import nharmonic5, dnharmonic5
 from module.contents.functions.nharmonic7 import nharmonic7, dnharmonic7
+from module.contents.functions.pair_polynominal import (
+    pair_polynominal,
+    dpair_polynominal,
+)
 
 
 class PotentialFunctions:
@@ -16,7 +20,7 @@ class PotentialFunctions:
                 return dharmonic_angle
             else:
                 return harmonic_angle
-        if func_name == "harmonic_bond":
+        elif func_name == "harmonic_bond":
             if d:
                 return dharmonic_bond
             else:
@@ -36,6 +40,11 @@ class PotentialFunctions:
                 return dnharmonic7
             else:
                 return nharmonic7
+        elif func_name == "pair_polynominal":
+            if d:
+                return dpair_polynominal
+            else:
+                return pair_polynominal
         else:
             print(f"The given potential function type {func_name} is invalid.")
             exit()

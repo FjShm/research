@@ -3,6 +3,7 @@ from scipy.interpolate import interp1d
 
 from typing import Union
 from module.facade.calc_Uip1_table_facade import CalcUip1TableFacade
+from module.facade.calc_Uip1_polynominal_facade import CalcUip1PolynominalFacade
 from module.facade.calc_Uip1_function_facade import CalcUip1FunctionFacade
 from module.service.get_distribution_service import GetDistribution
 from module.service.get_Ui_service import GetUi
@@ -61,6 +62,8 @@ class CalcUip1Adapter:
 
         if self.function_type == "table":
             Uip1, Uip1_fitting, coeff, table = CalcUip1TableFacade()(self)
+        elif self.function_type == "pair_polynominal":
+            Uip1, Uip1_fitting, coeff, table = CalcUip1PolynominalFacade()(self)
         else:
             Uip1, Uip1_fitting, coeff, table = CalcUip1FunctionFacade()(self)
         return self.x_new, Uip1, Uip1_fitting, coeff, table
