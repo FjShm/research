@@ -62,7 +62,7 @@ class CalcUip1Adapter:
 
         if self.function_type == "table":
             Uip1, Uip1_fitting, coeff, table = CalcUip1TableFacade()(self)
-        elif self.function_type == "polynominal":
+        elif self.function_type == "pair_polynominal":
             Uip1, Uip1_fitting, coeff, table = CalcUip1PolynominalFacade()(self)
         else:
             Uip1, Uip1_fitting, coeff, table = CalcUip1FunctionFacade()(self)

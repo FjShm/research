@@ -12,6 +12,7 @@ class CalcUip1PolynominalFacade:
             Uip1 = self.__BI(P_target)
         else:
             Uip1 = self.__IBI(Ui, P_target, P_CG)
+        Uip1 = self.__std_at_rcut(Uip1_adapter.x_new, Uip1)
 
         # fitting
         r = np.array(Uip1_adapter.x_new) - PRM.rcut
@@ -51,3 +52,7 @@ class CalcUip1PolynominalFacade:
     def __BI(self, P) -> list:
         P = np.array(P)
         return list(-PRM.kBT * np.log(P))
+
+    def __std_at_rcut(self, r: list, U: list) -> list:
+        idx = np.abs(np.array(r) - PRM.rcut).argmin()
+        return list(np.array(U) - U[idx])
