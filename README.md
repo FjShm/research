@@ -1,16 +1,16 @@
 # research/IBI program
 
 ## IBI program
-Program to **calculate the potential of ${\rm step}\ i+1$** from the distribution P of ${\rm step}\ i$.\
-**BI** as well as **IBI** are possible.\
-$P_i$ and $P_{\rm target}$ **agreement** can also be evaluated.
+* Program to **calculate the potential of ${\rm step}\ i+1$** from the distribution P of ${\rm step}\ i$.
+* **BI** as well as **IBI** are possible.
+* $P_i$ and $P_{\rm target}$ **agreement** can also be evaluated.
 
 ### How to use
 - Preparations
     1. input.yaml
     2. *histogram table* of CG (already normalized)
     3. *histogram table* of target (already normalized)
-    4. (only IBI) potential parameters or table of ${\rm step}\ i$
+    4. (only IBI) potential parameters (`previous_params_filepath`) or table of ${\rm step}\ i$
 
     \<example of *histogram table*\>
     ```
@@ -30,6 +30,11 @@ $P_i$ and $P_{\rm target}$ **agreement** can also be evaluated.
     python main.py -in input.yaml
     ```
 
+- Output file
+    1. LAMMPS potential table `*.table`
+    2. potential coefficients `*.param`
+    3. png comparing ($U_i$, )$U_{i+1}$, $U_{i+1}{\rm -fitting}$
+
 ### about: input file "input.yaml"
 ```yaml=
 "AA":
@@ -40,8 +45,8 @@ $P_i$ and $P_{\rm target}$ **agreement** can also be evaluated.
   "P_target_path": "target/tar_bond-AA.dat"
   "P_CG_path": "step_i/CG_bond-AA.dat"
   "previous_params_filepath": "step_i/bond-AA.param"
-  "min": 2 # minimum of xaxis of plot
-  "max": 5 # maxima of xaxis of plot
+  "min": 2 # minimum of xaxis of plot and LAMMPS potential table
+  "max": 5 # maxima of xaxis of plot and LAMMPS potential table
   "ratio": 0.01 # Distirution values lower than "ratio" are truncated.
   "bounds": # see scipy.optimize.curve_fit
     - [0, 10]
@@ -52,47 +57,95 @@ $P_i$ and $P_{\rm target}$ **agreement** can also be evaluated.
   ...
 ```
 
-### about: previous_params_file
 
-1. function potential
-    ```
-    50.23852 4.5
-    ```
+### about: `function_type`
+- table
+- [harmonic_bond](https://docs.lammps.org/bond_harmonic.html)
+    $$
+    U_{\rm bond}=K(l-l_0)^2
+    $$
+- [harmonic_angle](https://docs.lammps.org/angle_harmonic.html)
+    $$
+    U_{\rm angle}=K(\theta-\theta_0)^2\ (K\ {\rm [energy]},\ \theta\ [{\rm degree}])
+    $$
+- [gaussian](https://docs.lammps.org/angle_gaussian.html)
+    $$
+    U=-k_{\rm B}T\ln{\left[
+    \sum_{i=1}^2{\frac{a_i}{w_i\sqrt{\pi/2}}\exp{
+    \left\{
+    -2\left(\frac{\theta-\theta_i}{w_i}\right)
+    \right\}
+    }}
+    \right]}\ (\theta\ {\rm [degree]})
+    $$
+- [nharmonic5](https://docs.lammps.org/dihedral_nharmonic.html)
+    $$
+    U=
+    $$
+- [nharmonic7](https://docs.lammps.org/dihedral_nharmonic.html)
+- pair_polynominal
+
+---
+
+### about: `P_target_path`, `P_CG_path`
+As explained in Section "How to use/preparation".
+- `P_target_path`: required
+- `P_CG_path`: arbitrary, if not, BI
+
+---
+
+### about: `eval_type`, `eval_sigma`
+for bonded evaluate function (`eval_sigma` is $\sigma$ below)
+$$
+f_{\rm non-bond}=\int_r \exp{(-r/\sigma)}\left(P_{\rm target}(r)-P_{\rm CG}(r)\right)^2{\rm d}r
+$$
+
+for non-bonded evaluate function
+
+$$
+f_{\rm bond}=\int_x \left(P_{\rm target}(x)-P_{\rm CG}(x)\right)^2{\rm d}x
+$$
+
+---
+
+### about: `previous_params_file`
+
+ex1. `function_type` = `harmonic_bond`
+
+```
+50.23852 4.5
+```
 - half-width space delimiter
 - only one row
 - Forms that can be copied and pasted directly into `*_coeff` in LAMMPS
 
-2. table potential
-    ```
-    step_n/bond-AA.table bond-AA
-    ```
+ex2. `function_type` = `gaussian`
+
+```
+0.05599700755882821 0.2602738180935012 109.00000000000001 1.1494204534595935 0.5273574788996689 197.00000000001282
+```
+
+ex3. `function_type` = `table`
+
+```
+step_n/bond-AA.table bond-AA
+```
 - half-width space delimiter
 - `(table path) (senction name)`
 - only one row
 - Forms that can be copied and pasted directly into `*_coeff` in LAMMPS
 
----
-
-### about: potential function types
-- common
-    - table
-- bond
-    - [harmonic_bond](https://docs.lammps.org/bond_harmonic.html)
-
-- angle
-    - [harmonic_angle](https://docs.lammps.org/angle_harmonic.html)
-    - [gaussian](https://docs.lammps.org/angle_gaussian.html)
-- dihedral
-    - [nharmonic5](https://docs.lammps.org/dihedral_nharmonic.html)
-    - [nharmonic7](https://docs.lammps.org/dihedral_nharmonic.html)
-- pair
-    - polynominal
 
 ---
 
-### about: ratio
+### about: `ratio`
 Values near 0 in the histogram (near the bottom) are truncated because they become noise when fitting with the function.\
-This program truncates values less than (ratio) × (the maximum value of the histogram).
+This program truncates values less than **(ratio) × (the maximum value of the histogram)**.
+
+default: 0.01
+
+![](https://i.imgur.com/DvYoUzZ.png)
+
 
 ---
 ---
@@ -101,6 +154,7 @@ This program truncates values less than (ratio) × (the maximum value of the his
 (technical specification)
 
 ### use case
+- evaluate function
 - BI (IBI step 0)
     - Using only P_target, then Boltzmann Inversion
     - with/without funciton (such as harmonic, gaussian, ...)
@@ -111,45 +165,6 @@ This program truncates values less than (ratio) × (the maximum value of the his
     - polynominal
 - IBI without function (LAMMPS table shape)
     - [table format](https://docs.lammps.org/pair_table.html)
-
-### calculation flow
-- BI with function
-    1. receive P_target and processing
-    2. BI
-    3. fitting to function
-    4. plot and output (parameters)
-
-- BI without function
-    1. receive P_target and processing
-    2. BI
-    3. calculate -dE/dr
-    4. plot and output (table file, its path, section_name)
-
-- IBI with function (IBI step i to i+1)
-    1. receive P_target, P_CG and processing
-    2. receive functional type, [parameters(i)], and x(list) same as 1.
-    3. IBI
-    4. fitting to function
-    5. plot and output (parameters)
-
-- IBI without function (IBI step i to i+1)
-    1. receive P_target, P_CG and processing
-    2. receive (functional type)="table", parameters(i)=[table path, section_name].
-    3. IBI
-    4. calculate -dE/dr
-    5. plot and output (parameters)
-
-### directory structures
-```
-.----- step_i
-  |
-  ---- step_ip1
-  |
-  ---- module
-  |
-  main.py
-  input.yaml
-```
 
 ### domain model
 
@@ -245,6 +260,7 @@ GetUiAdapter --> GetUiNoneFacade
 $$
 f_{\rm non-bond}=\int_r \exp{(-r/\sigma)}\left(P_{\rm target}(r)-P_{\rm CG}(r)\right)^2{\rm d}r
 $$
+
 $$
 f_{\rm bond}=\int_x \left(P_{\rm target}(x)-P_{\rm CG}(x)\right)^2{\rm d}x
 $$
@@ -328,4 +344,94 @@ CalcUip1 --> CalcUip1Adapter
 CalcUip1Adapter --> CalcUip1TableFacade
 CalcUip1Adapter --> CalcUip1FunctionFacade
 CalcUip1Adapter --> CalcUip1PolynominalFacade
+```
+
+### directory structures
+```
+<domain>
+　├input.yaml
+　├main.py
+　├<module>
+　│　├<adapter>
+　│　│　├calc_Uip1_adapter.py
+　│　│　├evaluate_function_adapter.py
+　│　│　├get_distribution_adapter.py
+　│　│　└get_Ui_adapter.py
+　│　├<common>
+　│　│　└LAMMPS_potential_table_IO.py
+　│　├<contents>
+　│　│　├evaluate_functions.py
+　│　│　├<functions>
+　│　│　│　├evaluate_functions.py
+　│　│　│　├gaussian.py
+　│　│　│　├harmonic.py
+　│　│　│　├nharmonic5.py
+　│　│　│　├nharmonic7.py
+　│　│　│　└pair_polynominal.py
+　│　│　├parameters.py
+　│　│　└potential_functions.py
+　│　├<facade>
+　│　│　├calc_Uip1_function_facade.py
+　│　│　├calc_Uip1_polynominal_facade.py
+　│　│　├calc_Uip1_table_facade.py
+　│　│　├evaluate_function_facade.py
+　│　│　├evaluate_function_none_facade.py
+　│　│　├get_distribution_facade.py
+　│　│　├get_distribution_none_facade.py
+　│　│　├get_Ui_function_facade.py
+　│　│　├get_Ui_none_facade.py
+　│　│　└get_Ui_table_facade.py
+　│　└<service>
+　│　　　├calc_Uip1_service.py
+　│　　　├evaluate_function_service.py
+　│　　　├get_distribution_service.py
+　│　　　└get_Ui_service.py
+　├setup.cfg
+　├<step_i>
+　│　├angle_1.param
+　│　├angle_2.param
+　│　├bond_1.param
+　│　├bond_2.param
+　│　├CG-Angle_1.hist.dat
+　│　├CG-Angle_2.hist.dat
+　│　├CG-Bond_1.hist.dat
+　│　├CG-Bond_2.hist.dat
+　│　├CG-Dihedral_1.hist.dat
+　│　├CG-Dihedral_2.hist.dat
+　│　├dihed_1.param
+　│　├dihed_2.param
+　│　├pair-AA-11.param
+　│　├pair-AA-11.param_
+　│　├pair-AB-11.param
+　│　├pair-AB-11.param_
+　│　├pair-BB-11.param
+　│　├pair-BB-11.param_
+　│　├rdf.AA
+　│　├rdf.AB
+　│　└rdf.BB
+　├<step_ip1>
+　│　├AA.table
+　│　├ABA.table
+　│　├angle-ABA.param
+　│　├angle-ABA.png
+　│　├angle-BAB.png
+　│　├angle_1.param
+　│　├angle_2.param
+　│　├BAB.table
+　│　├bond-AA.png
+　│　├bond_1.param
+　│　├pair-AA-11.param_
+　│　├pair-AA.table
+　│　├pair-pair-AA.param
+　│　└pair-pair-AA.png
+　└<target_distribution>
+　　　├angle_1.dat
+　　　├angle_2.dat
+　　　├bond_1.dat
+　　　├bond_2.dat
+　　　├dihed_1.dat
+　　　├dihed_2.dat
+　　　├rdf.AA
+　　　├rdf.AB
+　　　└rdf.BB
 ```
