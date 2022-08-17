@@ -76,7 +76,7 @@
     $$
     U=-k_{\rm B}T\ln\left[
     \sum_{i=1}^2{\frac{a_i}{w_i\sqrt{\pi/2}}\exp{
-    \left(-2\left(\frac{\theta-\theta_i}{w_i}\right)\right)
+    \left(-2\left(\frac{\theta-\theta_i}{w_i}\right)^2\right)
     }}
     \right]\ (\theta\ {\rm [degree]})
     $$
