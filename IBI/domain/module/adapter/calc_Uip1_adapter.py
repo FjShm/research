@@ -4,6 +4,7 @@ from scipy.interpolate import interp1d
 from typing import Union
 from module.facade.calc_Uip1_table_facade import CalcUip1TableFacade
 from module.facade.calc_Uip1_polynominal_facade import CalcUip1PolynominalFacade
+from module.facade.calc_Uip1_myPolynominal_facade import CalcUip1MyPolynominalFacade
 from module.facade.calc_Uip1_function_facade import CalcUip1FunctionFacade
 from module.service.get_distribution_service import GetDistribution
 from module.service.get_Ui_service import GetUi
@@ -27,6 +28,8 @@ class CalcUip1Adapter:
         Ui: GetUi,
         Min: float,
         Max: float,
+        num: int,
+        ibi_accelerator: float = 1,
     ) -> None:
         self.function_type = function_type
         self.section_name = section_name
@@ -39,15 +42,31 @@ class CalcUip1Adapter:
         self.bounds = bounds
         self.Min = Min
         self.Max = Max
+        self.num = num
+        self.ibi_accelerator = ibi_accelerator
 
     def request(self):
         # x-axisが揃うように線形補間
         if self.P_CG is None:
-            self.x_new = self.x_target
+            if self.num == 0:
+                self.x_new = self.x_target
+            else:
+                num = self.num
+                # linear interpolation
+                lin_target = interp1d(self.x_target, self.P_target)
+                # lin_Ui = interp1d(self.x_Ui, self.Ui)
+
+                x = np.linspace(self.x_target[0], self.x_target[-1], num=num)
+                self.P_target = list(lin_target(x))
+                # self.Ui = list(lin_Ui(x))
+                self.x_new = x
         else:
             range_left = max(self.x_target[0], self.x_CG[0], self.x_Ui[0])
             range_right = min(self.x_target[-1], self.x_CG[-1], self.x_Ui[-1])
-            num = max(len(self.x_target), len(self.x_CG), len(self.x_Ui))
+            if self.num == 0:
+                num = max(len(self.x_target), len(self.x_CG), len(self.x_Ui))
+            else:
+                num = self.num
 
             # linear interpolation
             lin_target = interp1d(self.x_target, self.P_target)
@@ -64,6 +83,8 @@ class CalcUip1Adapter:
             Uip1, Uip1_fitting, coeff, table = CalcUip1TableFacade()(self)
         elif self.function_type == "pair_polynominal":
             Uip1, Uip1_fitting, coeff, table = CalcUip1PolynominalFacade()(self)
+        elif self.function_type == "pair_myPolynominal":
+            Uip1, Uip1_fitting, coeff, table = CalcUip1MyPolynominalFacade()(self)
         else:
             Uip1, Uip1_fitting, coeff, table = CalcUip1FunctionFacade()(self)
         return self.x_new, Uip1, Uip1_fitting, coeff, table

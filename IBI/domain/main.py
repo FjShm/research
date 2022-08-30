@@ -31,6 +31,8 @@ def default_input_data():
         "ratio": 0.01,
         "bounds": (-np.inf, np.inf),
         "output_dir": "step_ip1",
+        "num_table": 0,
+        "ibi_accelerator": 1,
     }
     return InputData
 
@@ -83,12 +85,23 @@ if __name__ == "__main__":
                     out_str += f"{coeff} "
                 out_str = out_str[:-1]
                 f.write(out_str)
+        else:
+            abs_table_path = os.path.abspath(
+                os.path.join(output_dir, f"{pair_name}.table")
+            )
+            abs_param_path = os.path.join(
+                os.path.dirname(abs_table_path), f"{InputData['section_name']}.param"
+            )
+            section_name = InputData["section_name"]
+            with open(abs_param_path, mode="w") as f:
+                f.write(f"{abs_table_path} {section_name}")
         with open(os.path.join(output_dir, f"{pair_name}.table"), mode="w") as f:
             f.write(Uip1.table)
 
         # plot
         fig = plt.figure(dpi=520)
-        ax = fig.add_subplot(111, ylim=(-1.5, 2))
+        ax = fig.add_subplot(111, ylim=(-1.5, 2.0))
+        # ax = fig.add_subplot(111, ylim=(-0.002, 0.01), xlim=(38, 42))
         if InputData["function_type"] != "table":
             if Ui.U is not None:
                 ax.plot(Ui.x, Ui.U, color="k", label=r"$U_i$")
@@ -104,7 +117,20 @@ if __name__ == "__main__":
         else:
             if Ui.U is not None:
                 ax.plot(Ui.x, Ui.U, color="k", label=r"$U_i$")
-            ax.plot(Uip1.x_new, Uip1.Uip1, color="r", label=r"$U_{i+1}$")
+            ax.plot(
+                Uip1.x_new,
+                Uip1.Uip1,
+                color="g",
+                label=r"$U_{i+1}$",
+                linestyle="dashed",
+            )
+            ax.plot(
+                Uip1.Uip1_fitting[0],
+                Uip1.Uip1_fitting[1],
+                color="r",
+                label=r"$U_{i+1}{\rm -fitting}$",
+                linewidth=0.5,
+            )
         ax.legend()
         fig.savefig(
             os.path.join(output_dir, f"{InputData['type']}-{pair_name}.png"),
