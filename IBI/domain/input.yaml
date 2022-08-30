@@ -44,7 +44,7 @@
 
 "pair-AA":
   "type": "pair"
-  "function_type": "pair_polynominal"
+  "function_type": "table"
   "eval_type": "non_bonded"
   "eval_sigma": 1
   "P_target_path": "target_distribution/rdf.AA"

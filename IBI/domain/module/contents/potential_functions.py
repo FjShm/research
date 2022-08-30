@@ -11,6 +11,10 @@ from module.contents.functions.pair_polynominal import (
     pair_polynominal,
     dpair_polynominal,
 )
+from module.contents.functions.pair_myPolynominal import (
+    pair_myPolynominal,
+    dpair_myPolynominal,
+)
 
 
 class PotentialFunctions:
@@ -45,6 +49,12 @@ class PotentialFunctions:
                 return dpair_polynominal
             else:
                 return pair_polynominal
+        elif func_name == "pair_myPolynominal":
+            if d:
+                return dpair_myPolynominal
+            else:
+                return pair_myPolynominal
         else:
             print(f"The given potential function type {func_name} is invalid.")
+            print("(module.contents.potentian_functions.py)\n")
             exit()

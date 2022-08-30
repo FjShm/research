@@ -33,5 +33,7 @@ class CalcUip1:
             Ui=self.__Ui,
             Min=self.__InputData["min"],
             Max=self.__InputData["max"],
+            num=self.__InputData["num_table"],
+            ibi_accelerator=self.__InputData["ibi_accelerator"],
         ).request()
         return self

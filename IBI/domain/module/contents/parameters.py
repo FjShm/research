@@ -5,4 +5,7 @@ class PRM:
     cal2J = 4.184  # 1 cal = 4.184 J
     J2cal = 1.0 / cal2J
     kBT = (kB * J2cal * 1e-3) * T * NA  # [kcal/mol]
-    rcut = 20  # [Ang]
+    rcut = 15  # [Ang]
+
+    mypoly_a = 0.15
+    mypoly_x0 = 30

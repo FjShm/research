@@ -4,7 +4,20 @@ from module.common.LAMMPS_potential_table_IO import LAMMPSPotentialTableIO
 from module.contents.parameters import PRM
 
 
-class CalcUip1PolynominalFacade:
+class Flatten:
+
+    a = PRM.mypoly_a
+    x0 = PRM.mypoly_x0
+
+    def tanh(self, x):
+        return 0.5 - np.tanh(self.a * (x - self.x0)) * 0.5
+
+    def dtanh(self, x) -> float:
+        cosh = np.cosh(self.a * (x - self.x0))
+        return -0.5 * self.a / (cosh * cosh)
+
+
+class CalcUip1MyPolynominalFacade:
     def __call__(self, Uip1_adapter):
         P_target = Uip1_adapter.P_target
         P_CG = Uip1_adapter.P_CG
@@ -54,11 +67,25 @@ class CalcUip1PolynominalFacade:
         # create LAMMPS table
         fUip1_fitting = np.poly1d(z)
         fdUip1_fitting = np.polyder(fUip1_fitting)
-        Uip1_fitting = list(fUip1_fitting(r))
-        Uip1_fitting_for_table = list(fUip1_fitting(r_for_table))
-        dUip1_fitting = list(-fdUip1_fitting(r))
-        dUip1_fitting_for_table = list(-fdUip1_fitting(r_for_table))
+        Uip1_fitting = fUip1_fitting(r)
+        Uip1_fitting_for_table = fUip1_fitting(r_for_table)
+        dUip1_fitting = fdUip1_fitting(r)
+        dUip1_fitting_for_table = fdUip1_fitting(r_for_table)
 
+        # flatten Uip1_fitting, dUip1_fitting
+        tanh = Flatten().tanh(r + PRM.rcut)
+        dtanh = Flatten().dtanh(r + PRM.rcut)
+        dUip1_fitting = -(dUip1_fitting * tanh + Uip1_fitting * dtanh)
+        Uip1_fitting = Uip1_fitting * tanh
+
+        tanh = Flatten().tanh(r_for_table + PRM.rcut)
+        dtanh = Flatten().dtanh(r_for_table + PRM.rcut)
+        dUip1_fitting_for_table = -(
+            dUip1_fitting_for_table * tanh + Uip1_fitting_for_table * dtanh
+        )
+        Uip1_fitting_for_table = Uip1_fitting_for_table * tanh
+
+        # write table
         table = LAMMPSPotentialTableIO("", Uip1_adapter.section_name)
         r_for_table = list(r_for_table + PRM.rcut)
         # 両端の丸め誤差修正
