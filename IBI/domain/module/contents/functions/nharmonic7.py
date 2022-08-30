@@ -43,3 +43,4 @@ def dnharmonic7(
     a = (a1, a2, a3, a4, a5, a6, a7)
     for i in range(len(a)):
         Sum += -i * a[i] * np.sin(np.deg2rad(phi)) ** (i - 1)
+    return Sum

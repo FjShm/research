@@ -100,8 +100,7 @@ if __name__ == "__main__":
 
         # plot
         fig = plt.figure(dpi=520)
-        ax = fig.add_subplot(111, ylim=(-1.5, 2.0))
-        # ax = fig.add_subplot(111, ylim=(-0.002, 0.01), xlim=(38, 42))
+        ax = fig.add_subplot(111)
         if InputData["function_type"] != "table":
             if Ui.U is not None:
                 ax.plot(Ui.x, Ui.U, color="k", label=r"$U_i$")
