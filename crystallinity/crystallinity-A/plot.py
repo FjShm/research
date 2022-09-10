@@ -10,15 +10,18 @@ class PRM:
     chain_length = 49
     num_bond = chain_length - 1
 
+
 if __name__ == "__main__":
     df = pd.read_csv(sys.argv[1], header=None, sep="\s+")
-    df.sort_values(by=len(df)-1, axis=1, ascending=False, inplace=True)
+    df.sort_values(by=len(df) - 1, axis=1, ascending=False, inplace=True)
     erate = float(input("please type erate [ns^-1]: "))
     dt = float(input("type dt [fs]: "))
 
     fig = plt.figure(dpi=600)
-    ax = fig.add_subplot(111, xlabel=r"strain $\varepsilon$", ylabel="crystallinity [-]",
-            xscale="log")
+    ax = fig.add_subplot(
+        111, xlabel=r"strain $\varepsilon$", ylabel="crystallinity [-]", xscale="log"
+    )
+    ax.plot([1], [0.8], color="white", marker=".", label="# bonds from terminal")
     for i, col in enumerate(df.columns):
         if i == 0:
             continue
@@ -28,8 +31,8 @@ if __name__ == "__main__":
         ax.plot(
             list(df[0] * dt * PRM.fs2ns * erate),
             list(df[col]),
-            label=f"position-{distance_from_terminal}",
-            color=cm.jet((i-1)/(len(df.columns)-1)),
+            label=f"{distance_from_terminal:^10d}",
+            color=cm.jet((i - 1) / (len(df.columns) - 1)),
         )
-    ax.legend()
+    ax.legend(bbox_to_anchor=(1, 1), loc="upper left", fontsize=12)
     fig.savefig("sample_data/Cry.png", bbox_inches="tight")
