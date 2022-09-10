@@ -1,0 +1,3 @@
+input_dump_path: sample_data/dump.u.lammpstrj
+output_crytxt_path: sample_data/cry.txt
+k: 16

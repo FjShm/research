@@ -8,6 +8,7 @@
 #include <eigen3/Eigen/LU>
 #include <algorithm>
 #include <boost/progress.hpp>
+#include <yaml-cpp/yaml.h>
 
 
 std::vector<std::string> split(const std::string&, char);
@@ -23,5 +24,5 @@ void read_one_timestep_of_dump(
 void write_to_newdump(
         std::ofstream&, int&, int&, Eigen::MatrixXd&, Eigen::MatrixXd&,
         Eigen::MatrixXd&, Eigen::MatrixXd&, std::vector<Eigen::MatrixXd>&, std::vector<int>&);
-void count_number_of_rows(std::string&, int&);
+void count_number_of_rows(const std::string&, int&);
 

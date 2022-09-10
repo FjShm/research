@@ -1,11 +1,12 @@
 #include "rotate_dump.h"
 
 
-int main(){
+int main(int argc, char *argv[]){
     // input
-    std::string dump_path = "sample_data/dump.u.lammpstrj";
-    std::string rot_path = "sample_data/rotation.txt";
-    std::string out_dump_path = "sample_data/rotated_dump.u.lammpstrj";
+    YAML::Node param = YAML::LoadFile(argv[1]);
+    const std::string dump_path = param["input_dump_path"].as<std::string>();
+    const std::string rot_path = param["input_rotationtxt_path"].as<std::string>();
+    const std::string out_dump_path = param["output_rotated_dump_path"].as<std::string>();
 
     // -------------------------------
     // max loop
@@ -285,7 +286,7 @@ void write_to_newdump(
     }
 }
  
-void count_number_of_rows(std::string &path, int &max_loop){
+void count_number_of_rows(const std::string &path, int &max_loop){
     std::ifstream in{path};
     std::string row;
     for (int i = 0; i < 2; i++) std::getline(in, row);
