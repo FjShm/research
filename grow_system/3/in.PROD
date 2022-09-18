@@ -1,0 +1,88 @@
+units           real
+atom_style      molecular
+special_bonds   lj 0.0 0.0 0.0
+
+
+### define variables ###
+# for run
+variable        totalTime equal 100                                            # [ns]
+variable        dt equal 5
+variable        runstep equal ${totalTime}*1000000/${dt}
+variable        run1 equal ${runstep}*0.9
+variable        dump equal ${runstep}/100
+variable        dump2 equal ${runstep}/10000
+variable        fixstress equal ${runstep}/1000
+variable        thermostep equal ${runstep}/100
+variable        restart equal ${runstep}/10
+
+# temperature
+variable        temp equal 360.0
+variable        Tstart equal 360.0
+variable        Tstop equal 360.0
+variable        Tdampstep equal 100
+variable        Tdamp equal ${dt}*${Tdampstep}
+
+# pressure
+variable        Pdampstep equal 10000
+variable        Pdamp equal ${dt}*${Pdampstep}
+
+
+### simulation settings ###
+pair_style      lj96/cut 10
+bond_style      harmonic
+angle_style     hybrid harmonic gaussian
+dihedral_style  nharmonic
+
+read_data       ../NPT/24monomerM512.data
+velocity        all create ${Tstart} 19990126 dist gaussian
+
+include         ../PARAM.dat
+
+#neighbor        0.4 bin
+neigh_modify    every 1 delay 1 check yes
+
+change_box all triclinic
+#comm_modify     cutoff 3.4
+
+### compute ###
+compute mytemp all temp
+compute mypress all pressure mytemp
+#variable pxx equal c_mypress[1]
+#variable pyy equal c_mypress[2]
+#variable pzz equal c_mypress[3]
+#variable pxy equal c_mypress[4]
+#variable pxz equal c_mypress[5]
+#variable pyz equal c_mypress[6]
+#variable pxxyy equal v_pxx-v_pyy
+#variable pxxzz equal v_pxx-v_pzz
+#variable pyyzz equal v_pyy-v_pzz
+
+#thermo_style custom step temp pe ke etotal epair ebond eangle edihed emol press vol density
+thermo_style custom step temp press density
+thermo ${thermostep}
+
+fix 1 all nvt temp ${Tstart} ${Tstop} ${Tdamp}
+fix 2 all langevin ${temp} ${temp} ${Tdamp} 19990126
+#fix ave2 all ave/correlate/long 1 1024 &
+#v_pxy v_pxz v_pyz v_pxxyy v_pxxzz v_pyyzz &
+#file corr.long.dat overwrite ncorr 30
+
+dump 1 all custom ${dump} dump.1.lammpstrj id xu yu zu
+
+timestep        ${dt}
+restart ${restart} restart/res
+run ${run1} upto
+
+compute 1 all property/local batom1 batom2 btype
+compute mybond all bond/local dist
+compute 2 all property/local aatom1 aatom2 aatom3 atype
+compute myangle all angle/local theta
+compute 3 all property/local datom1 datom2 datom3 datom4 dtype
+compute mydihedral all dihedral/local phi
+
+dump 2 all local ${dump2} bond.dump c_1[3] c_mybond
+dump 3 all local ${dump2} angle.dump c_2[4] c_myangle
+dump 4 all local ${dump2} dihedral.dump c_3[5] c_mydihedral
+run ${runstep} upto
+
+write_data      24monomerM512.data
