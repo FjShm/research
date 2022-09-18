@@ -1,0 +1,107 @@
+units           real
+atom_style      molecular
+special_bonds   lj 0.0 0.0 0.0
+
+
+### define variables ###
+# for run
+## dt [fs]
+variable        dt equal 5
+
+## simulation time [ns] and timesteps
+variable        time_nvt_ns equal 1.0
+variable        time_prod_ns equal 0.1
+variable        nvt_timestep equal ${time_nvt_ns}*1000000/${dt}
+variable        prod_timestep equal ${time_prod_ns}*1000000/${dt}
+
+## output (dump)
+variable        nvt_dump_frames equal 100
+variable        nvt_dump equal ${nvt_timestep}/${nvt_dump_frames}
+
+## output (fix)
+variable        nvt_fix_frames equal 1000
+variable        prod_fix_frames equal 1000
+variable        rdf_fix_frames equal 2
+variable        nvt_fix equal ${nvt_timestep}/${nvt_fix_frames}
+variable        prod_fix equal ${prod_timestep}/${prod_fix_frames}
+variable        rdf_fix equal ${prod_timestep}/${rdf_fix_frames}
+
+## output (thermo)
+variable        nvt_thm_frames equal 10
+variable        prod_thm_frames equal 10
+variable        nvt_thm equal ${nvt_timestep}/${nvt_thm_frames}
+variable        prod_thm equal ${prod_timestep}/${prod_thm_frames}
+
+## temperature
+variable        temp equal 360.0
+variable        Tstart equal 360.0
+variable        Tstop equal 360.0
+variable        Tdampstep equal 2
+variable        Tdamp equal ${dt}*${Tdampstep}
+
+
+### simulation settings ###
+pair_style      table linear 2000
+bond_style      harmonic
+angle_style     hybrid harmonic gaussian
+dihedral_style  nharmonic
+
+read_data       coordination/start.coordination.data
+#change_box      all ortho
+velocity        all create ${Tstart} 19990126 dist gaussian
+
+include         PARAM.dat
+
+#neighbor        0.4 bin
+#neigh_modify    every 1 delay 1 check yes one 3000
+
+thermo_style    custom step temp press density
+thermo          ${nvt_thm}
+
+
+# --------------------< energy minimization & NVT >-------------------- #
+
+fix 1 all nvt temp ${Tstart} ${Tstop} ${Tdamp}
+fix 2 all langevin ${temp} ${temp} ${Tdamp} 19990126
+
+#dump 1 all custom ${nvt_dump} dump.ibi.lammpstrj id xu yu zu
+
+timestep        ${dt}
+
+# energy minimize
+min_style       cg
+minimize        1e-10 1e-10 10000 10000
+
+run ${nvt_timestep} upto
+
+
+# --------------------------< calculate RDF >-------------------------- #
+
+special_bonds   lj 0.0 0.0 0.0
+#neigh_modify    every 1 delay 1 check yes one 10000 page 100000
+
+# bonded distribution
+#compute         1 all property/local batom1 batom2 btype
+#compute         mybond all bond/local dist
+#compute         2 all property/local aatom1 aatom2 aatom3 atype
+#compute         myangle all angle/local theta
+#compute         3 all property/local datom1 datom2 datom3 datom4 dtype
+#compute         mydihedral all dihedral/local phi
+#dump 2 all local ${dump2} bond.dump c_1[3] c_mybond
+#dump 3 all local ${dump2} angle.dump c_2[4] c_myangle
+#dump 4 all local ${dump2} dihedral.dump c_3[5] c_mydihedral
+
+# rdf
+compute         RDF_AA all rdf 2000 1 1 cutoff 15
+#compute         RDF_AB all rdf 2000 1 2 cutoff 15
+#compute         RDF_BB all rdf 2000 2 2 cutoff 15
+fix 3 all ave/time 1 ${prod_timestep} ${prod_timestep} c_RDF_AA[*] file rdf/rdf.AA mode vector
+#fix 4 all ave/time 1 ${prod_timestep} ${prod_timestep} c_RDF_AB[*] file rdf/rdf.AB mode vector
+#fix 5 all ave/time 1 ${prod_timestep} ${prod_timestep} c_RDF_BB[*] file rdf/rdf.BB mode vector
+
+thermo           0
+
+run ${prod_timestep}
+
+
+write_data      coordination/finished.coordination.data

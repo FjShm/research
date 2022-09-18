@@ -1,0 +1,98 @@
+units           real
+atom_style      molecular
+special_bonds   lj 0.0 0.0 0.0
+
+
+### define variables ###
+# for run
+## dt [fs]
+variable        dt equal 5
+
+## simulation time [ns] and timesteps
+variable        time_nvt_ns equal 1
+variable        nvt_timestep equal ${time_nvt_ns}*1000000/${dt}
+
+## output (dump)
+variable        nvt_dump_frames equal 1000
+variable        nvt_dump equal ${nvt_timestep}/${nvt_dump_frames}
+
+## output (fix)
+variable        nvt_fix_frames equal 10
+variable        nvt_fix equal ${nvt_timestep}/${nvt_fix_frames}
+
+## output (thermo)
+variable        nvt_thm_frames equal 10
+variable        nvt_thm equal ${nvt_timestep}/${nvt_thm_frames}
+
+## temperature
+variable        temp equal 360.0
+variable        Tstart equal 360.0
+variable        Tstop equal 360.0
+variable        Tdampstep equal 2
+variable        Tdamp equal ${dt}*${Tdampstep}
+
+
+### simulation settings ###
+pair_style      table linear 2000
+bond_style      harmonic
+angle_style     hybrid harmonic gaussian
+dihedral_style  nharmonic
+
+read_data       coordination/start.coordination.data
+#change_box      all ortho
+velocity        all create ${Tstart} 19990126 dist gaussian
+
+include         PARAM.dat
+
+thermo_style    custom step temp press density
+thermo          ${nvt_thm}
+
+
+# --------------------< energy minimization & NVT >-------------------- #
+
+# energy minimize
+min_style       cg
+minimize        1e-10 1e-10 10000 10000
+
+
+# --------------------------< calculate RDF >-------------------------- #
+
+# bonded distribution
+#compute         1 all property/local batom1 batom2 btype
+#compute         mybond all bond/local dist
+#compute         2 all property/local aatom1 aatom2 aatom3 atype
+#compute         myangle all angle/local theta
+#compute         3 all property/local datom1 datom2 datom3 datom4 dtype
+#compute         mydihedral all dihedral/local phi
+#dump 2 all local ${dump2} bond.dump c_1[3] c_mybond
+#dump 3 all local ${dump2} angle.dump c_2[4] c_myangle
+#dump 4 all local ${dump2} dihedral.dump c_3[5] c_mydihedral
+
+# rdf
+#compute         RDF_AA all rdf 2000 1 1 cutoff 15
+#compute         RDF_AB all rdf 2000 1 2 cutoff 15
+#compute         RDF_BB all rdf 2000 2 2 cutoff 15
+#fix 3 all ave/time 1 ${nvt_timestep} ${nvt_timestep} c_RDF_AA[*] file rdf/rdf.AA mode vector
+#fix 4 all ave/time 1 ${nvt_timestep} ${nvt_timestep} c_RDF_AB[*] file rdf/rdf.AB mode vector
+#fix 5 all ave/time 1 ${nvt_timestep} ${nvt_timestep} c_RDF_BB[*] file rdf/rdf.BB mode vector
+
+
+# -------------------------< calculate press >------------------------- #
+
+compute mytemp all temp
+compute mypress all pressure mytemp
+variable pxx equal c_mypress[1]
+variable pyy equal c_mypress[2]
+variable pzz equal c_mypress[3]
+variable ave_press equal (v_pxx+v_pyy+v_pzz)/3
+
+fix 1 all nvt temp ${Tstart} ${Tstop} ${Tdamp}
+fix 2 all langevin ${temp} ${temp} ${Tdamp} 19990126
+fix 3 all ave/time 1 ${nvt_fix} ${nvt_fix} v_ave_press file correction/press.txt
+
+
+timestep        ${dt}
+run ${nvt_timestep}
+
+
+write_data      coordination/finished.coordination.data
