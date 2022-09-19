@@ -9,7 +9,7 @@ special_bonds   lj 0.0 0.0 0.0
 variable        dt equal 5
 
 ## simulation time [ns] and timesteps
-variable        time_nvt_ns equal 1
+variable        time_nvt_ns equal 0.01
 variable        nvt_timestep equal ${time_nvt_ns}*1000000/${dt}
 
 ## output (dump)
@@ -21,7 +21,7 @@ variable        nvt_fix_frames equal 10
 variable        nvt_fix equal ${nvt_timestep}/${nvt_fix_frames}
 
 ## output (thermo)
-variable        nvt_thm_frames equal 10
+variable        nvt_thm_frames equal 100
 variable        nvt_thm equal ${nvt_timestep}/${nvt_thm_frames}
 
 ## temperature
@@ -38,11 +38,11 @@ bond_style      harmonic
 angle_style     hybrid harmonic gaussian
 dihedral_style  nharmonic
 
-read_data       coordination/start.coordination.data
+read_data       ../src/start.coordination.data
 #change_box      all ortho
 velocity        all create ${Tstart} 19990126 dist gaussian
 
-include         PARAM.dat
+include         ../src/PARAM.dat
 
 thermo_style    custom step temp press density
 thermo          ${nvt_thm}
@@ -95,4 +95,4 @@ timestep        ${dt}
 run ${nvt_timestep}
 
 
-write_data      coordination/finished.coordination.data
+write_data      finished.coordination.data

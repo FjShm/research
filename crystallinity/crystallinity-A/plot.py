@@ -1,3 +1,4 @@
+import os
 import sys
 import numpy as np
 import pandas as pd
@@ -35,4 +36,5 @@ if __name__ == "__main__":
             color=cm.jet((i - 1) / (len(df.columns) - 1)),
         )
     ax.legend(bbox_to_anchor=(1, 1), loc="upper left", fontsize=12)
-    fig.savefig("sample_data/Cry.png", bbox_inches="tight")
+    Dir = os.path.dirname(sys.argv[1])
+    fig.savefig(os.path.join(Dir, "Cry.png"), bbox_inches="tight")
