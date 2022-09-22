@@ -20,7 +20,11 @@ if __name__ == "__main__":
 
     fig = plt.figure(dpi=600)
     ax = fig.add_subplot(
-        111, xlabel=r"strain $\varepsilon$", ylabel="crystallinity [-]", xscale="log"
+        111,
+        xlabel=r"strain $\varepsilon$",
+        ylabel="crystallinity [-]",
+        ylim=(0, 1.0),
+        yticks=np.arange(0, 1.1, 0.1),
     )
     ax.plot([1], [0.8], color="white", marker=".", label="# bonds from terminal")
     for i, col in enumerate(df.columns):
