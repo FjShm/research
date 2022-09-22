@@ -25,8 +25,6 @@ int main(int argc, char *argv[]){
     for (int i = 0; i < 2; i++) std::getline(rotxt, rotxt_row);
 
 
-    bool f1rst_loop = true;
-    Eigen::MatrixXd cell_origin0, a0, b0, c0;
     while(std::getline(rotxt, rotxt_row)){
         // read rotation.txt
         int timestep;
@@ -35,18 +33,14 @@ int main(int argc, char *argv[]){
 
         // read dump one timestep
         Eigen::MatrixXd a(1, 3), b(1, 3), c(1, 3), cell_origin(1, 3);
-        std::vector<Eigen::MatrixXd> coordinations(1, Eigen::MatrixXd (1, 3));
+        std::vector<Eigen::MatrixXd> coordinations;
         std::vector<int> mols;
         int timestep_dump, num_atoms;
         read_one_timestep_of_dump(
                 dump, a, b, c, cell_origin, coordinations, mols, timestep_dump, num_atoms);
-        if (f1rst_loop){
-            cell_origin0 = cell_origin;
-            a0 = a;
-            b0 = b;
-            c0 = c;
-            f1rst_loop = false;
-        }
+
+        int mol_max = *std::max_element(mols.begin(), mols.end());
+        int bead_per_chain = num_atoms / mol_max;
 
         // check timestep
         if (timestep != timestep_dump){
@@ -56,73 +50,44 @@ int main(int argc, char *argv[]){
             return 1;
         }
 
-        // rotate simulation cell
-        Eigen::MatrixXd new_a(1, 3), new_b(1, 3), new_c(1, 3), new_cell_origin(1, 3);
-        new_cell_origin = cell_origin * rot;
-        new_a = a * rot;
-        new_b = b * rot;
-        new_c = c * rot;
-
-        // fix position of cell
-        new_cell_origin = cell_origin0;
-
         // rotate coordinations
         std::vector<Eigen::MatrixXd> new_coordinations(num_atoms, Eigen::MatrixXd (1, 3));
         for (int i = 0; i < num_atoms; i++){
             new_coordinations[i] = coordinations[i] * rot;
         }
 
-        // move the center of gravity of the polymer's coordinates into the cell
-        // converte basis vector
-        Eigen::MatrixXd ex(1, 3), ey(1, 3), ez(1, 3);
-        ex << 1., 0., 0.;
-        ey << 0., 1., 0.;
-        ez << 0., 0., 1.;
-        Eigen::Matrix3d M;
-        // M << new_a(0, 0), new_b(0, 0), new_c(0, 0),
-        //   new_a(0, 1), new_b(0, 1), new_c(0, 1),
-        //   new_a(0, 2), new_b(0, 2), new_c(0, 2);
-        M << a0(0, 0), b0(0, 0), c0(0, 0),
-          a0(0, 1), b0(0, 1), c0(0, 1),
-          a0(0, 2), b0(0, 2), c0(0, 2);
-        Eigen::Matrix3d M_inv = M.inverse();
-
-        // calculate center of gravity of each polymer
-        Eigen::MatrixXd cg(1, 3);
-        cg << 0., 0., 0.;
-        int num_beads_per_chain = 0;
+        // calc center of gravity of each polymers
+        std::vector<Eigen::MatrixXd> cogs(mol_max, Eigen::MatrixXd(1, 3));
+        Eigen::MatrixXd sum_tmp(1, 3);
+        sum_tmp << 0., 0., 0.;
         for (int i = 0; i < num_atoms; i++){
-            num_beads_per_chain++;
-            cg += new_coordinations[i];
-            if ((i == num_atoms - 1) || (mols[i + 1] > mols[i])){
-                cg /= num_beads_per_chain;
-                // cg -= new_cell_origin;
-                cg -= cell_origin0;
-                double p, q, r;
-                p = cg(0, 0); q = cg(0, 1); r = cg(0, 2);
-                double coeff_a = p*M_inv(0, 0) + q*M_inv(0, 1) + r*M_inv(0, 2);
-                double coeff_b = p*M_inv(1, 0) + q*M_inv(1, 1) + r*M_inv(1, 2);
-                double coeff_c = p*M_inv(2, 0) + q*M_inv(2, 1) + r*M_inv(2, 2);
-                if (coeff_a < 0) coeff_a -= 1.;
-                if (coeff_b < 0) coeff_b -= 1.;
-                if (coeff_c < 0) coeff_c -= 1.;
-                for (int j = 0; j < num_beads_per_chain; j++){
-                    // new_coordinations[i - j] -= (double)((int)coeff_a) * new_a;
-                    // new_coordinations[i - j] -= (double)((int)coeff_b) * new_b;
-                    // new_coordinations[i - j] -= (double)((int)coeff_c) * new_c;
-                    new_coordinations[i - j] -= (double)((int)coeff_a) * a0;
-                    new_coordinations[i - j] -= (double)((int)coeff_b) * b0;
-                    new_coordinations[i - j] -= (double)((int)coeff_c) * c0;
-                }
-                num_beads_per_chain = 0;
-                cg << 0., 0., 0.;
+            sum_tmp += new_coordinations[i];
+            if (i == num_atoms - 1 || mols[i] < mols[i+1]){
+                cogs[mols[i]-1] = sum_tmp / (double)bead_per_chain;
+                sum_tmp << 0., 0., 0.;
             }
+        }
+
+        // move vector
+        std::vector<Eigen::MatrixXd> movecs(mol_max, Eigen::MatrixXd(1, 3));
+        for (int i = 0; i < mol_max; i++){
+            cogs[i] -= cell_origin;
+            int xi, yi, zi;
+            zi = std::floor(cogs[i](0, 2) / c(0, 2));
+            yi = std::floor((cogs[i](0, 1) - (double)zi*c(0, 1)) / b(0, 1));
+            xi = std::floor((cogs[i](0, 0) - (double)yi*b(0, 0) - (double)zi*c(0, 0)) / a(0, 0));
+            movecs[i] = (double)xi*a + (double)yi*b + (double)zi*c;
+        }
+
+        // move
+        for (int i = 0; i < num_atoms; i++){
+            new_coordinations[i] -= movecs[mols[i]-1];
         }
 
         // output new dump
         write_to_newdump(
-                out_dump, timestep, num_atoms, new_a, new_b, new_c,
-                new_cell_origin, new_coordinations, mols
+                out_dump, timestep, num_atoms, a, b, c,
+                cell_origin, new_coordinations, mols
                 );
 
         // update progress bar
@@ -131,7 +96,6 @@ int main(int argc, char *argv[]){
 }
 
 
- 
 std::vector<std::string> split(const std::string &s, char delim){
     std::vector<std::string> elems;
     std::stringstream ss(s);
@@ -153,7 +117,7 @@ void dumpcell_to_vector_converter(
         Eigen::MatrixXd &b,
         Eigen::MatrixXd &c,
         Eigen::MatrixXd &cell_origin
-    ){
+        ){
     double xlo,xhi, ylo,yhi, zlo,zhi;
     xlo = xlo_b - std::min({0., xy, xz, xy + xz});
     xhi = xhi_b - std::max({0., xy, xz, xy + xz});
@@ -173,7 +137,7 @@ void vector_to_dumpcell_converter(
         Eigen::MatrixXd &b,
         Eigen::MatrixXd &c,
         Eigen::MatrixXd &cell_origin
-    ){
+        ){
     double xlo,xhi,xy, ylo,yhi,xz, zlo,zhi,yz;
     xlo = cell_origin(0, 0);
     ylo = cell_origin(0, 1);
@@ -222,7 +186,7 @@ void read_one_timestep_of_dump(
         std::vector<int> &mols,
         int &timestep_dump,
         int &num_atoms
-    ){
+        ){
     std::string row;
 
     // TIMESTEP
@@ -256,7 +220,7 @@ void read_one_timestep_of_dump(
     }
     std::getline(dump, row);
 }
- 
+
 void write_to_newdump(
         std::ofstream &out,
         int &timestep,
@@ -267,7 +231,7 @@ void write_to_newdump(
         Eigen::MatrixXd &cell_origin,
         std::vector<Eigen::MatrixXd> &coordinations,
         std::vector<int> &mols
-    ){
+        ){
     out << "ITEM: TIMESTEP\n" << timestep << std::endl;
     out << "ITEM: NUMBER OF ATOMS\n" << num_atoms << std::endl;
     out << "ITEM: BOX BOUNDS xy xz yz pp pp pp\n";
@@ -285,7 +249,7 @@ void write_to_newdump(
             << coordinations[i](0, 1) << " " << coordinations[i](0, 2) << std::endl;
     }
 }
- 
+
 void count_number_of_rows(const std::string &path, int &max_loop){
     std::ifstream in{path};
     std::string row;
