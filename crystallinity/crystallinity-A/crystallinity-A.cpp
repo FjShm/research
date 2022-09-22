@@ -7,6 +7,7 @@ int main(int argc, char* argv[]){
     const std::string dump_path = param["input_dump_path"].as<std::string>();
     const std::string out_crytxt_path = param["output_crytxt_path"].as<std::string>();
     const int k = param["k"].as<int>();
+    const int beta = param["beta"].as<int>();
 
     // -------------------------------
     // max loop
@@ -20,9 +21,9 @@ int main(int argc, char* argv[]){
 
     for (int i = 0; i < max_loop; i++){
         // read dump one timestep
-        // coordinationsは取り敢えず1要素
-        // 後でresize
-        std::vector<Eigen::Vector3d> coordinations(1, Eigen::Vector3d(0., 0., 0.));
+        // coordinations, molsは
+        // read_one_timestep_of_dump内でresize
+        std::vector<Eigen::Vector3d> coordinations;//(1, Eigen::Vector3d(0., 0., 0.));
         std::vector<int> mols;
         int timestep, num_atoms, beads_per_chain, num_chains;
         read_one_timestep_of_dump(
@@ -30,52 +31,38 @@ int main(int argc, char* argv[]){
         num_chains = num_atoms / beads_per_chain;
 
         // calculate lambda
-        std::vector<double> lambda(beads_per_chain - 2*k - 1, 0.);
+        std::vector<double> lambda(beads_per_chain - 2*k - 2*beta, 0.);
         for (int nc = 0; nc < num_chains; nc++){
-            for (int alpha = k; alpha <= beads_per_chain - 2 - k; alpha++){
+            for (int alpha = k + beta; alpha < beads_per_chain - k - beta; alpha++){
                 int bead_idx = nc*beads_per_chain + alpha;
                 Eigen::Vector3d sum(0., 0., 0.);
                 Eigen::Vector3d d(0., 0., 0.);
                 for (int kk = -k; kk <= k; kk++){
-                    d = coordinations[bead_idx + kk + 1] - coordinations[bead_idx + kk];
+                    d = coordinations[bead_idx + kk + beta] - coordinations[bead_idx + kk - beta];
                     d /= d.norm();
                     sum += d;
                 }
                 double norm = sum.norm();
-                lambda[alpha - k] += norm / (2.*(double)k + 1.);
+                lambda[alpha - (k + beta)] += norm / (2.*(double)k + 1.);
             }
         }
 
         // average lambda
-        for (int alpha = k; alpha <= beads_per_chain - 2 - k; alpha++){
-            lambda[alpha - k] /= (double)num_chains;
+        for (int alpha = k + beta; alpha < beads_per_chain - k - beta; alpha++){
+            lambda[alpha - (k + beta)] /= (double)num_chains;
         }
 
         // output crystallinity
         out_crytxt << timestep << " ";
-        for (int alpha = k; alpha < beads_per_chain - 2 - k; alpha++){
-            out_crytxt << lambda[alpha - k] << " ";
+        for (int alpha = k + beta; alpha < beads_per_chain - k - beta - 1; alpha++){
+            out_crytxt << lambda[alpha - (k + beta)] << " ";
         }
-        out_crytxt << lambda[beads_per_chain - 2 - k - k] << std::endl;
+        out_crytxt << lambda[beads_per_chain - k - beta - 1 - (k + beta)] << std::endl;
 
 
         // update progress bar
         ++show_progress;
     }
-}
-
-
- 
-std::vector<std::string> split(const std::string &s, char delim){
-    std::vector<std::string> elems;
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        if (!item.empty()) {
-            elems.push_back(item);
-        }
-    }
-    return elems;
 }
 
 
@@ -102,7 +89,7 @@ void read_one_timestep_of_dump(
     mols.resize(num_atoms);
 
     // BOX BOUNDS xy xz yz pp pp pp
-    for (int i = 0; i < 4; i++ )std::getline(dump, row);
+    for (int i = 0; i < 4; i++) std::getline(dump, row);
 
     // ATOMS id mol xu yu zu
     std::getline(dump, row);
