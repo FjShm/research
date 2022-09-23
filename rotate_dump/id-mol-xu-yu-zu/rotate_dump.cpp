@@ -7,6 +7,7 @@ int main(int argc, char *argv[]){
     const std::string dump_path = param["input_dump_path"].as<std::string>();
     const std::string rot_path = param["input_rotationtxt_path"].as<std::string>();
     const std::string out_dump_path = param["output_rotated_dump_path"].as<std::string>();
+    const bool move_to_cell = param["move_to_cell"].as<bool>();
 
     // -------------------------------
     // max loop
@@ -56,32 +57,34 @@ int main(int argc, char *argv[]){
             new_coordinations[i] = coordinations[i] * rot;
         }
 
-        // calc center of gravity of each polymers
-        std::vector<Eigen::MatrixXd> cogs(mol_max, Eigen::MatrixXd(1, 3));
-        Eigen::MatrixXd sum_tmp(1, 3);
-        sum_tmp << 0., 0., 0.;
-        for (int i = 0; i < num_atoms; i++){
-            sum_tmp += new_coordinations[i];
-            if (i == num_atoms - 1 || mols[i] < mols[i+1]){
-                cogs[mols[i]-1] = sum_tmp / (double)bead_per_chain;
-                sum_tmp << 0., 0., 0.;
+        if (move_to_cell){
+            // calc center of gravity of each polymers
+            std::vector<Eigen::MatrixXd> cogs(mol_max, Eigen::MatrixXd(1, 3));
+            Eigen::MatrixXd sum_tmp(1, 3);
+            sum_tmp << 0., 0., 0.;
+            for (int i = 0; i < num_atoms; i++){
+                sum_tmp += new_coordinations[i];
+                if (i == num_atoms - 1 || mols[i] < mols[i+1]){
+                    cogs[mols[i]-1] = sum_tmp / (double)bead_per_chain;
+                    sum_tmp << 0., 0., 0.;
+                }
             }
-        }
 
-        // move vector
-        std::vector<Eigen::MatrixXd> movecs(mol_max, Eigen::MatrixXd(1, 3));
-        for (int i = 0; i < mol_max; i++){
-            cogs[i] -= cell_origin;
-            int xi, yi, zi;
-            zi = std::floor(cogs[i](0, 2) / c(0, 2));
-            yi = std::floor((cogs[i](0, 1) - (double)zi*c(0, 1)) / b(0, 1));
-            xi = std::floor((cogs[i](0, 0) - (double)yi*b(0, 0) - (double)zi*c(0, 0)) / a(0, 0));
-            movecs[i] = (double)xi*a + (double)yi*b + (double)zi*c;
-        }
+            // move vector
+            std::vector<Eigen::MatrixXd> movecs(mol_max, Eigen::MatrixXd(1, 3));
+            for (int i = 0; i < mol_max; i++){
+                cogs[i] -= cell_origin;
+                int xi, yi, zi;
+                zi = std::floor(cogs[i](0, 2) / c(0, 2));
+                yi = std::floor((cogs[i](0, 1) - (double)zi*c(0, 1)) / b(0, 1));
+                xi = std::floor((cogs[i](0, 0) - (double)yi*b(0, 0) - (double)zi*c(0, 0)) / a(0, 0));
+                movecs[i] = (double)xi*a + (double)yi*b + (double)zi*c;
+            }
 
-        // move
-        for (int i = 0; i < num_atoms; i++){
-            new_coordinations[i] -= movecs[mols[i]-1];
+            // move
+            for (int i = 0; i < num_atoms; i++){
+                new_coordinations[i] -= movecs[mols[i]-1];
+            }
         }
 
         // output new dump
