@@ -12,7 +12,6 @@ int main(int argc, char* argv[]){
     const double lath = param["lambda_threshold"].as<double>();
     const double dith = param["neighbor_stem_distance_threshold"].as<double>();
     const double thth = param["theta_deg_threshold"].as<double>();
-    const double sqrdLath = lath*lath;
     const double sqrdDith = dith*dith;
     const double cos_thth = std::cos(thth * M_PI/180.);
 
@@ -170,22 +169,22 @@ int main(int argc, char* argv[]){
             a2 = stem_i + stem_vecs[i]*0.5;
             for (int j = 0; j < num_stems; j++){
                 if (i == j) continue;
-                // stem-jは周期境界を考慮
+                // stem-iは周期境界を考慮
                 bool done = false;
                 int xd_fl, yd_fl, zd_fl;
                 int _xi, xi_, _yi, yi_, _zi, zi_;
-                xd_fl = std::floor(abc_coords[j](0));
-                yd_fl = std::floor(abc_coords[j](1));
-                zd_fl = std::floor(abc_coords[j](2));
+                xd_fl = std::floor(abc_coords[i](0));
+                yd_fl = std::floor(abc_coords[i](1));
+                zd_fl = std::floor(abc_coords[i](2));
                 _xi = xi_ = xd_fl;
                 _yi = yi_ = yd_fl;
                 _zi = zi_ = zd_fl;
-                if (abc_coords[j](0) - (double)xd_fl < wa) _xi = xd_fl-1;
-                if (abc_coords[j](1) - (double)yd_fl < wb) _yi = yd_fl-1;
-                if (abc_coords[j](2) - (double)zd_fl < wc) _zi = zd_fl-1;
-                if ((double)xd_fl + 1. - abc_coords[j](0) < wa) xi_ = xd_fl+1;
-                if ((double)yd_fl + 1. - abc_coords[j](1) < wb) yi_ = yd_fl+1;
-                if ((double)zd_fl + 1. - abc_coords[j](2) < wc) zi_ = zd_fl+1;
+                if (abc_coords[i](0) - (double)xd_fl < wa) _xi = xd_fl-1;
+                if (abc_coords[i](1) - (double)yd_fl < wb) _yi = yd_fl-1;
+                if (abc_coords[i](2) - (double)zd_fl < wc) _zi = zd_fl-1;
+                if ((double)xd_fl + 1. - abc_coords[i](0) < wa) xi_ = xd_fl+1;
+                if ((double)yd_fl + 1. - abc_coords[i](1) < wb) yi_ = yd_fl+1;
+                if ((double)zd_fl + 1. - abc_coords[i](2) < wc) zi_ = zd_fl+1;
                 for (int xi = _xi; xi <= xi_; xi++){
                     for (int yi = _yi; yi <= yi_; yi++){
                         for (int zi = _zi; zi <= zi_; zi++){
@@ -203,7 +202,7 @@ int main(int argc, char* argv[]){
                             if (sqrdDistance <= sqrdDith){
                                 done = true;
                                 total_neighbor_stems[i]++;
-                                if (all_cos(i, j) >= cos_thth){
+                                if (all_cos(i, j) >= cos_thth && lambdas[i] >= lath && lambdas[j] >= lath){
                                     cry_neighbor_stems[i]++;
                                 }
                                 break;
@@ -215,6 +214,11 @@ int main(int argc, char* argv[]){
                 }
             }
         }
+
+        // 割合
+        std::vector<double> cry_ratio(num_stems);
+        for (int i = 0; i < num_stems; i++)
+            cry_neighbor_stems[i] / total_neighbor_stems[i];
 
         // output new dump
         write_to_newdump(
@@ -378,16 +382,20 @@ void write_to_newdump(
     out << dumpcell(1, 0) << " " << dumpcell(1, 1) << " " << dumpcell(1, 2) << std::endl;
     out << dumpcell(2, 0) << " " << dumpcell(2, 1) << " " << dumpcell(2, 2) << std::endl;
 
-    out << "ITEM: ATOMS id mol xu yu zu cry_stems total_neighbor_stems\n";
+    out << "ITEM: ATOMS id mol xu yu zu cry_stems total_neighbor_stems ratio\n";
     int al = 0;
     for (int i = 0; i < num_atoms; i++){
         out << i + 1 << " " << mols[i] << " " << coordinations[i](0) << " "
             << coordinations[i](1) << " " << coordinations[i](2) << " ";
-        if (i == alphas[al]){
-            out << cry_neighbor_stems[al] << " " << total_neighbor_stems[al] << std::endl;
+        if (i == alphas[al] && total_neighbor_stems[al] != 0){
+            out << cry_neighbor_stems[al] << " " << total_neighbor_stems[al] << " "
+                << (double)cry_neighbor_stems[al]/(double)total_neighbor_stems[al] << std::endl;
+            al++;
+        } else if (i == alphas[al]){
+            out << 0 << " " << 0 << " " << 0 << std::endl;
             al++;
         } else {
-            out << 0 << " " << 0 << std::endl;
+            out << 0 << " " << 0 << " " << 0 << std::endl;
         }
     }
 }
