@@ -1,8 +1,0 @@
-input_dump_path: sample_data/erate_0.1_dt_5.u.lammpstrj
-input_rotationtxt_path: sample_data/rotation.txt
-output_cry_dump_path: sample_data/cry_dump.lammpstrj
-k: 16
-beta: 2
-lambda_threshold: 0.8
-neighbor_stem_distance_threshold: 10
-theta_deg_threshold: 10
