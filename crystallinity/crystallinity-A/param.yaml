@@ -1,4 +1,0 @@
-input_dump_path: sample_data/erate_0.1_dt_5.u.lammpstrj
-output_crytxt_path: sample_data/cry.txt
-k: 8
-beta: 2
