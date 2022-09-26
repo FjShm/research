@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <cmath>
+#include <cfloat>
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -12,17 +13,12 @@
 
 
 std::vector<std::string> split(const std::string&, char);
-void dumpcell_to_vector_converter(
-        double&, double&, double&, double&, double&, double&, double&, double&, double&,
-        Eigen::MatrixXd&, Eigen::MatrixXd&, Eigen::MatrixXd&);
-void vector_to_dumpcell_converter(
-        Eigen::Matrix3d&, Eigen::MatrixXd&, Eigen::MatrixXd&, Eigen::MatrixXd&, Eigen::MatrixXd&);
 void rotationtxt2rotmatrix(std::string&, Eigen::Matrix3d&, int&);
 void read_one_timestep_of_dump(
-        std::ifstream&, Eigen::MatrixXd&, Eigen::MatrixXd&, Eigen::MatrixXd&,
-        Eigen::MatrixXd&, std::vector<Eigen::MatrixXd>&, std::vector<int>&, int&, int&);
+        std::ifstream&, Eigen::Vector3d&, Eigen::Vector3d&, Eigen::Vector3d&,
+        Eigen::Vector3d&, std::vector<Eigen::Vector3d>&, std::vector<int>&, int&, int&);
 void write_to_newdump(
-        std::ofstream&, int&, int&, Eigen::MatrixXd&, Eigen::MatrixXd&,
-        Eigen::MatrixXd&, Eigen::MatrixXd&, std::vector<Eigen::MatrixXd>&, std::vector<int>&);
+        std::ofstream&, int&, int&, Eigen::Vector3d&, Eigen::Vector3d&,
+        Eigen::Vector3d&, Eigen::Vector3d&, std::vector<Eigen::Vector3d>&, std::vector<int>&);
 void count_number_of_rows(const std::string&, int&);
 
