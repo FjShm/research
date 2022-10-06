@@ -7,6 +7,7 @@ int main(int argc, char* argv[]){
     const std::string dump_path = param["input_dump_path"].as<std::string>();
     const std::string rot_path = param["input_rotationtxt_path"].as<std::string>();
     const std::string out_dump_path = param["output_cry_dump_path"].as<std::string>();
+    const std::string out_cry_path = param["output_cry_text_path"].as<std::string>();
     const int k = param["k"].as<int>();
     const int beta = param["beta"].as<int>();
     const double lath = param["lambda_threshold"].as<double>();
@@ -25,8 +26,10 @@ int main(int argc, char* argv[]){
     std::ifstream dump{dump_path};
     std::ifstream rotxt{rot_path};
     std::ofstream out_dump{out_dump_path, std::ios::out | std::ios::trunc};
+    std::ofstream out_cry{out_cry_path, std::ios::out | std::ios::trunc};
 
-    std::string rotxt_row;;
+    std::string rotxt_row;
+    bool f1rst_loop = true;
 
     // skip header of rotation.txt
     for (int i = 0; i < 2; i++) std::getline(rotxt, rotxt_row);
@@ -172,6 +175,25 @@ int main(int argc, char* argv[]){
                 cell_origin, output_coordinations, mols,
                 total_neighbor_stems, cry_neighbor_stems, alphas
                 );
+
+        // output cry text
+        if (f1rst_loop){
+            out_cry << "TimeStep";
+            for (size_t i = 0; i < num_stems; i++)
+                out_cry << " " << alphas[i];
+            out_cry << std::endl;
+            f1rst_loop = false;
+        }
+        out_cry << timestep;
+        for (size_t i = 0; i < num_stems; i++){
+            if (total_neighbor_stems[i] != 0){
+                out_cry << " " << (double)cry_neighbor_stems[i] / (double)total_neighbor_stems[i];
+            } else {
+                out_cry << " 0";
+            }
+        }
+        out_cry << std::endl;
+
 
         // update progress bar
         ++show_progress;
