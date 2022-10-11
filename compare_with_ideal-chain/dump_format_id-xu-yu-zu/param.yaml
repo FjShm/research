@@ -1,0 +1,4 @@
+input_dump_path: sample_data/dump.1.lammpstrj
+output_path: sample_data/Out.R2_n.txt
+N: 49
+M: 512
