@@ -158,7 +158,8 @@ int main(int argc, char* argv[]){
             total_neighbor_stems[i] = idxes.size();
             for (int j = 0; j < idxes.size(); j++){
             //for (int j = 1; j < idxes.size(); j++){
-                int jj = idxes[j] / 27;
+                // int jj = idxes[j] / 27;
+                int jj = idxes[j] % num_stems;
                 stem_j = stem_vecs[jj];
                 if (lambdas[i] >= lath && lambdas[jj] >= lath){
                     double cos =
