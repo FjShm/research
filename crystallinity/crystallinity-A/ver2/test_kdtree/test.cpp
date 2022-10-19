@@ -75,7 +75,7 @@ int main(int argc, char **argv)
     clock_t start, end, time;
     std::vector<std::vector<int> > num_neighbors(npoints, std::vector<int>(2));
 
-    std::cout << "--- KBTree ---" << std::endl;
+    std::cout << "--- KDTree ---" << std::endl;
     start = clock();
 
     boost::progress_display show_progress(npoints);

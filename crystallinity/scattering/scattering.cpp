@@ -57,7 +57,7 @@ int main(int argc, char* argv[]){
         // check timestep
         if (timestep != rd.timestep){
             std::cout << "The timestep in the dump file and rotation.txt do not match.\n"
-                << "rotation.txt: " << timestep
+                << "rotation.txt: " << timestep << std::endl
                 << "dump file:    " << rd.timestep << std::endl;
             std::exit(EXIT_FAILURE);
         }
