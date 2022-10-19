@@ -1,0 +1,4 @@
+input_dump_path: sample_data/erate_0.1_dt_5.u.lammpstrj
+output_cry_text_path: sample_data/cry.txt
+k: 2
+neighbor_stem_distance_threshold: 10

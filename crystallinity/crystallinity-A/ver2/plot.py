@@ -70,8 +70,8 @@ if __name__ == "__main__":
         111,
         xlabel="strain [-]",
         ylabel="crystallinity [-]",
-        xlim=(0, 20),
-        xticks=np.arange(0, 21, 5),
+        xlim=(0, 14),
+        xticks=np.arange(0, 15, 2),
         ylim=(0, 0.2),
         yticks=np.arange(0, 0.21, 0.05),
     )
@@ -87,5 +87,5 @@ if __name__ == "__main__":
         bbox_to_anchor=(1, 1), loc="upper left", handles=hans[::-1], labels=labs[::-1]
     )
     Dir = os.path.dirname(sys.argv[1])
-    fname = os.path.splitext(os.path.basename(sys.argv[1]))[0] + ".png"
+    fname = os.path.splitext(os.path.basename(sys.argv[1]))[0] + ".pdf"
     fig.savefig(os.path.join(Dir, fname), bbox_inches="tight")
