@@ -67,7 +67,7 @@ int main(int argc, char* argv[]){
             position_fixed_coordinations[i] = coordinations[i] - movecs[mols[i]-1];
         }
 
-        // 周期境界条件も考えてKB-tree作成
+        // 周期境界条件も考えてKD-tree作成
         Eigen::Vector3d zeros = {0., 0., 0.};
         std::vector<Eigen::Vector3d> _a_ = {-a, zeros, a};
         std::vector<Eigen::Vector3d> _b_ = {-b, zeros, b};
