@@ -12,12 +12,13 @@
 "b_BA":
   "type": "bond"
   "function_type": "harmonic_bond"
-  "P_target_path": "target_distribution/bond_1.dat"
+  "P_target_path": "target_distribution/bond_2.dat"
   "min": 2
   "max": 5
   "ratio": 0.01
   "bounds": [[56, 2.9], [62, 3.1]]
   "output_dir": "step_ip1"
+  "shift_U_min_to_zero": true
 
 "b_ABA":
   "type": "angle"
@@ -28,6 +29,7 @@
   "ratio": 0.01
   "bounds": [[26, 92], [27, 93]]
   "output_dir": "step_ip1"
+  "shift_U_min_to_zero": true
 
 "b_BAB":
   "type": "angle"
