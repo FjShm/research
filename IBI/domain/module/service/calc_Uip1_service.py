@@ -35,5 +35,6 @@ class CalcUip1:
             Max=self.__InputData["max"],
             num=self.__InputData["num_table"],
             ibi_accelerator=self.__InputData["ibi_accelerator"],
+            shift=self.__InputData["shift_U_min_to_zero"],
         ).request()
         return self
