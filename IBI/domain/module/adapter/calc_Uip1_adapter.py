@@ -30,6 +30,7 @@ class CalcUip1Adapter:
         Max: float,
         num: int,
         ibi_accelerator: float = 1,
+        shift: bool = False,
     ) -> None:
         self.function_type = function_type
         self.section_name = section_name
@@ -44,6 +45,7 @@ class CalcUip1Adapter:
         self.Max = Max
         self.num = num
         self.ibi_accelerator = ibi_accelerator
+        self.shift = shift
 
     def request(self):
         # x-axisが揃うように線形補間

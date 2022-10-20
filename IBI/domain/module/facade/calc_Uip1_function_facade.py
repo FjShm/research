@@ -11,7 +11,7 @@ class CalcUip1FunctionFacade:
         P_CG = Uip1_adapter.P_CG
         Ui = Uip1_adapter.Ui
         if P_CG is None:
-            Uip1 = self.__BI(P_target)
+            Uip1 = self.__BI(P_target, shift=Uip1_adapter.shift)
         else:
             Uip1 = self.__IBI(Ui, P_target, P_CG)
 
@@ -41,6 +41,9 @@ class CalcUip1FunctionFacade:
         Uip1 = Ui + PRM.kBT * np.log(P_CG / P_target)
         return list(Uip1)
 
-    def __BI(self, P) -> list:
+    def __BI(self, P, shift=False) -> list:
         P = np.array(P)
-        return list(-PRM.kBT * np.log(P))
+        Uip1 = -PRM.kBT * np.log(P)
+        if shift is True:
+            Uip1 -= Uip1.min()
+        return list(Uip1)
