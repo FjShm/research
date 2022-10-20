@@ -7,6 +7,7 @@
   "ratio": 0.01
   "bounds": [[95, 2.4], [105, 2.5]]
   "output_dir": "step_ip1"
+  "shift_U_min_to_zero": true
 
 "b_BA":
   "type": "bond"
