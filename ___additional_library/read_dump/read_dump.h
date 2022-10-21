@@ -12,7 +12,7 @@ namespace ReadDump
 {
     class ReadDump {
         public:
-            int timestep, num_atoms, num_frames(-1);
+            int timestep, num_atoms, num_frames;
             Eigen::Vector3d cellbox_a, cellbox_b, cellbox_c, cellbox_origin;
             Eigen::MatrixXd *atoms_all_data;
             std::map<std::string, int> *header_map;
@@ -20,6 +20,8 @@ namespace ReadDump
             ReadDump() {}
             ReadDump(const std::string &arg_ipath) : ipath(arg_ipath){
                 fileopen(ipath);
+                atoms_all_data = &_atoms_all_data;
+                header_map = &_header_map;
             }
             ~ReadDump() {clear();}
 
@@ -29,7 +31,7 @@ namespace ReadDump
 
             void clear(){
                 dump.close();
-                *header_map.clear();
+                header_map->clear();
             }
 
             void join_3columns(
@@ -40,9 +42,9 @@ namespace ReadDump
             ){
                 if (joined.size() != num_atoms) joined.resize(num_atoms);
                 for (int i = 0; i < num_atoms; i++){
-                    joined[i](0) = *atoms_all_data(i, *header_map.at(c1));
-                    joined[i](1) = *atoms_all_data(i, *header_map.at(c2));
-                    joined[i](2) = *atoms_all_data(i, *header_map.at(c3));
+                    joined[i](0) = atoms_all_data->coeff(i, header_map->at(c1));
+                    joined[i](1) = atoms_all_data->coeff(i, header_map->at(c2));
+                    joined[i](2) = atoms_all_data->coeff(i, header_map->at(c3));
                 }
             }
 
@@ -55,6 +57,8 @@ namespace ReadDump
             int line_number = 0;
             std::string ipath, tmp;
             std::ifstream dump;
+            Eigen::MatrixXd _atoms_all_data;
+            std::map<std::string, int> _header_map;
 
             std::vector<std::string> split(const std::string &s, char delim){
                 std::vector<std::string> elems;
@@ -107,10 +111,10 @@ namespace ReadDump
             }
 
             void read_atoms(int num_column){
-                if (*header_map.count("id") == 0){
+                if (header_map->count("id") == 0){
                     for (int r = 0; r < num_atoms; r++){
                         for (int c = 0; c < num_column; c++){
-                            dump >> *atoms_all_data(r, c);
+                            dump >> (*atoms_all_data)(r, c);
                         }
                     }
                 } else {
@@ -120,7 +124,7 @@ namespace ReadDump
                             dump >> buf[c];
                         }
                         for (int c = 0; c < num_column; c++){
-                            *atoms_all_data((int)buf[*header_map.at("id")]-1, c) = buf[c];
+                            (*atoms_all_data)((int)buf[header_map->at("id")]-1, c) = buf[c];
                         }
                     }
                 }
@@ -176,11 +180,11 @@ namespace ReadDump
 
                         // header index をマッピング
                         for (size_t i = 1; i < atoms_header.size(); i++)
-                            *header_map.insert(std::make_pair(atoms_header[i], i-1));
+                            header_map->insert(std::make_pair(atoms_header[i], i-1));
 
                         // ATOMS 読み込み
                         int num_column = atoms_header.size() - 1;
-                        *atoms_all_data.conservativeResize(num_atoms, num_column);
+                        atoms_all_data->conservativeResize(num_atoms, num_column);
                         read_atoms(num_column);
 
                         return true; // ATOMSの最後が1frameの最後
