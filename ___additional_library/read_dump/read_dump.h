@@ -83,7 +83,7 @@ namespace ReadDump
                 std::cout << std::endl << "done" << std::endl;
             }
 
-            void header_validation(std::vector<std::string> &headers){
+            void header_validation(const std::vector<std::string> &headers){
                 bool abort = false;
                 for (std::string header : headers){
                     if (header_map->count(header) == 0){
