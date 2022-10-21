@@ -1,0 +1,12 @@
+=== START ===
+Thu Oct 20 19:16:07 JST 2022
+
+0%   10   20   30   40   50   60   70   80   90   100%
+|----|----|----|----|----|----|----|----|----|----|
+***************************************************
+Traceback (most recent call last):
+  File "plot.py", line 4, in <module>
+    import seaborn as sns
+ModuleNotFoundError: No module named 'seaborn'
+=== END ===
+Thu Oct 20 21:56:30 JST 2022

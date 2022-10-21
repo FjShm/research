@@ -11,6 +11,18 @@ int main(int argc, char* argv[]){
     const double freq_min = param["freq_min"].as<double>();
     const int resolution = param["resolution"].as<int>();
     const std::string aspect = param["aspect"].as<std::string>();
+    const std::string read_frame = param["frame"]["type"].as<std::string>();
+    std::vector<int> read_timestep;
+    std::vector<double> read_ratio;
+    if (read_frame == "timestep"){
+        read_timestep = param["frame"]["content"].as< std::vector<int> >();
+    } else if (read_frame == "ratio"){
+        read_ratio = param["frame"]["content"].as< std::vector<double> >();
+        // dumpを1回読み込み, ratioをtimestepに変換
+        // ratioに最も近いtimestepを選択
+        // dumpの総frame数 < ratioのsizeの場合はerror
+        // ratioが0以上1以下でない場合もerror
+    }
 
     const std::vector<double> freq_axis = linspace(freq_min, freq_max, resolution);
     int ax0, ax1;
@@ -82,23 +94,33 @@ int main(int argc, char* argv[]){
         }
 
         // scatter
-        for (int i = 0; i < resolution; i++){
+        double kr;
+        Eigen::MatrixXd Sks(resolution, resolution);
+        #pragma omp parallel for
+        for (int i = 0; i <= int(resolution*0.5); i++){
             for (int j = 0; j < resolution; j++){
                 double sum_coskr(0.), sum_sinkr(0.);
-                double k0 = freq_axis[i];
-                double k1 = freq_axis[j];
+                //#pragma omp parallel for reduction(+:sum_coskr, sum_sinkr)
                 for (int n = 0; n < rd.num_atoms; n++){
-                    sum_coskr += std::cos(
-                        k0*rotated_coordinations[n](ax0) + k1*rotated_coordinations[n](ax1)
-                    );
-                    sum_sinkr += std::sin(
-                        k0*rotated_coordinations[n](ax0) + k1*rotated_coordinations[n](ax1)
-                    );
+                    kr = freq_axis[j]*rotated_coordinations[n](ax0)
+                        + freq_axis[resolution-i-1]*rotated_coordinations[n](ax1);
+                    sum_coskr += std::cos(kr);
+                    sum_sinkr += std::sin(kr);
                 }
-                double Sk = (sum_coskr*sum_coskr + sum_sinkr*sum_sinkr)/rd.num_atoms;
-                out_scat << " " << Sk;
+                //double Sk = (sum_coskr*sum_coskr + sum_sinkr*sum_sinkr)/(double)rd.num_atoms;
+                //out_scat << " " << Sk;
+                Sks(i, j) = (sum_coskr*sum_coskr + sum_sinkr*sum_sinkr)/(double)rd.num_atoms;
             }
         }
+
+        // 点対称のため
+        for (int i = 0; i < int(resolution*0.5); i++)
+            for (int j = 0; j < resolution; j++)
+                Sks(resolution-i-1, resolution-j-1) = Sks(i, j);
+
+        for (int i = 0; i < resolution; i++)
+            for (int j = 0; j < resolution; j++)
+                out_scat << " " << Sks(i, j);
         out_scat << std::endl;
 
         // update progress bar

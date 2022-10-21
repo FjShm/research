@@ -1,4 +1,4 @@
 #!/bin/bash
 
 ./Scattering.o param.yaml
-python plot.py sample_data/out.scatter.txt
+/home/fujii/anaconda3/bin/python3 plot.py sample_data/out.scatter.txt

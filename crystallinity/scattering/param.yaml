@@ -1,7 +1,13 @@
 input_dump_path: sample_data/erate_0.1_dt_5.u.lammpstrj
 input_rotationtxt_path: sample_data/rotation.txt
 output_scatter_text_path: sample_data/out.scatter.txt
-freq_max: 30
-freq_min: -30
-resolution: 101
+freq_max: 5
+freq_min: -5
+resolution: 2001
 aspect: xz
+frame:
+  type: all # all, timestep, ratio
+  content:
+    - 0
+    - 0.5
+    - 1
