@@ -67,9 +67,10 @@ namespace ReadDump
             }
 
             void read_all_frames(){
-                std::cout << ipath << "\nnow loading...\n";
+                std::cout << ipath << " : now loading...\n";
                 while(_read_1frame()){
                     num_frames++;
+                    std::cout << "\rtimestep: " << timestep;
                     timestep_v.push_back(timestep);
                     num_atoms_v.push_back(num_atoms);
                     ca_v.push_back(cellbox_a);
@@ -79,6 +80,7 @@ namespace ReadDump
                     atoms_all_data_v.push_back(_atoms_all_data);
                     header_map_v.push_back(_header_map);
                 }
+                std::cout << std::endl << "done" << std::endl;
             }
 
             void header_validation(std::vector<std::string> &headers){
