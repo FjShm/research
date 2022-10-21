@@ -52,6 +52,16 @@ namespace ReadDump
                 return _read_1frame();
             }
 
+            void read_all_frames(){
+                while(_read_1frame()){
+                    //
+                }
+            }
+
+            void header_validation(std::vector<std::string> &headers){
+                //
+            }
+
 
         private:
             int line_number = 0;
