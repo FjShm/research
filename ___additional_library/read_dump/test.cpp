@@ -3,7 +3,9 @@
 
 int main(){
     ReadDump::ReadDump rd("dump.u.lammpstrj");
+    std::vector<std::string> headers = {"id", "mol", "none", "xu"};
     while (rd.read_1frame()){
+        rd.header_validation(headers);
         std::vector<Eigen::Vector3d> coordinate;
         rd.join_3columns(coordinate, "xu", "yu", "zu");
 

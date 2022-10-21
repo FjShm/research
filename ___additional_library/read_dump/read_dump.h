@@ -59,7 +59,21 @@ namespace ReadDump
             }
 
             void header_validation(std::vector<std::string> &headers){
-                //
+                bool abort = false;
+                for (std::string header : headers){
+                    if (header_map->count(header) == 0){
+                        std::cout << "'" << header << "' is not exist in dump file ATOMS.\n";
+                        abort = true;
+                    }
+                }
+                if (abort) std::exit(EXIT_FAILURE);
+            }
+
+            void header_validation(std::string header){
+                if (header_map->count(header) == 0){
+                    std::cout << "'" << header << "' is not exist in dump file ATOMS.\n";
+                    std::exit(EXIT_FAILURE);
+                }
             }
 
 
