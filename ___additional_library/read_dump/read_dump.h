@@ -52,8 +52,17 @@ namespace ReadDump
             }
 
             void read_all_frames(){
+                std::cout << ipath << "\nnow loading...\n";
                 while(_read_1frame()){
-                    //
+                    num_frames++;
+                    timestep_v.push_back(timestep);
+                    num_atoms_v.push_back(num_atoms);
+                    ca_v.push_back(cellbox_a);
+                    cb_v.push_back(cellbox_b);
+                    cc_v.push_back(cellbox_c);
+                    co_v.push_back(cellbox_origin);
+                    atoms_all_data_v.push_back(_atoms_all_data);
+                    header_map_v.push_back(_header_map);
                 }
             }
 
