@@ -17,11 +17,10 @@ namespace ReadDump
             Eigen::MatrixXd *atoms_all_data;
             std::map<std::string, int> *header_map;
 
-            ReadDump() {}
+            ReadDump() {init();}
             ReadDump(const std::string &arg_ipath) : ipath(arg_ipath){
                 fileopen(ipath);
-                atoms_all_data = &_atoms_all_data;
-                header_map = &_header_map;
+                init();
             }
             ~ReadDump() {clear();}
 
@@ -84,6 +83,12 @@ namespace ReadDump
             Eigen::MatrixXd _atoms_all_data;
             std::map<std::string, int> _header_map;
 
+            // 全frameのデータを格納するvector
+            std::vector<int> timestep_v, num_atoms_v;
+            std::vector<Eigen::Vector3d> ca_v, cb_v, cc_v, co_v;
+            std::vector<Eigen::MatrixXd> atoms_all_data_v;
+            std::vector< std::map<std::string, int> > header_map_v;
+
             std::vector<std::string> split(const std::string &s, char delim){
                 std::vector<std::string> elems;
                 std::stringstream ss(s);
@@ -94,6 +99,12 @@ namespace ReadDump
                     }
                 }
                 return elems;
+            }
+
+            void init(){
+                atoms_all_data = &_atoms_all_data;
+                header_map = &_header_map;
+                num_frames = 0;
             }
 
             void read_timestep(){
