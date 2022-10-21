@@ -32,48 +32,6 @@ namespace ReadDump
                 header_map.clear();
             }
 
-            bool read_1frame(){
-                std::string row;
-                while(std::getline(dump, row)){
-                    line_number++;
-                    std::vector<std::string> splited_row = split(row, ':');
-                    if (splited_row[0] != "ITEM"){
-                        std::cout << "Error: Invalid dumpfile format.\n"
-                            << "line " << line_number << ": " << row << std::endl;
-                        std::exit(EXIT_FAILURE);
-                    }
-
-                    if (splited_row[1] == " TIMESTEP"){
-                        read_timestep();
-                    } else if (splited_row[1] == " NUMBER OF ATOMS"){
-                        read_number_of_atoms();
-                    } else if (splited_row[1] == " BOX BOUNDS xy xz yz pp pp pp"){
-                        read_box("triclinic");
-                    } else if (splited_row[1] == " BOX BOUNDS xx yy zz pp pp pp"){
-                        read_box("orthogonal");
-                    } else {
-                        std::vector<std::string> atoms_header = split(splited_row[1], ' ');
-                        if (atoms_header[0] != "ATOMS"){
-                            std::cout << "Error: Invalid dumpfile format.\n"
-                                << "ITEM: ATOMS must be come\n"
-                                << "line " << line_number << ": " << row << std::endl;
-                            std::exit(EXIT_FAILURE);
-                        }
-
-                        // header index をマッピング
-                        for (size_t i = 1; i < atoms_header.size(); i++)
-                            header_map.insert(std::make_pair(atoms_header[i], i-1));
-
-                        // ATOMS 読み込み
-                        int num_column = atoms_header.size() - 1;
-                        atoms_all_data.conservativeResize(num_atoms, num_column);
-                        read_atoms(num_column);
-
-                        return true; // ATOMSの最後が1frameの最後
-                    }
-                }
-                return false; // ファイル末尾の場合はここ
-            }
 
             void join_3columns(
                 std::vector<Eigen::Vector3d> &joined,
@@ -89,6 +47,9 @@ namespace ReadDump
                 }
             }
 
+            bool read_1frame(){
+                return _read_1frame();
+            }
 
 
         private:
@@ -184,6 +145,49 @@ namespace ReadDump
                 cellbox_a << xhi - xlo, 0., 0.;
                 cellbox_b << xy, yhi - ylo, 0.;
                 cellbox_c << xz, yz, zhi - zlo;
+            }
+
+            bool _read_1frame(){
+                std::string row;
+                while(std::getline(dump, row)){
+                    line_number++;
+                    std::vector<std::string> splited_row = split(row, ':');
+                    if (splited_row[0] != "ITEM"){
+                        std::cout << "Error: Invalid dumpfile format.\n"
+                            << "line " << line_number << ": " << row << std::endl;
+                        std::exit(EXIT_FAILURE);
+                    }
+
+                    if (splited_row[1] == " TIMESTEP"){
+                        read_timestep();
+                    } else if (splited_row[1] == " NUMBER OF ATOMS"){
+                        read_number_of_atoms();
+                    } else if (splited_row[1] == " BOX BOUNDS xy xz yz pp pp pp"){
+                        read_box("triclinic");
+                    } else if (splited_row[1] == " BOX BOUNDS xx yy zz pp pp pp"){
+                        read_box("orthogonal");
+                    } else {
+                        std::vector<std::string> atoms_header = split(splited_row[1], ' ');
+                        if (atoms_header[0] != "ATOMS"){
+                            std::cout << "Error: Invalid dumpfile format.\n"
+                                << "ITEM: ATOMS must be come\n"
+                                << "line " << line_number << ": " << row << std::endl;
+                            std::exit(EXIT_FAILURE);
+                        }
+
+                        // header index をマッピング
+                        for (size_t i = 1; i < atoms_header.size(); i++)
+                            header_map.insert(std::make_pair(atoms_header[i], i-1));
+
+                        // ATOMS 読み込み
+                        int num_column = atoms_header.size() - 1;
+                        atoms_all_data.conservativeResize(num_atoms, num_column);
+                        read_atoms(num_column);
+
+                        return true; // ATOMSの最後が1frameの最後
+                    }
+                }
+                return false; // ファイル末尾の場合はここ
             }
     };
 }
