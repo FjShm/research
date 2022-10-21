@@ -70,7 +70,7 @@ namespace ReadDump
                 std::cout << ipath << " : now loading...\n";
                 while(_read_1frame()){
                     num_frames++;
-                    std::cout << "\rtimestep: " << timestep;
+                    std::cout << "\rtimestep: " + std::to_string(timestep);
                     timestep_v.push_back(timestep);
                     num_atoms_v.push_back(num_atoms);
                     ca_v.push_back(cellbox_a);
