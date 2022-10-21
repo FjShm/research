@@ -8,6 +8,8 @@ int main(int argc, char* argv[]){
     const std::string rot_path = param["input_rotationtxt_path"].as<std::string>();
     const std::string out_dump_path = param["output_rotated_dump_path"].as<std::string>();
     const bool ifMove = param["move_to_cell"].as<bool>();
+    int N = param["N"].as<int>(-1);
+    int M = param["M"].as<int>(-1);
 
     // -------------------------------
     // max loop
@@ -16,7 +18,7 @@ int main(int argc, char* argv[]){
     boost::progress_display show_progress(max_loop);
 
     // -------------------------------
-    std::ifstream dump{dump_path};
+    ReadDump::ReadDump rd(dump_path);
     std::ifstream rotxt{rot_path};
     std::ofstream out_dump{out_dump_path, std::ios::out | std::ios::trunc};
 
@@ -26,31 +28,48 @@ int main(int argc, char* argv[]){
     for (int i = 0; i < 2; i++) std::getline(rotxt, rotxt_row);
 
 
-    while(std::getline(rotxt, rotxt_row)){
+    while(rd.read_1frame()){
         // read rotation.txt
         int timestep;
         Eigen::Matrix3d rot;
+        std::getline(rotxt, rotxt_row);
         rotationtxt2rotmatrix(rotxt_row, rot, timestep);
 
 
         // read dump one timestep
-        // coordinations, molsは
-        // read_one_timestep_of_dump内でresize
-        Eigen::Vector3d a, b, c, cell_origin;
         std::vector<Eigen::Vector3d> coordinations;
-        std::vector<int> mols;
-        int timestep_dump, num_atoms;
-        read_one_timestep_of_dump(
-                dump, a, b, c, cell_origin, coordinations, mols, timestep_dump, num_atoms);
+        rd.join_3columns(coordinations, "xu", "yu", "zu");
+        int mol, id;
+        if (rd.header_map.count("mol") == 0){
+            id = rd.header_map.at("id");
+            mol = rd.atoms_all_data.cols();
+            rd.header_map.insert(std::make_pair("mol", mol));
+            rd.atoms_all_data.conservativeResize(rd.num_atoms, mol+1);
+            if (N != -1){
+                for (int i = 0; i < rd.num_atoms; i++)
+                    rd.atoms_all_data(i, mol) = ((int)rd.atoms_all_data(i, id) - 1) / N + 1;
+            } else if (M != -1){
+                N = rd.num_atoms / M;
+                for (int i = 0; i < rd.num_atoms; i++)
+                    rd.atoms_all_data(i, mol) = ((int)rd.atoms_all_data(i, id) - 1) / N + 1;
+            } else {
+                std::cout << "Since there is no 'mol' in ATOMS in the dump file,"
+                    << " it is necessary to write N or M in the "
+                    << argv[1] << ".\n";
+                std::exit(EXIT_FAILURE);
+            }
+        } else {
+            mol = rd.header_map.at("mol");
+        }
 
-        int mol_max = *std::max_element(mols.begin(), mols.end());
-        int bead_per_chain = num_atoms / mol_max;
+        int mol_max = rd.atoms_all_data.col(mol).array().maxCoeff();
+        int bead_per_chain = rd.num_atoms / mol_max;
 
         // check timestep
-        if (timestep != timestep_dump){
+        if (timestep != rd.timestep){
             std::cout << "The timestep in the dump file and rotation.txt do not match.\n"
-                << "rotation.txt: " << timestep
-                << "dump file:    " << timestep_dump << std::endl;
+                << "rotation.txt: " << timestep << std::endl
+                << "dump file:    " << rd.timestep << std::endl;
             return 1;
         }
 
@@ -59,10 +78,10 @@ int main(int argc, char* argv[]){
             std::vector<Eigen::Vector3d> cogs(mol_max);
             Eigen::Vector3d sum_tmp;
             sum_tmp << 0., 0., 0.;
-            for (int i = 0; i < num_atoms; i++){
+            for (int i = 0; i < rd.num_atoms; i++){
                 sum_tmp += coordinations[i];
-                if (i == num_atoms - 1 || mols[i] < mols[i+1]){
-                    cogs[mols[i]-1] = sum_tmp / (double)bead_per_chain;
+                if (i == rd.num_atoms - 1 || rd.atoms_all_data(i, mol) < rd.atoms_all_data(i+1, mol)){
+                    cogs[rd.atoms_all_data(i, mol)-1] = sum_tmp / (double)bead_per_chain;
                     sum_tmp << 0., 0., 0.;
                 }
             }
@@ -70,102 +89,38 @@ int main(int argc, char* argv[]){
             // move vector
             std::vector<Eigen::Vector3d> movecs(mol_max);
             for (int i = 0; i < mol_max; i++){
-                cogs[i] -= cell_origin;
+                cogs[i] -= rd.cellbox_origin;
                 int xi, yi, zi;
-                zi = std::floor(cogs[i](2) / c(2));
-                yi = std::floor((cogs[i](1) - (double)zi*c(1)) / b(1));
-                xi = std::floor((cogs[i](0) - (double)yi*b(0) - (double)zi*c(0)) / a(0));
-                movecs[i] = (double)xi*a + (double)yi*b + (double)zi*c;
+                zi = std::floor(cogs[i](2) / rd.cellbox_c(2));
+                yi = std::floor((cogs[i](1) - (double)zi*rd.cellbox_c(1)) / rd.cellbox_b(1));
+                xi = std::floor(
+                    (cogs[i](0) - (double)yi*rd.cellbox_b(0) - (double)zi*rd.cellbox_c(0))
+                    / rd.cellbox_a(0)
+                );
+                movecs[i] =
+                    (double)xi*rd.cellbox_a + (double)yi*rd.cellbox_b + (double)zi*rd.cellbox_c;
             }
 
             // move polymer into simulation box
-            for (int i = 0; i < num_atoms; i++){
-                coordinations[i] -= movecs[mols[i]-1];
+            for (int i = 0; i < rd.num_atoms; i++){
+                coordinations[i] -= movecs[rd.atoms_all_data(i, mol)-1];
             }
         }
 
         // rotate coordinations
-        for (int i = 0; i < num_atoms; i++){
+        for (int i = 0; i < rd.num_atoms; i++){
             coordinations[i] = coordinations[i].transpose() * rot;
         }
 
 
         // output new dump
-        write_to_newdump(
-                out_dump, timestep, num_atoms, a, b, c,
-                cell_origin, coordinations, mols);
+        write_to_newdump(out_dump, rd, coordinations);
 
         // update progress bar
         ++show_progress;
     }
 }
 
-void dumpcell_to_vector_converter(
-        double &xlo_b, double &xhi_b, double &xy,
-        double &ylo_b, double &yhi_b, double &xz,
-        double &zlo_b, double &zhi_b, double &yz,
-        Eigen::Vector3d &a,
-        Eigen::Vector3d &b,
-        Eigen::Vector3d &c,
-        Eigen::Vector3d &cell_origin
-        ){
-    double xlo,xhi, ylo,yhi, zlo,zhi;
-    xlo = xlo_b - std::min({0., xy, xz, xy + xz});
-    xhi = xhi_b - std::max({0., xy, xz, xy + xz});
-    ylo = ylo_b - std::min({0., yz});
-    yhi = yhi_b - std::max({0., yz});
-    zlo = zlo_b;
-    zhi = zhi_b;
-    cell_origin << xlo, ylo, zlo;
-    a << xhi - xlo, 0., 0.;
-    b << xy, yhi - ylo, 0.;
-    c << xz, yz, zhi - zlo;
-}
-
-void read_one_timestep_of_dump(
-        std::ifstream &dump,
-        Eigen::Vector3d &a,
-        Eigen::Vector3d &b,
-        Eigen::Vector3d &c,
-        Eigen::Vector3d &cell_origin,
-        std::vector<Eigen::Vector3d> &coordinations,
-        std::vector<int> &mols,
-        int &timestep_dump,
-        int &num_atoms
-        ){
-    std::string row;
-
-    // TIMESTEP
-    std::getline(dump, row);
-    std::getline(dump, row);
-    timestep_dump = std::stoi(row);
-
-    // NUMBER OF ATOMS
-    std::getline(dump, row);
-    std::getline(dump, row);
-    num_atoms = std::stoi(row);
-    coordinations.resize(num_atoms);
-    mols.resize(num_atoms);
-
-    // BOX BOUNDS xy xz yz pp pp pp
-    double xlo_b,xhi_b,xy, ylo_b,yhi_b,xz, zlo_b,zhi_b,yz;
-    std::getline(dump, row);
-    dump >> xlo_b >> xhi_b >> xy >> ylo_b >> yhi_b >> xz >> zlo_b >> zhi_b >> yz;
-    dumpcell_to_vector_converter(
-            xlo_b, xhi_b, xy, ylo_b, yhi_b, xz, zlo_b, zhi_b, yz, a, b, c, cell_origin);
-    std::getline(dump, row);
-
-    // ATOMS id mol xu yu zu
-    std::getline(dump, row);
-    int id, mol;
-    double xu, yu, zu;
-    for (int i = 0; i < num_atoms; i++){
-        dump >> id >> mol >> xu >> yu >> zu;
-        mols[id - 1] = mol;
-        coordinations[id - 1] << xu, yu, zu;
-    }
-    std::getline(dump, row);
-}
 
 std::vector<std::string> split(const std::string &s, char delim){
     std::vector<std::string> elems;
@@ -226,29 +181,25 @@ void vector_to_dumpcell_converter(
 
 void write_to_newdump(
         std::ofstream &out,
-        int &timestep,
-        int& num_atoms,
-        Eigen::Vector3d &a,
-        Eigen::Vector3d &b,
-        Eigen::Vector3d &c,
-        Eigen::Vector3d &cell_origin,
-        std::vector<Eigen::Vector3d> &coordinations,
-        std::vector<int> &mols
+        ReadDump::ReadDump &rd,
+        std::vector<Eigen::Vector3d> &coordinations
         ){
-    out << "ITEM: TIMESTEP\n" << timestep << std::endl;
-    out << "ITEM: NUMBER OF ATOMS\n" << num_atoms << std::endl;
+    out << "ITEM: TIMESTEP\n" << rd.timestep << std::endl;
+    out << "ITEM: NUMBER OF ATOMS\n" << rd.num_atoms << std::endl;
     out << "ITEM: BOX BOUNDS xy xz yz pp pp pp\n";
 
     // calculate triclinic box
     Eigen::Matrix3d dumpcell;
-    vector_to_dumpcell_converter(dumpcell, a, b, c, cell_origin);
+    vector_to_dumpcell_converter(
+        dumpcell, rd.cellbox_a, rd.cellbox_b, rd.cellbox_c, rd.cellbox_origin);
     out << dumpcell(0, 0) << " " << dumpcell(0, 1) << " " << dumpcell(0, 2) << std::endl;
     out << dumpcell(1, 0) << " " << dumpcell(1, 1) << " " << dumpcell(1, 2) << std::endl;
     out << dumpcell(2, 0) << " " << dumpcell(2, 1) << " " << dumpcell(2, 2) << std::endl;
 
     out << "ITEM: ATOMS id mol xu yu zu\n";
-    for (int i = 0; i < num_atoms; i++){
-        out << i + 1 << " " << mols[i] << " " << coordinations[i](0) << " "
+    int mol = rd.header_map.at("mol");
+    for (int i = 0; i < rd.num_atoms; i++){
+        out << i + 1 << " " << rd.atoms_all_data(i, mol) << " " << coordinations[i](0) << " "
             << coordinations[i](1) << " " << coordinations[i](2) << std::endl;
     }
 }
