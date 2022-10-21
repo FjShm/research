@@ -48,7 +48,22 @@ namespace ReadDump
             }
 
             bool read_1frame(){
-                return _read_1frame();
+                if (timestep_v.size() == 0){
+                    // read_all_framesが実行されていない場合
+                    return _read_1frame();
+                } else {
+                    if (now_frame >= num_frames) return false;
+                    timestep = timestep_v[now_frame];
+                    num_atoms = num_atoms_v[now_frame];
+                    cellbox_a = ca_v[now_frame];
+                    cellbox_b = cb_v[now_frame];
+                    cellbox_c = cc_v[now_frame];
+                    cellbox_origin = co_v[now_frame];
+                    atoms_all_data = &atoms_all_data_v[now_frame];
+                    header_map = &header_map_v[now_frame];
+                    now_frame++;
+                    return true;
+                }
             }
 
             void read_all_frames(){
@@ -87,6 +102,7 @@ namespace ReadDump
 
         private:
             int line_number = 0;
+            int now_frame = 0;
             std::string ipath, tmp;
             std::ifstream dump;
             Eigen::MatrixXd _atoms_all_data;
