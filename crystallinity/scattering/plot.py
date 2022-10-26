@@ -7,6 +7,8 @@ from tqdm import tqdm
 
 if __name__ == "__main__":
     txt = np.loadtxt(sys.argv[1], dtype=float, delimiter=" ")
+    if len(txt.shape) == 1:
+        txt = [txt]
     for row in tqdm(txt):
         dim = int(np.sqrt(len(row) - 1))
         timestep, row2d = row[0], row[1:].reshape(dim, dim)

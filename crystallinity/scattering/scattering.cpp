@@ -11,7 +11,7 @@ int main(int argc, char* argv[]){
     const double freq_min = param["freq_min"].as<double>();
     const int resolution = param["resolution"].as<int>();
     const std::string aspect = param["aspect"].as<std::string>();
-    const std::string read_frame = param["frame"]["type"].as<std::string>();
+    const std::string read_frame = param["frame"]["type"].as<std::string>("all");
     std::vector<int> read_timestep;
     std::vector<double> read_ratio;
     // read_frame: "all", "timestep", "ratio"
@@ -39,12 +39,6 @@ int main(int argc, char* argv[]){
     }
 
     // -------------------------------
-    // max loop
-    int max_loop = 0;
-    count_number_of_rows(dump_path, max_loop);
-    boost::progress_display show_progress(max_loop);
-
-    // -------------------------------
     ReadDump::ReadDump rd(dump_path);
     std::ifstream rotxt{rot_path};
     std::ofstream out_scat{out_scat_path, std::ios::out | std::ios::trunc};
@@ -58,18 +52,28 @@ int main(int argc, char* argv[]){
     for (int i = 0; i < 2; i++) std::getline(rotxt, rotxt_row);
 
     // pre-read dump
-    if (read_frame != "all"){
+    if (read_frame == "timestep" || read_frame == "ratio"){
         rd.read_all_frames();
         rd.set_want_frames(read_ratio, read_timestep);
     }
 
+    // -------------------------------
+    // max loop
+    int max_loop = 0;
+    count_number_of_rows(dump_path, max_loop);
+    boost::progress_display show_progress(max_loop);
+
+    // -------------------------------
     int timestep;
     while(rd.read_1frame()){
-        if (rd.check_if_wanted_frame() == false) continue;
         std::getline(rotxt, rotxt_row);
         Eigen::Matrix3d rot;
         rotationtxt2rotmatrix(rotxt_row, rot, timestep);
 
+        if (rd.check_if_wanted_frame() == false){
+            ++show_progress;
+            continue;
+        }
         // check timestep
         if (timestep != rd.timestep){
             std::cout << "The timestep in the dump file and rotation.txt do not match.\n"

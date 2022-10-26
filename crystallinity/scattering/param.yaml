@@ -3,11 +3,9 @@ input_rotationtxt_path: sample_data/rotation.txt
 output_scatter_text_path: sample_data/out.scatter.txt
 freq_max: 5
 freq_min: -5
-resolution: 2001
+resolution: 21
 aspect: xz
 frame:
-  type: all # all, timestep, ratio
+  type: ratio # all, timestep, ratio
   content:
-    - 0
-    - 0.5
-    - 1
+    - 0.6
