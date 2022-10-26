@@ -60,9 +60,7 @@ int main(int argc, char* argv[]){
     // pre-read dump
     if (read_frame != "all"){
         rd.read_all_frames();
-        if (read_frame == "ratio"){
-            rd.ratio2timestep(read_ratio, read_timestep);
-        }
+        rd.set_read_frames(read_ratio, read_timestep);
     }
 
     int timestep;
