@@ -14,14 +14,11 @@ int main(int argc, char* argv[]){
     const std::string read_frame = param["frame"]["type"].as<std::string>();
     std::vector<int> read_timestep;
     std::vector<double> read_ratio;
+    // read_frame: "all", "timestep", "ratio"
     if (read_frame == "timestep"){
         read_timestep = param["frame"]["content"].as< std::vector<int> >();
     } else if (read_frame == "ratio"){
         read_ratio = param["frame"]["content"].as< std::vector<double> >();
-        // dumpを1回読み込み, ratioをtimestepに変換
-        // ratioに最も近いtimestepを選択
-        // dumpの総frame数 < ratioのsizeの場合はerror
-        // ratioが0以上1以下でない場合もerror
     }
 
     const std::vector<double> freq_axis = linspace(freq_min, freq_max, resolution);
@@ -59,6 +56,14 @@ int main(int argc, char* argv[]){
 
     // skip header of rotation.txt
     for (int i = 0; i < 2; i++) std::getline(rotxt, rotxt_row);
+
+    // pre-read dump
+    if (read_frame != "all"){
+        rd.read_all_frames();
+        if (read_frame == "ratio"){
+            rd.ratio2timestep(read_ratio, read_timestep);
+        }
+    }
 
     int timestep;
     while(rd.read_1frame()){
