@@ -65,6 +65,7 @@ int main(int argc, char* argv[]){
 
     int timestep;
     while(rd.read_1frame()){
+        if (rd.isWantFrame == false) continue;
         std::getline(rotxt, rotxt_row);
         Eigen::Matrix3d rot;
         rotationtxt2rotmatrix(rotxt_row, rot, timestep);
