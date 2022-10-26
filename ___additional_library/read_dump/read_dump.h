@@ -16,7 +16,6 @@ namespace ReadDump
             Eigen::Vector3d cellbox_a, cellbox_b, cellbox_c, cellbox_origin;
             Eigen::MatrixXd *atoms_all_data;
             std::map<std::string, int> *header_map;
-            bool isWantFrame = true;
 
             ReadDump() {init();}
             ReadDump(const std::string &arg_ipath) : ipath(arg_ipath){
@@ -63,14 +62,18 @@ namespace ReadDump
                     atoms_all_data = atoms_all_data_v[now_frame];
                     header_map = header_map_v[now_frame];
                     now_frame++;
-                    // want frameかどうか判定
-                    std::vector<int>::iterator itr
-                        = std::find(want_timesteps.begin(), want_timesteps.end(), timestep);
-                    if (itr == want_timesteps.end()){
-                        isWantFrame = false;
-                    } else {
-                        isWantFrame = true;
-                    }
+                    return true;
+                }
+            }
+
+            bool check_if_wanted_frame(){
+                // want frameかどうか判定
+                if (timestep_v.size() == 0) return true;
+                std::vector<int>::iterator itr
+                    = std::find(want_timesteps.begin(), want_timesteps.end(), timestep);
+                if (itr == want_timesteps.end()){
+                    return false;
+                } else {
                     return true;
                 }
             }
