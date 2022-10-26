@@ -16,6 +16,7 @@ namespace ReadDump
             Eigen::Vector3d cellbox_a, cellbox_b, cellbox_c, cellbox_origin;
             Eigen::MatrixXd *atoms_all_data;
             std::map<std::string, int> *header_map;
+            bool isWantFrame = true;
 
             ReadDump() {init();}
             ReadDump(const std::string &arg_ipath) : ipath(arg_ipath){
@@ -62,6 +63,14 @@ namespace ReadDump
                     atoms_all_data = atoms_all_data_v[now_frame];
                     header_map = header_map_v[now_frame];
                     now_frame++;
+                    // want frameかどうか判定
+                    std::vector<int>::iterator itr
+                        = std::find(want_timesteps.begin(), want_timesteps.end(), timestep);
+                    if (itr == want_timesteps.end()){
+                        isWantFrame = false;
+                    } else {
+                        isWantFrame = true;
+                    }
                     return true;
                 }
             }
@@ -101,6 +110,35 @@ namespace ReadDump
                 }
             }
 
+            void set_want_frames(std::vector<double> &read_ratio, std::vector<int> &read_timestep){
+                for (int ts : read_timestep)
+                    want_timesteps.push_back(ts);
+                for (double rr : read_ratio){
+                    want_timesteps.push_back(search_nearest_timestep(rr));
+                }
+            }
+
+            int search_nearest_timestep(const double &ratio){
+                if (ratio < 0. || 1. < ratio){
+                    std::cout << "Invalid ratio was given.\n" << ratio
+                        << std::endl;
+                    std::exit(EXIT_FAILURE);
+                }
+                if (timestep_v.size() == 0){
+                    std::cout << "Call read_all_frames before calling the "
+                        << "search_nearest_timestep member function.\n";
+                    std::exit(EXIT_FAILURE);
+                }
+                int timestep_max = timestep_v[timestep_v.size()-1];
+                double diff0, diff1;
+                diff0 = std::abs((double)timestep_v[0]/(double)timestep_max - ratio);
+                for (size_t i = 1; i < timestep_v.size(); i++){
+                    diff1 = std::abs((double)timestep_v[i]/(double)timestep_max - ratio);
+                    if (diff1 > diff0) return timestep_v[i-1];
+                }
+                return timestep_max;
+            }
+
 
         private:
             int line_number = 0;
@@ -109,7 +147,7 @@ namespace ReadDump
             std::ifstream dump;
 
             // 全frameのデータを格納するvector
-            std::vector<int> timestep_v, num_atoms_v;
+            std::vector<int> timestep_v, num_atoms_v, want_timesteps;
             std::vector<Eigen::Vector3d> ca_v, cb_v, cc_v, co_v;
             std::vector<Eigen::MatrixXd*> atoms_all_data_v;
             std::vector< std::map<std::string, int>* > header_map_v;
