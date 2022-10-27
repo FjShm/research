@@ -145,7 +145,7 @@ namespace ReadDump
             std::vector<Eigen::MatrixXd*> atoms_all_data_v;
             std::vector< std::map<std::string, int>* > header_map_v;
 
-            // 汎用関数
+            // 汎用関数 -------------------------------------------------------------------
             std::vector<std::string> split(const std::string &s, char delim){
                 std::vector<std::string> elems;
                 std::stringstream ss(s);
