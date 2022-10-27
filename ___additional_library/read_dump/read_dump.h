@@ -55,17 +55,6 @@ namespace ReadDump
                 }
             }
 
-            bool check_if_wanted_frame(){
-                if (!all_frames_loaded) return true;
-                std::vector<int>::iterator itr
-                    = std::find(want_timesteps.begin(), want_timesteps.end(), timestep);
-                if (itr == want_timesteps.end()){
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-
             void read_all_frames(){
                 std::cout << ipath << " : now loading...\n";
                 while(_read_1frame()){
@@ -106,11 +95,14 @@ namespace ReadDump
                 if (abort) std::exit(EXIT_FAILURE);
             }
 
-            void set_want_frames(std::vector<double> &read_ratio, std::vector<int> &read_timestep){
-                for (int ts : read_timestep)
-                    want_timesteps.push_back(ts);
+            void set_want_frames(const std::vector<double> &read_ratio){
                 for (double rr : read_ratio)
                     want_timesteps.push_back(search_nearest_timestep(rr));
+            }
+
+            void set_want_frames(const std::vector<int> &read_timestep){
+                for (int ts : read_timestep)
+                    want_timesteps.push_back(ts);
             }
 
             int search_nearest_timestep(const double &ratio){
@@ -121,7 +113,7 @@ namespace ReadDump
                 }
                 if (!all_frames_loaded){
                     std::cout << "Call read_all_frames before calling the "
-                        << "search_nearest_timestep member function.\n";
+                        << "search_nearest_timestep (read_dump.h)\n";
                     std::exit(EXIT_FAILURE);
                 }
                 int timestep_max = vec_max(timestep_v);
@@ -129,6 +121,17 @@ namespace ReadDump
                 for (size_t i = 0; i < diffs.size(); i++)
                     diffs[i] = std::abs((double)timestep_v[i]/(double)timestep_max - ratio);
                 return timestep_v[vec_minid(diffs)];
+            }
+
+            bool check_if_wanted_frame(){
+                if (!all_frames_loaded) return true;
+                std::vector<int>::iterator itr
+                    = std::find(want_timesteps.begin(), want_timesteps.end(), timestep);
+                if (itr == want_timesteps.end()){
+                    return false;
+                } else {
+                    return true;
+                }
             }
 
 
