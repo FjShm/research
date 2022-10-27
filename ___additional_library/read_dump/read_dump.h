@@ -70,7 +70,7 @@ namespace ReadDump
                 std::cout << ipath << " : now loading...\n";
                 while(_read_1frame()){
                     num_frames++;
-                    std::cout << "\rtimestep: " + std::to_string(timestep);
+                    std::cout << "\r>>> timestep: " + std::to_string(timestep);
                     timestep_v.push_back(timestep);
                     num_atoms_v.push_back(num_atoms);
                     ca_v.push_back(cellbox_a);
@@ -124,14 +124,11 @@ namespace ReadDump
                         << "search_nearest_timestep member function.\n";
                     std::exit(EXIT_FAILURE);
                 }
-                int timestep_max = timestep_v[timestep_v.size()-1];
-                double diff0 = std::abs((double)timestep_v[0]/(double)timestep_max - ratio);
-                for (size_t i = 1; i < timestep_v.size(); i++){
-                    double diff1 = std::abs((double)timestep_v[i]/(double)timestep_max - ratio);
-                    if (diff1 > diff0) return timestep_v[i-1];
-                    diff0 = diff1;
-                }
-                return timestep_max;
+                int timestep_max = vec_max(timestep_v);
+                std::vector<double> diffs(timestep_v.size());
+                for (size_t i = 0; i < diffs.size(); i++)
+                    diffs[i] = std::abs((double)timestep_v[i]/(double)timestep_max - ratio);
+                return timestep_v[vec_minid(diffs)];
             }
 
 
@@ -148,6 +145,7 @@ namespace ReadDump
             std::vector<Eigen::MatrixXd*> atoms_all_data_v;
             std::vector< std::map<std::string, int>* > header_map_v;
 
+            // 汎用関数
             std::vector<std::string> split(const std::string &s, char delim){
                 std::vector<std::string> elems;
                 std::stringstream ss(s);
@@ -159,6 +157,31 @@ namespace ReadDump
                 }
                 return elems;
             }
+
+            template<typename T> T vec_max(std::vector<T> &vec){
+                typename std::vector<T>::iterator iter = std::max_element(vec.begin(), vec.end());
+                size_t idx = std::distance(vec.begin(), iter);
+                return vec[idx];
+            }
+
+            template<typename T> size_t vec_maxid(std::vector<T> &vec){
+                typename std::vector<T>::iterator iter = std::max_element(vec.begin(), vec.end());
+                size_t idx = std::distance(vec.begin(), iter);
+                return idx;
+            }
+
+            template<typename T> T vec_min(std::vector<T> &vec){
+                typename std::vector<T>::iterator iter = std::min_element(vec.begin(), vec.end());
+                size_t idx = std::distance(vec.begin(), iter);
+                return vec[idx];
+            }
+
+            template<typename T> size_t vec_minid(std::vector<T> &vec){
+                typename std::vector<T>::iterator iter = std::min_element(vec.begin(), vec.end());
+                size_t idx = std::distance(vec.begin(), iter);
+                return idx;
+            }
+            // ----------------------------------------------------------------------------
 
             void init(){
                 num_frames = 0;
