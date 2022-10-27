@@ -106,11 +106,15 @@ namespace ReadDump
                 if (abort) std::exit(EXIT_FAILURE);
             }
 
-            void header_validation(std::string header){
-                if (header_map->count(header) == 0){
-                    std::cout << "'" << header << "' is not exist in dump file ATOMS.\n";
-                    std::exit(EXIT_FAILURE);
+            template<class... T> void header_validation(T... headers){
+                bool abort = false;
+                for (std::string header : std::initializer_list<std::string>{headers...}){
+                    if (header_map->count(header) == 0){
+                        std::cout << "'" << header << "' is not exist in dump file ATOMS.\n";
+                        abort = true;
+                    }
                 }
+                if (abort) std::exit(EXIT_FAILURE);
             }
 
             void set_want_frames(std::vector<double> &read_ratio, std::vector<int> &read_timestep){
