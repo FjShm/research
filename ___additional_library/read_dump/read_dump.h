@@ -48,27 +48,15 @@ namespace ReadDump
             }
 
             bool read_1frame(){
-                if (timestep_v.size() == 0){
-                    // read_all_framesが実行されていない場合
+                if (!all_frames_loaded){
                     return _read_1frame();
                 } else {
-                    if (now_frame >= num_frames) return false;
-                    timestep = timestep_v[now_frame];
-                    num_atoms = num_atoms_v[now_frame];
-                    cellbox_a = ca_v[now_frame];
-                    cellbox_b = cb_v[now_frame];
-                    cellbox_c = cc_v[now_frame];
-                    cellbox_origin = co_v[now_frame];
-                    atoms_all_data = atoms_all_data_v[now_frame];
-                    header_map = header_map_v[now_frame];
-                    now_frame++;
-                    return true;
+                    return change_now_frame(1);
                 }
             }
 
             bool check_if_wanted_frame(){
-                // want frameかどうか判定
-                if (timestep_v.size() == 0) return true;
+                if (!all_frames_loaded) return true;
                 std::vector<int>::iterator itr
                     = std::find(want_timesteps.begin(), want_timesteps.end(), timestep);
                 if (itr == want_timesteps.end()){
@@ -93,6 +81,7 @@ namespace ReadDump
                     header_map_v.push_back(header_map);
                 }
                 std::cout << std::endl << "done" << std::endl;
+                all_frames_loaded = true;
             }
 
             void header_validation(const std::vector<std::string> &headers){
@@ -120,9 +109,8 @@ namespace ReadDump
             void set_want_frames(std::vector<double> &read_ratio, std::vector<int> &read_timestep){
                 for (int ts : read_timestep)
                     want_timesteps.push_back(ts);
-                for (double rr : read_ratio){
+                for (double rr : read_ratio)
                     want_timesteps.push_back(search_nearest_timestep(rr));
-                }
             }
 
             int search_nearest_timestep(const double &ratio){
@@ -131,16 +119,15 @@ namespace ReadDump
                         << std::endl;
                     std::exit(EXIT_FAILURE);
                 }
-                if (timestep_v.size() == 0){
+                if (!all_frames_loaded){
                     std::cout << "Call read_all_frames before calling the "
                         << "search_nearest_timestep member function.\n";
                     std::exit(EXIT_FAILURE);
                 }
                 int timestep_max = timestep_v[timestep_v.size()-1];
-                double diff0, diff1;
-                diff0 = std::abs((double)timestep_v[0]/(double)timestep_max - ratio);
+                double diff0 = std::abs((double)timestep_v[0]/(double)timestep_max - ratio);
                 for (size_t i = 1; i < timestep_v.size(); i++){
-                    diff1 = std::abs((double)timestep_v[i]/(double)timestep_max - ratio);
+                    double diff1 = std::abs((double)timestep_v[i]/(double)timestep_max - ratio);
                     if (diff1 > diff0) return timestep_v[i-1];
                     diff0 = diff1;
                 }
@@ -150,9 +137,10 @@ namespace ReadDump
 
         private:
             int line_number = 0;
-            int now_frame = 0;
+            int now_frame = -1;
             std::string ipath, tmp;
             std::ifstream dump;
+            bool all_frames_loaded = false;
 
             // 全frameのデータを格納するvector
             std::vector<int> timestep_v, num_atoms_v, want_timesteps;
@@ -297,6 +285,24 @@ namespace ReadDump
                     }
                 }
                 return false; // ファイル末尾の場合はここ
+            }
+
+            bool change_now_frame(int frame, bool absolute = false){
+                if (absolute){
+                    now_frame = frame;
+                } else {
+                    now_frame += frame;
+                }
+                if (now_frame < 0 || num_frames <= now_frame) return false;
+                timestep = timestep_v[now_frame];
+                num_atoms = num_atoms_v[now_frame];
+                cellbox_a = ca_v[now_frame];
+                cellbox_b = cb_v[now_frame];
+                cellbox_c = cc_v[now_frame];
+                cellbox_origin = co_v[now_frame];
+                atoms_all_data = atoms_all_data_v[now_frame];
+                header_map = header_map_v[now_frame];
+                return true;
             }
     };
 }
