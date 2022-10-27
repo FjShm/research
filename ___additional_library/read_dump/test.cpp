@@ -13,7 +13,9 @@ int main(){
     std::cout << std::endl;
     if (yn == 'Y') rd.read_all_frames();
     while (rd.read_1frame()){
-        rd.header_validation(headers);
+        //rd.header_validation(headers);
+        //rd.header_validation("id", "xu", "yu", "zu");
+        rd.header_validation("id");
         std::vector<Eigen::Vector3d> coordinate;
         rd.join_3columns(coordinate, "xu", "yu", "zu");
 

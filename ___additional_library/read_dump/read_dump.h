@@ -142,6 +142,7 @@ namespace ReadDump
                 for (size_t i = 1; i < timestep_v.size(); i++){
                     diff1 = std::abs((double)timestep_v[i]/(double)timestep_max - ratio);
                     if (diff1 > diff0) return timestep_v[i-1];
+                    diff0 = diff1;
                 }
                 return timestep_max;
             }
