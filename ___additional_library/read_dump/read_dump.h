@@ -48,33 +48,10 @@ namespace ReadDump
             }
 
             bool read_1frame(){
-                if (timestep_v.size() == 0){
-                    // read_all_framesが実行されていない場合
+                if (!all_frames_loaded){
                     return _read_1frame();
                 } else {
-                    if (now_frame >= num_frames) return false;
-                    timestep = timestep_v[now_frame];
-                    num_atoms = num_atoms_v[now_frame];
-                    cellbox_a = ca_v[now_frame];
-                    cellbox_b = cb_v[now_frame];
-                    cellbox_c = cc_v[now_frame];
-                    cellbox_origin = co_v[now_frame];
-                    atoms_all_data = atoms_all_data_v[now_frame];
-                    header_map = header_map_v[now_frame];
-                    now_frame++;
-                    return true;
-                }
-            }
-
-            bool check_if_wanted_frame(){
-                // want frameかどうか判定
-                if (timestep_v.size() == 0) return true;
-                std::vector<int>::iterator itr
-                    = std::find(want_timesteps.begin(), want_timesteps.end(), timestep);
-                if (itr == want_timesteps.end()){
-                    return false;
-                } else {
-                    return true;
+                    return change_now_frame(1);
                 }
             }
 
@@ -82,7 +59,7 @@ namespace ReadDump
                 std::cout << ipath << " : now loading...\n";
                 while(_read_1frame()){
                     num_frames++;
-                    std::cout << "\rtimestep: " + std::to_string(timestep);
+                    std::cout << "\r>>> timestep: " + std::to_string(timestep);
                     timestep_v.push_back(timestep);
                     num_atoms_v.push_back(num_atoms);
                     ca_v.push_back(cellbox_a);
@@ -93,6 +70,7 @@ namespace ReadDump
                     header_map_v.push_back(header_map);
                 }
                 std::cout << std::endl << "done" << std::endl;
+                all_frames_loaded = true;
             }
 
             void header_validation(const std::vector<std::string> &headers){
@@ -106,19 +84,25 @@ namespace ReadDump
                 if (abort) std::exit(EXIT_FAILURE);
             }
 
-            void header_validation(std::string header){
-                if (header_map->count(header) == 0){
-                    std::cout << "'" << header << "' is not exist in dump file ATOMS.\n";
-                    std::exit(EXIT_FAILURE);
+            template<class... T> void header_validation(T... headers){
+                bool abort = false;
+                for (std::string header : std::initializer_list<std::string>{headers...}){
+                    if (header_map->count(header) == 0){
+                        std::cout << "'" << header << "' is not exist in dump file ATOMS.\n";
+                        abort = true;
+                    }
                 }
+                if (abort) std::exit(EXIT_FAILURE);
             }
 
-            void set_want_frames(std::vector<double> &read_ratio, std::vector<int> &read_timestep){
+            void set_want_frames(const std::vector<double> &read_ratio){
+                for (double rr : read_ratio)
+                    want_timesteps.push_back(search_nearest_timestep(rr));
+            }
+
+            void set_want_frames(const std::vector<int> &read_timestep){
                 for (int ts : read_timestep)
                     want_timesteps.push_back(ts);
-                for (double rr : read_ratio){
-                    want_timesteps.push_back(search_nearest_timestep(rr));
-                }
             }
 
             int search_nearest_timestep(const double &ratio){
@@ -127,27 +111,36 @@ namespace ReadDump
                         << std::endl;
                     std::exit(EXIT_FAILURE);
                 }
-                if (timestep_v.size() == 0){
+                if (!all_frames_loaded){
                     std::cout << "Call read_all_frames before calling the "
-                        << "search_nearest_timestep member function.\n";
+                        << "search_nearest_timestep (read_dump.h)\n";
                     std::exit(EXIT_FAILURE);
                 }
-                int timestep_max = timestep_v[timestep_v.size()-1];
-                double diff0, diff1;
-                diff0 = std::abs((double)timestep_v[0]/(double)timestep_max - ratio);
-                for (size_t i = 1; i < timestep_v.size(); i++){
-                    diff1 = std::abs((double)timestep_v[i]/(double)timestep_max - ratio);
-                    if (diff1 > diff0) return timestep_v[i-1];
+                int timestep_max = vec_max(timestep_v);
+                std::vector<double> diffs(timestep_v.size());
+                for (size_t i = 0; i < diffs.size(); i++)
+                    diffs[i] = std::abs((double)timestep_v[i]/(double)timestep_max - ratio);
+                return timestep_v[vec_minid(diffs)];
+            }
+
+            bool check_if_wanted_frame(){
+                if (!all_frames_loaded) return true;
+                std::vector<int>::iterator itr
+                    = std::find(want_timesteps.begin(), want_timesteps.end(), timestep);
+                if (itr == want_timesteps.end()){
+                    return false;
+                } else {
+                    return true;
                 }
-                return timestep_max;
             }
 
 
         private:
             int line_number = 0;
-            int now_frame = 0;
+            int now_frame = -1;
             std::string ipath, tmp;
             std::ifstream dump;
+            bool all_frames_loaded = false;
 
             // 全frameのデータを格納するvector
             std::vector<int> timestep_v, num_atoms_v, want_timesteps;
@@ -155,6 +148,7 @@ namespace ReadDump
             std::vector<Eigen::MatrixXd*> atoms_all_data_v;
             std::vector< std::map<std::string, int>* > header_map_v;
 
+            // 汎用関数 -------------------------------------------------------------------
             std::vector<std::string> split(const std::string &s, char delim){
                 std::vector<std::string> elems;
                 std::stringstream ss(s);
@@ -166,6 +160,31 @@ namespace ReadDump
                 }
                 return elems;
             }
+
+            template<typename T> T vec_max(std::vector<T> &vec){
+                typename std::vector<T>::iterator iter = std::max_element(vec.begin(), vec.end());
+                size_t idx = std::distance(vec.begin(), iter);
+                return vec[idx];
+            }
+
+            template<typename T> size_t vec_maxid(std::vector<T> &vec){
+                typename std::vector<T>::iterator iter = std::max_element(vec.begin(), vec.end());
+                size_t idx = std::distance(vec.begin(), iter);
+                return idx;
+            }
+
+            template<typename T> T vec_min(std::vector<T> &vec){
+                typename std::vector<T>::iterator iter = std::min_element(vec.begin(), vec.end());
+                size_t idx = std::distance(vec.begin(), iter);
+                return vec[idx];
+            }
+
+            template<typename T> size_t vec_minid(std::vector<T> &vec){
+                typename std::vector<T>::iterator iter = std::min_element(vec.begin(), vec.end());
+                size_t idx = std::distance(vec.begin(), iter);
+                return idx;
+            }
+            // ----------------------------------------------------------------------------
 
             void init(){
                 num_frames = 0;
@@ -292,6 +311,24 @@ namespace ReadDump
                     }
                 }
                 return false; // ファイル末尾の場合はここ
+            }
+
+            bool change_now_frame(int frame, bool absolute = false){
+                if (absolute){
+                    now_frame = frame;
+                } else {
+                    now_frame += frame;
+                }
+                if (now_frame < 0 || num_frames <= now_frame) return false;
+                timestep = timestep_v[now_frame];
+                num_atoms = num_atoms_v[now_frame];
+                cellbox_a = ca_v[now_frame];
+                cellbox_b = cb_v[now_frame];
+                cellbox_c = cc_v[now_frame];
+                cellbox_origin = co_v[now_frame];
+                atoms_all_data = atoms_all_data_v[now_frame];
+                header_map = header_map_v[now_frame];
+                return true;
             }
     };
 }
