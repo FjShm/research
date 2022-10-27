@@ -122,7 +122,6 @@ while(rd.read_1frame()){
   
   // display coordination of id=100
   int id = 100;
-  std::cout << "method 2\n";
   std::vector<Eigen::Vector3d> coordinate;
   rd.join_3columns(coordinate, "xu", "yu", "zu");
   std::cout << coordinate[id-1] << std::endl;
@@ -134,7 +133,7 @@ Pre-set the frames you want to load, **by specifying timesteps**.
 ```c++
 ReadDump::ReadDump rd("dump.u.lammpstrj");
 rd.read_all_frames(); // MUST
-std::vector<double> timestep = {0, 20000000, 40000000}; // In no particular order, duplicates are acceptable. Timesteps that do not exist are ignored.
+std::vector<int> timestep = {0, 20000000, 40000000}; // In no particular order, duplicates are acceptable. Timesteps that do not exist are ignored.
 rd.set_want_frames(timestep);
 
 while(rd.read_1frame()){
@@ -146,7 +145,6 @@ while(rd.read_1frame()){
   
   // display coordination of id=100
   int id = 100;
-  std::cout << "method 2\n";
   std::vector<Eigen::Vector3d> coordinate;
   rd.join_3columns(coordinate, "xu", "yu", "zu");
   std::cout << coordinate[id-1] << std::endl;
