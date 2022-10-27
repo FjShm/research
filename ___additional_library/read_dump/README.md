@@ -27,7 +27,7 @@ Available by simply placing a header(`read_dump.h`) in the include directory.
 |clear(void)|void|-|
 |join_3columns(<br>std::vector\<Eigen::Vector3d\>&,<br>std::string,<br>std::string,<br>std::string<br>)|void|The data of the columns matching the three specified header names are concatenated and returned.|
 |read\_1frame(void)|void|Read through the dump file for one frame. If read\_all\_frames, described below, has already been executed, it only refers to the next frame's data from memory.|
-|read\_all\_frames|void|Load all data in the dump file.|
+|read\_all\_frames(void)|void|Load all data in the dump file.|
 |header\_validation(...std::string)|void|Verify that the required column names are present in the header. Multiple column names (std::string) may be packed into a vector type and passed as an argument, or any number of column names (std::string) may be passed as an argument.|
 |set\_wanted\_frames(const std::vector\<double\>&)<br>set\_wanted\_frames(const std::vector\<int\>&)|void|Set the timestep of the frame to be read or the position of the frame in all frames (0-1).|
 |search\_nearest\_timestep(void)|int|The position of the frame within all frames is given as a number between 0 and 1, and the timestep closest to that value is returned.|
