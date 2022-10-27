@@ -150,3 +150,7 @@ while(rd.read_1frame()){
   std::cout << coordinate[id-1] << std::endl;
 }
 ```
+
+## Restrictions
+- `Eigen` library is needed
+- g++17 or later is needed to compile `sample/test.cpp`
