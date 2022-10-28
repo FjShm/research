@@ -7,7 +7,7 @@ int main(int argc, char* argv[]){
     const std::string dump_path = param["input_dump_path"].as<std::string>();
     const std::string rot_path = param["input_rotationtxt_path"].as<std::string>();
     const std::string out_dump_path = param["output_rotated_dump_path"].as<std::string>();
-    const bool ifMove = param["move_to_cell"].as<bool>();
+    const bool wannaMove = param["move_to_cell"].as<bool>(true);
     int N = param["N"].as<int>(-1);
     int M = param["M"].as<int>(-1);
 
@@ -29,29 +29,40 @@ int main(int argc, char* argv[]){
 
 
     while(rd.read_1frame()){
+        // validation
+        rd.header_validation("id", "xu", "yu", "zu");
         // read rotation.txt
         int timestep;
         Eigen::Matrix3d rot;
         std::getline(rotxt, rotxt_row);
         rotationtxt2rotmatrix(rotxt_row, rot, timestep);
 
+        // check timestep
+        if (timestep != rd.timestep){
+            std::cout << "The timestep in the dump file and rotation.txt do not match.\n"
+                << "rotation.txt: " << timestep << std::endl
+                << "dump file:    " << rd.timestep << std::endl;
+            std::exit(EXIT_FAILURE);
+        }
 
-        // read dump one timestep
+        // get coordination
         std::vector<Eigen::Vector3d> coordinations;
         rd.join_3columns(coordinations, "xu", "yu", "zu");
+
+        // get "mol": # of chain
         int mol, id;
-        if (rd.header_map.count("mol") == 0){
-            id = rd.header_map.at("id");
-            mol = rd.atoms_all_data.cols();
-            rd.header_map.insert(std::make_pair("mol", mol));
-            rd.atoms_all_data.conservativeResize(rd.num_atoms, mol+1);
+        if (rd.header_map->count("mol") == 0){
+            id = rd.header_map->at("id");
+            mol = rd.atoms_all_data->cols();
+            rd.header_map->insert(std::make_pair("mol", mol));
+            rd.atoms_all_data->conservativeResize(rd.num_atoms, mol+1);
             if (N != -1){
                 for (int i = 0; i < rd.num_atoms; i++)
-                    rd.atoms_all_data(i, mol) = ((int)rd.atoms_all_data(i, id) - 1) / N + 1;
+                    (*rd.atoms_all_data)(i, mol) = ((int)rd.atoms_all_data->coeff(i, id) - 1) / N + 1;
             } else if (M != -1){
                 N = rd.num_atoms / M;
                 for (int i = 0; i < rd.num_atoms; i++)
-                    rd.atoms_all_data(i, mol) = ((int)rd.atoms_all_data(i, id) - 1) / N + 1;
+                    (*rd.atoms_all_data)(i, mol) = ((int)rd.atoms_all_data->coeff(i, id) - 1) / N + 1;
             } else {
                 std::cout << "Since there is no 'mol' in ATOMS in the dump file,"
                     << " it is necessary to write N or M in the "
@@ -59,29 +70,21 @@ int main(int argc, char* argv[]){
                 std::exit(EXIT_FAILURE);
             }
         } else {
-            mol = rd.header_map.at("mol");
+            mol = rd.header_map->at("mol");
         }
 
-        int mol_max = rd.atoms_all_data.col(mol).array().maxCoeff();
+        int mol_max = rd.atoms_all_data->col(mol).array().maxCoeff();
         int bead_per_chain = rd.num_atoms / mol_max;
 
-        // check timestep
-        if (timestep != rd.timestep){
-            std::cout << "The timestep in the dump file and rotation.txt do not match.\n"
-                << "rotation.txt: " << timestep << std::endl
-                << "dump file:    " << rd.timestep << std::endl;
-            return 1;
-        }
-
-        if (ifMove){
+        if (wannaMove){
             // calc center of gravity of each polymers
             std::vector<Eigen::Vector3d> cogs(mol_max);
             Eigen::Vector3d sum_tmp;
             sum_tmp << 0., 0., 0.;
             for (int i = 0; i < rd.num_atoms; i++){
                 sum_tmp += coordinations[i];
-                if (i == rd.num_atoms - 1 || rd.atoms_all_data(i, mol) < rd.atoms_all_data(i+1, mol)){
-                    cogs[rd.atoms_all_data(i, mol)-1] = sum_tmp / (double)bead_per_chain;
+                if (i == rd.num_atoms - 1 || rd.atoms_all_data->coeff(i, mol) < rd.atoms_all_data->coeff(i+1, mol)){
+                    cogs[rd.atoms_all_data->coeff(i, mol)-1] = sum_tmp / (double)bead_per_chain;
                     sum_tmp << 0., 0., 0.;
                 }
             }
@@ -103,7 +106,7 @@ int main(int argc, char* argv[]){
 
             // move polymer into simulation box
             for (int i = 0; i < rd.num_atoms; i++){
-                coordinations[i] -= movecs[rd.atoms_all_data(i, mol)-1];
+                coordinations[i] -= movecs[rd.atoms_all_data->coeff(i, mol)-1];
             }
         }
 
@@ -111,7 +114,6 @@ int main(int argc, char* argv[]){
         for (int i = 0; i < rd.num_atoms; i++){
             coordinations[i] = coordinations[i].transpose() * rot;
         }
-
 
         // output new dump
         write_to_newdump(out_dump, rd, coordinations);
@@ -197,9 +199,9 @@ void write_to_newdump(
     out << dumpcell(2, 0) << " " << dumpcell(2, 1) << " " << dumpcell(2, 2) << std::endl;
 
     out << "ITEM: ATOMS id mol xu yu zu\n";
-    int mol = rd.header_map.at("mol");
+    int mol = rd.header_map->at("mol");
     for (int i = 0; i < rd.num_atoms; i++){
-        out << i + 1 << " " << rd.atoms_all_data(i, mol) << " " << coordinations[i](0) << " "
+        out << i + 1 << " " << rd.atoms_all_data->coeff(i, mol) << " " << coordinations[i](0) << " "
             << coordinations[i](1) << " " << coordinations[i](2) << std::endl;
     }
 }
