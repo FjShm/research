@@ -1,3 +1,6 @@
+#ifndef __READ_DUMP_H__
+#define __READ_DUMP_H__
+
 #include <cstdlib>
 #include <map>
 #include <iostream>
@@ -289,6 +292,8 @@ namespace ReadDump
                         read_box("triclinic");
                     } else if (splited_row[1] == " BOX BOUNDS xx yy zz pp pp pp"){
                         read_box("orthogonal");
+                    } else if (splited_row[1] == " BOX BOUNDS pp pp pp"){
+                        read_box("orthogonal");
                     } else {
                         std::vector<std::string> atoms_header = split(splited_row[1], ' ');
                         if (atoms_header[0] != "ATOMS"){
@@ -333,3 +338,4 @@ namespace ReadDump
     };
 }
 
+#endif
