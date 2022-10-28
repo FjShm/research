@@ -5,7 +5,6 @@ int main(int argc, char* argv[]){
     YAML::Node param = YAML::LoadFile(argv[1]);
     const std::string ipath = param["input_dump_path"].as<std::string>();
     const std::string opath = param["output_path"].as<std::string>();
-    const std::string col2 = param["col2"].as<std::string>();
     int N = param["beads_per_chain"].as<int>();
     int M = param["num_chain"].as<int>();
 
@@ -18,13 +17,12 @@ int main(int argc, char* argv[]){
     // -------------------------------
 
     ReadDump::ReadDump rd(ipath);
-    int NM, count(0), timestep, beads_total;
-    NM = N * M;
     Eigen::VectorXd R2_n(N+1);
 
+    int count = 0;
     while(rd.read_1frame()){
         rd.header_validation("id", "xu", "yu", "zu");
-        compute_R2_n(rd, N, M, NM, R2_n);
+        compute_R2_n(rd, N, M, R2_n);
         ++count;
         ++show_progress;
     }
@@ -32,17 +30,18 @@ int main(int argc, char* argv[]){
 
     // output
     std::ofstream out{opath, std::ios::out | std::ios::trunc};
-    for (int n = 2; n <= N; n++){
+    for (int n = 2; n <= N; n++)
         out << n-1 << ' ' << R2_n(n) << std::endl;
-    }
 }
 
 
-void compute_R2_n(ReadDump::ReadDump &rd, int N, int M, int NM, Eigen::VectorXd& R2_n){
+void compute_R2_n(ReadDump::ReadDump &rd, int N, int M, Eigen::VectorXd& R2_n){
     Eigen::VectorXd R2_n_tmp(N+1);
     std::vector<Eigen::Vector3d> coordinations;
     rd.join_3columns(coordinations, "xu", "yu", "zu");
     Eigen::Vector3d dpos;
+    // N-n+1: # of pairs for each chains
+    // n-1: # of bonds
     for (int n = 2; n <= N; n++){
         for (int m = 0; m < M; m++){
             for (int start_id = 0; start_id <= N-n; start_id++){
@@ -52,9 +51,6 @@ void compute_R2_n(ReadDump::ReadDump &rd, int N, int M, int NM, Eigen::VectorXd&
             }
         }
         R2_n_tmp(n) /= (M * (N - n + 1)) * (n-1);
-        // M: chains
-        // N-n+1: # of pairs for each chains
-        // n-1: # of bonds
     }
     R2_n += R2_n_tmp;
 }
