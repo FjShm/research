@@ -213,7 +213,6 @@ namespace ReadDump
                          >> zlo_b >> zhi_b >> yz;
                     dumpcell_to_vector_converter(
                         xlo_b, xhi_b, xy, ylo_b, yhi_b, xz, zlo_b, zhi_b, yz);
-                    std::getline(dump, tmp);
                     line_number += 3;
                 } else if (boxtype == "orthogonal"){
                     double xlo,xhi, ylo,yhi, zlo,zhi;
@@ -229,6 +228,7 @@ namespace ReadDump
                     std::cout << "Error: undefined box type\n"
                         << "line " << line_number << std::endl;
                 }
+                std::getline(dump, tmp);
             }
 
             void read_atoms(int num_column){
