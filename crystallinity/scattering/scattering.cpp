@@ -76,6 +76,7 @@ int main(int argc, char* argv[]){
     // -------------------------------
     int timestep;
     while(rd.read_1frame()){
+        rd.header_validation("x", "y", "z");
         std::getline(rotxt, rotxt_row);
         Eigen::Matrix3d rot;
         rotationtxt2rotmatrix(rotxt_row, rot, timestep);
