@@ -80,7 +80,7 @@ int main(int argc, char* argv[]){
         Eigen::Matrix3d rot;
         rotationtxt2rotmatrix(rotxt_row, rot, timestep);
 
-        if (rd.check_if_wanted_frame() == false){
+        if (!rd.check_if_wanted_frame()){
             ++show_progress;
             continue;
         }
