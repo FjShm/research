@@ -29,29 +29,6 @@ int main(int argc, char* argv[]){
     R2_n *= 0;
     std::ifstream in{ipath};
 
-    //while(std::getline(in, line)){
-    //    if (line == "ITEM: TIMESTEP"){
-    //        in >> timestep;
-    //    } else if (line == "ITEM: NUMBER OF ATOMS"){
-    //        in >> beads_total;
-    //        if (beads_total != NM){
-    //            std::cout << "N, M is wrong. N*M = " << NM
-    //            << ", total number of beads = " << beads_total << std::endl;
-    //            std::exit(EXIT_FAILURE);
-    //        }
-    //    } else if (line == "ITEM: ATOMS id mol xu yu zu" ||
-    //            line == "ITEM: ATOMS id type xu yu zu"){
-    //        if (col2 == "mol"){
-    //            compute_R2_n(in, N, M, NM, R2_n, "mol");
-    //        } else if (col2 == "type"){
-    //            compute_R2_n(in, N, M, NM, R2_n, "type");
-    //        }
-    //        count++;
-
-    //        // update progress bar
-    //        ++show_progress;
-    //    } else continue;
-    //}
     while(rd.read_1frame()){
         rd.header_validation("id", "xu", "yu", "zu");
         int id, mol;
@@ -92,23 +69,6 @@ int main(int argc, char* argv[]){
 
 void compute_R2_n(ReadDump::ReadDump &rd, int N, int M, int NM, Eigen::VectorXd& R2_n){
     Eigen::VectorXd R2_n_tmp(N+1);
-    //int id, mol, type;
-    //for (int i = 0; i < NM; i++){
-    //    in >> id;
-    //    if (col2 == "mol"){
-    //        in >> mol;
-    //    } else if (col2 == "type"){
-    //        in >> type;
-    //        mol = (id - 1)/N + 1;
-    //    } else {
-    //        std::cout << "warning: The lammpstrj format corresponds "
-    //            << "to id-mol-xu-yu-zu or id-type-xu-yu-zu.\n";
-    //        return;
-    //    }
-    //    int idx = (id - 1) % N;
-    //    in >> posx[mol-1][idx] >> posy[mol-1][idx] >> posz[mol-1][idx];
-    //}
-
     std::vector<Eigen::Vector3d> coordinations;
     rd.join_3columns(coordinations, "xu", "yu", "zu");
     Eigen::Vector3d dpos;
