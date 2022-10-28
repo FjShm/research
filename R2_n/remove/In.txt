@@ -1,4 +1,0 @@
-sample_data/dump.1.lammpstrj
-Out.R2_n.txt
-49
-512
