@@ -2,11 +2,6 @@
 
 
 int main(int argc, char* argv[]){
-    if (argc < 2){
-        std::cout << "Error: Execute with the input yaml file path as an argument.\n"
-            << "ex.) $ ./a.out param.yaml" << std::endl;
-        std::exit(EXIT_FAILURE);
-    }
     YAML::Node param = YAML::LoadFile(argv[1]);
     const std::string ipath = param["input_dump_path"].as<std::string>();
     const std::string opath = param["output_path"].as<std::string>();
@@ -26,34 +21,9 @@ int main(int argc, char* argv[]){
     int NM, count(0), timestep, beads_total;
     NM = N * M;
     Eigen::VectorXd R2_n(N+1);
-    std::cout << 0 << std::endl;
 
     while(rd.read_1frame()){
-    std::cout << 0 << std::endl;
         rd.header_validation("id", "xu", "yu", "zu");
-    std::cout << 0 << std::endl;
-        //if (rd.header_map->count("mol") == 0){
-        //    id = rd.header_map->at("id");
-        //    mol = rd.atoms_all_data->cols();
-        //    rd.header_map->insert(std::make_pair("mol", mol));
-        //    rd.atoms_all_data->conservativeResize(rd.num_atoms, mol+1);
-        //    if (N != -1){
-        //        for (int i = 0; i < rd.num_atoms; i++)
-        //            (*rd.atoms_all_data)(i, mol) = ((int)rd.atoms_all_data->coeff(i, id) - 1) / N + 1;
-        //    } else if (M != -1){
-        //        N = rd.num_atoms / M;
-        //        for (int i = 0; i < rd.num_atoms; i++)
-        //            (*rd.atoms_all_data)(i, mol) = ((int)rd.atoms_all_data->coeff(i, id) - 1) / N + 1;
-        //    } else {
-        //        std::cout << "Since there is no 'mol' in ATOMS in the dump file,"
-        //            << " it is necessary to write N or M in the "
-        //            << argv[1] << ".\n";
-        //        std::exit(EXIT_FAILURE);
-        //    }
-        //} else {
-        //    mol = rd.header_map->at("mol");
-        //}
-        std::cout << 0 << std::endl;
         compute_R2_n(rd, N, M, NM, R2_n);
         ++count;
         ++show_progress;
