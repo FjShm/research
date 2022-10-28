@@ -8,4 +8,6 @@ aspect: xz
 frame:
   type: ratio # all, timestep, ratio
   content:
-    - 0.6
+    - 0.
+    - 0.3
+    - 1.0

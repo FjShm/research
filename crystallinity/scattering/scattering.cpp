@@ -12,14 +12,7 @@ int main(int argc, char* argv[]){
     const int resolution = param["resolution"].as<int>();
     const std::string aspect = param["aspect"].as<std::string>();
     const std::string read_frame = param["frame"]["type"].as<std::string>("all");
-    std::vector<int> read_timestep;
-    std::vector<double> read_ratio;
     // read_frame: "all", "timestep", "ratio"
-    if (read_frame == "timestep"){
-        read_timestep = param["frame"]["content"].as< std::vector<int> >();
-    } else if (read_frame == "ratio"){
-        read_ratio = param["frame"]["content"].as< std::vector<double> >();
-    }
 
     const std::vector<double> freq_axis = linspace(freq_min, freq_max, resolution);
     int ax0, ax1;
@@ -52,9 +45,26 @@ int main(int argc, char* argv[]){
     for (int i = 0; i < 2; i++) std::getline(rotxt, rotxt_row);
 
     // pre-read dump
-    if (read_frame == "timestep" || read_frame == "ratio"){
+    if (read_frame == "timestep"){
         rd.read_all_frames();
-        rd.set_want_frames(read_ratio, read_timestep);
+        try{
+            rd.set_want_frames(param["frame"]["content"].as< std::vector<int> >());
+        } catch (const YAML::TypedBadConversion<std::vector<int>>& e) {
+            std::cout << "'frame.content' must be needed in "
+                << argv[1] << " if 'frame.type' is 'timestep'.\n"
+                << "Error: " << e.msg << std::endl;
+            std::exit(EXIT_FAILURE);
+        }
+    } else if (read_frame == "ratio"){
+        rd.read_all_frames();
+        try{
+            rd.set_want_frames(param["frame"]["content"].as< std::vector<double> >());
+        } catch (const YAML::TypedBadConversion<std::vector<double>>& e) {
+            std::cout << "'frame.content' must be needed in "
+                << argv[1] << " if 'frame.type' is 'ratio'.\n"
+                << "Error: " << e.msg << std::endl;
+            std::exit(EXIT_FAILURE);
+        }
     }
 
     // -------------------------------
@@ -66,11 +76,12 @@ int main(int argc, char* argv[]){
     // -------------------------------
     int timestep;
     while(rd.read_1frame()){
+        rd.header_validation("x", "y", "z");
         std::getline(rotxt, rotxt_row);
         Eigen::Matrix3d rot;
         rotationtxt2rotmatrix(rotxt_row, rot, timestep);
 
-        if (rd.check_if_wanted_frame() == false){
+        if (!rd.check_if_wanted_frame()){
             ++show_progress;
             continue;
         }
