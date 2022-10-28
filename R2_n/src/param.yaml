@@ -1,0 +1,4 @@
+input_dump_path: sample_data/sample.lammpstrj
+output_path: sample_data/r2_n.txt
+beads_per_chain: 49
+num_chain: 512
