@@ -7,8 +7,8 @@ int main(int argc, char* argv[]){
     YAML::Node param = YAML::LoadFile(argv[1]);
     const std::string ipath = param["input_dump_path"].as<std::string>();
     const std::string opath = param["output_path"].as<std::string>();
-    const int N = param["N"].as<int>();
-    const int M = param["M"].as<int>();
+    const int N = param["N"].as<int>(-1);
+    const int M = param["M"].as<int>(-1);
 
     const int NM = N * M;
 
@@ -19,24 +19,24 @@ int main(int argc, char* argv[]){
     boost::progress_display show_progress(max_loop);
 
     // -------------------------------
-    int count(0), timestep, beads_total;
     double R2(0), R4(0), Rgcm(0);
     ReadDump::ReadDump rd(ipath);
 
     while(rd.read_1frame()){
-            compute_R2_n(in, N, M, NM, R2, R4, Rgcm);
+        rd.header_validation("id", "xu", "yu", "zu");
+        compute_R2_n(rd, N, M, NM, R2, R4, Rgcm);
     
         // update progress bar
         ++show_progress;
     }
-    R2 /= (double)count;
-    R4 /= (double)count;
-    Rgcm /= (double)count;
+    R2 /= (double)rd.num_frames;
+    R4 /= (double)rd.num_frames;
+    Rgcm /= (double)rd.num_frames;
 
     // output
     std::ofstream out{opath, std::ios::out | std::ios::trunc};
-    out << "<R4/(R2)^2> = " << R4/(R2*R2) << std::endl;
-    out << "<R2/RG2>    = " << R2/Rgcm << std::endl;
+    out << "<R4>/<(R2)>^2 = " << R4/(R2*R2) << std::endl;
+    out << "<R2>/<RG2>    = " << R2/Rgcm << std::endl;
 }
 
 
