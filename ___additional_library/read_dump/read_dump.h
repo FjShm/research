@@ -128,6 +128,7 @@ namespace ReadDump
 
             bool check_if_wanted_frame(){
                 if (!all_frames_loaded) return true;
+                if (want_timesteps.size() == 0) return true;
                 std::vector<int>::iterator itr
                     = std::find(want_timesteps.begin(), want_timesteps.end(), timestep);
                 if (itr == want_timesteps.end()){
@@ -325,7 +326,7 @@ namespace ReadDump
                 } else {
                     now_frame += frame;
                 }
-                if (now_frame < 0 || num_frames <= now_frame) return false;
+                if (now_frame < 0 || num_frames < now_frame) return false;
                 timestep = timestep_v[now_frame];
                 num_atoms = num_atoms_v[now_frame];
                 cellbox_a = ca_v[now_frame];
