@@ -19,29 +19,12 @@ int main(int argc, char* argv[]){
     boost::progress_display show_progress(max_loop);
 
     // -------------------------------
-    std::string line;
     int count(0), timestep, beads_total;
     double R2(0), R4(0), Rgcm(0);
-    std::ifstream in{ipath};
+    ReadDump::ReadDump rd(ipath);
 
-    while(std::getline(in, line)){
-        if (line == "ITEM: TIMESTEP"){
-            in >> timestep;
-            continue;
-        } else if (line == "ITEM: NUMBER OF ATOMS"){
-            in >> beads_total;
-            if (beads_total != NM){
-                std::cout << "N, M is wrong. N*M = " << NM
-                << ", total number of beads = " << beads_total << std::endl;
-                return -1;
-            }
-            continue;
-        } else if (line == "ITEM: BOX BOUNDS xy xz yz pp pp pp"){
-            continue;
-        } else if (line == "ITEM: ATOMS id xu yu zu"){
+    while(rd.read_1frame()){
             compute_R2_n(in, N, M, NM, R2, R4, Rgcm);
-            count++;
-        } else continue;
     
         // update progress bar
         ++show_progress;
