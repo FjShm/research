@@ -137,16 +137,6 @@ namespace ReadDump
                 }
             }
 
-            // inherit
-            template<class... T> void add_column_if_not_exist(std::string colname, T... args){
-                if (colname == "mol"){
-                    add_mol(args...);
-                } else {
-                    std::cout << "Invalid column name: " << colname << std::endl
-                        << "This message can be ignored but may cause an error.\n"
-                        << "(add_column_if_not_exist, read_dump.h)\n";
-                }
-            }
 
 
         private:
@@ -348,6 +338,25 @@ namespace ReadDump
                 return true;
             }
 
+    }; // class ReadDump
+
+
+    class ExtraReadDump : public ReadDump
+    {
+        using ReadDump::ReadDump;
+
+        public:
+            template<class... T> void add_column_if_not_exist(std::string colname, T... args){
+                if (colname == "mol"){
+                    add_mol(args...);
+                } else {
+                    std::cout << "Invalid column name: " << colname << std::endl
+                        << "This message can be ignored but may cause an error.\n"
+                        << "(add_column_if_not_exist, read_dump.h)\n";
+                }
+            }
+
+        private:
             void add_mol(int N, int M){
                 if (header_map->count("mol") == 0){
                     int id = header_map->at("id");
@@ -368,7 +377,7 @@ namespace ReadDump
                     }
                 }
             }
-    };
+    }; // class ExtraReadDump
 }
 
 #endif
