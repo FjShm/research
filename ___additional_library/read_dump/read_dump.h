@@ -61,7 +61,6 @@ namespace ReadDump
             void read_all_frames(){
                 std::cout << ipath << " : now loading...\n";
                 while(_read_1frame()){
-                    num_frames++;
                     std::cout << "\r>>> timestep: " + std::to_string(timestep);
                     timestep_v.push_back(timestep);
                     num_atoms_v.push_back(num_atoms);
@@ -273,7 +272,6 @@ namespace ReadDump
             }
 
             bool _read_1frame(){
-                num_frames++;
                 std::string row;
                 atoms_all_data = new Eigen::MatrixXd;
                 header_map = new std::map<std::string, int>;
@@ -288,6 +286,7 @@ namespace ReadDump
 
                     if (splited_row[1] == " TIMESTEP"){
                         read_timestep();
+                        num_frames++;
                     } else if (splited_row[1] == " NUMBER OF ATOMS"){
                         read_number_of_atoms();
                     } else if (splited_row[1] == " BOX BOUNDS xy xz yz pp pp pp"){
@@ -326,7 +325,7 @@ namespace ReadDump
                 } else {
                     now_frame += frame;
                 }
-                if (now_frame < 0 || num_frames < now_frame) return false;
+                if (now_frame < 0 || num_frames <= now_frame) return false;
                 timestep = timestep_v[now_frame];
                 num_atoms = num_atoms_v[now_frame];
                 cellbox_a = ca_v[now_frame];
