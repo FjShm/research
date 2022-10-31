@@ -1,10 +1,15 @@
+#include <random>
 #include "../read_dump.h"
+
+std::random_device rd;
+std::mt19937 gen(rd());
 
 
 int main(){
     const std::string dir = "./";
-    const std::string fname = "dump.u.lammpstrj";
-    ReadDump::ReadDump rd(dir + fname);
+    const std::string fname = "_dump.u.lammpstrj";
+    const int N(49), M(512);
+    ReadDump::ExtraReadDump rd(dir + fname);
 
     // test read_all_frames, or read_1frame
     std::cout << "Do you want to load all of the following file first?\n"
@@ -51,6 +56,17 @@ int main(){
             continue;
         }
 
+        // test add_mol
+        std::uniform_int_distribution<> dist(0, N*M-1);
+        int id = dist(gen);
+        rd.add_column_if_not_exist("mol", N, M);
+        int mol = rd.header_map->at("mol");
+        int mol_origin = rd.header_map->at("mol_origin");
+        
+        std::cout << "id: " << id << std::endl;
+        std::cout << "added mol: " << rd.atoms_all_data->coeff(id, mol) << std::endl;
+        std::cout << "original mol: " << rd.atoms_all_data->coeff(id, mol_origin) << std::endl;
+
         // test reference to member variables
         std::cout << "timestep: " << rd.timestep << std::endl;
         std::cout << "num_atoms: " << rd.num_atoms << std::endl;
@@ -78,4 +94,5 @@ int main(){
         std::cout << rd.atoms_all_data->coeff(14920-1, zu) << std::endl;
         std::cout << std::endl;
     }
+    std::cout << "num_frames: " << rd.num_frames << std::endl;
 }
