@@ -20,10 +20,11 @@ int main(int argc, char* argv[]){
 
     // -------------------------------
     double R2(0), R4(0), Rgcm(0);
-    ReadDump::ReadDump rd(ipath);
+    ReadDump::ExtraReadDump rd(ipath);
 
     while(rd.read_1frame()){
         rd.header_validation("id", "xu", "yu", "zu");
+        rd.add_column_if_not_exist("mol", N, M);
         compute_R2_n(rd, N, M, NM, R2, R4, Rgcm);
     
         // update progress bar
@@ -40,15 +41,12 @@ int main(int argc, char* argv[]){
 }
 
 
-void compute_R2_n(std::ifstream& in, int N, int M, int NM, double& R2, double& R4, double& Rgcm){
+void compute_R2_n(ReadDump::ExtraReadDump& rd, double& R2, double& R4, double& Rgcm){
     std::vector<Eigen::Vector3d> pos(NM);
     double R2_tmp(0), R4_tmp(0), Rgcm_tmp(0);
-    int index;
-    for (int i = 0; i < NM; i++){
-        in >> index;
-        in >> pos[index-1](0) >> pos[index-1](1) >> pos[index-1](2);
-    }
 
+    int M = (int)rd.max_of_column("mol");
+    int N = rd.num_atoms / M;
     for (int i = 0; i < M; i++){
         int idx_head = i*N;
         int idx_tail = idx_head + N - 1;
