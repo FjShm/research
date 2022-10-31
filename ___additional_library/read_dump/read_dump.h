@@ -272,6 +272,7 @@ namespace ReadDump
             }
 
             bool _read_1frame(){
+                num_frames++;
                 std::string row;
                 atoms_all_data = new Eigen::MatrixXd;
                 header_map = new std::map<std::string, int>;
