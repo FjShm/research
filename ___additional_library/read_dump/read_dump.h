@@ -137,6 +137,17 @@ namespace ReadDump
                 }
             }
 
+            // inherit
+            template<class... T> void add_column_if_not_exist(std::string colname, T... args){
+                if (colname == "mol"){
+                    add_mol(args...);
+                } else {
+                    std::cout << "Invalid column name: " << colname << std::endl
+                        << "This message can be ignored but may cause an error.\n"
+                        << "(add_column_if_not_exist, read_dump.h)\n";
+                }
+            }
+
 
         private:
             int line_number = 0;
@@ -335,6 +346,27 @@ namespace ReadDump
                 atoms_all_data = atoms_all_data_v[now_frame];
                 header_map = header_map_v[now_frame];
                 return true;
+            }
+
+            void add_mol(int N, int M){
+                if (header_map->count("mol") == 0){
+                    int id = header_map->at("id");
+                    int mol = atoms_all_data->cols();
+                    header_map->insert(std::make_pair("mol", mol));
+                    atoms_all_data->conservativeResize(num_atoms, mol+1);
+                    if (N != -1){
+                        for (int i = 0; i < num_atoms; i++)
+                            (*atoms_all_data)(i, mol) = ((int)atoms_all_data->coeff(i, id) - 1) / N + 1;
+                    } else if (M != -1){
+                        N = num_atoms / M;
+                        for (int i = 0; i < num_atoms; i++)
+                            (*atoms_all_data)(i, mol) = ((int)atoms_all_data->coeff(i, id) - 1) / N + 1;
+                    } else {
+                        std::cout << "Since there is no 'mol' in ATOMS in the dump file,"
+                            << " it is necessary to write N or M in the input file.\n";
+                        std::exit(EXIT_FAILURE);
+                    }
+                }
             }
     };
 }
