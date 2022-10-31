@@ -78,4 +78,5 @@ int main(){
         std::cout << rd.atoms_all_data->coeff(14920-1, zu) << std::endl;
         std::cout << std::endl;
     }
+    std::cout << "num_frames: " << rd.num_frames << std::endl;
 }
