@@ -42,7 +42,8 @@ int main(int argc, char* argv[]){
 
 
 void compute_R2_n(ReadDump::ExtraReadDump& rd, double& R2, double& R4, double& Rgcm){
-    std::vector<Eigen::Vector3d> pos(NM);
+    std::vector<Eigen::Vector3d> pos;
+    rd.join_3columns(pos, "xu", "yu", "zu");
     double R2_tmp(0), R4_tmp(0), Rgcm_tmp(0);
 
     int M = (int)rd.max_of_column("mol");
