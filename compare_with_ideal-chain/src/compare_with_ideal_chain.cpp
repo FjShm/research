@@ -7,10 +7,8 @@ int main(int argc, char* argv[]){
     YAML::Node param = YAML::LoadFile(argv[1]);
     const std::string ipath = param["input_dump_path"].as<std::string>();
     const std::string opath = param["output_path"].as<std::string>();
-    const int N = param["N"].as<int>();
-    const int M = param["M"].as<int>();
-
-    const int NM = N * M;
+    const int N = param["N"].as<int>(-1);
+    const int M = param["M"].as<int>(-1);
 
     // -------------------------------
     // max loop
@@ -19,53 +17,35 @@ int main(int argc, char* argv[]){
     boost::progress_display show_progress(max_loop);
 
     // -------------------------------
-    std::string line;
-    int count(0), timestep, beads_total;
     double R2(0), R4(0), Rgcm(0);
-    std::ifstream in{ipath};
+    ReadDump::ExtraReadDump rd(ipath);
 
-    while(std::getline(in, line)){
-        if (line == "ITEM: TIMESTEP"){
-            in >> timestep;
-            continue;
-        } else if (line == "ITEM: NUMBER OF ATOMS"){
-            in >> beads_total;
-            if (beads_total != NM){
-                std::cout << "N, M is wrong. N*M = " << NM
-                << ", total number of beads = " << beads_total << std::endl;
-                return -1;
-            }
-            continue;
-        } else if (line == "ITEM: BOX BOUNDS xy xz yz pp pp pp"){
-            continue;
-        } else if (line == "ITEM: ATOMS id xu yu zu"){
-            compute_R2_n(in, N, M, NM, R2, R4, Rgcm);
-            count++;
-        } else continue;
+    while(rd.read_1frame()){
+        rd.header_validation("id", "xu", "yu", "zu");
+        rd.add_column_if_not_exist("mol", N, M);
+        compute_R2_n(rd, R2, R4, Rgcm);
     
         // update progress bar
         ++show_progress;
     }
-    R2 /= (double)count;
-    R4 /= (double)count;
-    Rgcm /= (double)count;
+    R2 /= (double)rd.num_frames;
+    R4 /= (double)rd.num_frames;
+    Rgcm /= (double)rd.num_frames;
 
     // output
     std::ofstream out{opath, std::ios::out | std::ios::trunc};
-    out << "<R4/(R2)^2> = " << R4/(R2*R2) << std::endl;
-    out << "<R2/RG2>    = " << R2/Rgcm << std::endl;
+    out << "<R4>/<(R2)>^2 = " << R4/(R2*R2) << std::endl
+        << "<R2>/<RG2>    = " << R2/Rgcm << std::endl;
 }
 
 
-void compute_R2_n(std::ifstream& in, int N, int M, int NM, double& R2, double& R4, double& Rgcm){
-    std::vector<Eigen::Vector3d> pos(NM);
+void compute_R2_n(ReadDump::ExtraReadDump& rd, double& R2, double& R4, double& Rgcm){
+    std::vector<Eigen::Vector3d> pos;
+    rd.join_3columns(pos, "xu", "yu", "zu");
     double R2_tmp(0), R4_tmp(0), Rgcm_tmp(0);
-    int index;
-    for (int i = 0; i < NM; i++){
-        in >> index;
-        in >> pos[index-1](0) >> pos[index-1](1) >> pos[index-1](2);
-    }
 
+    int M = rd.max_of_col("mol");
+    int N = rd.num_atoms / M;
     for (int i = 0; i < M; i++){
         int idx_head = i*N;
         int idx_tail = idx_head + N - 1;
