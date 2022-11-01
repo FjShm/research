@@ -93,6 +93,16 @@ int main(){
         std::cout << rd.atoms_all_data->coeff(14920-1, yu) << std::endl;
         std::cout << rd.atoms_all_data->coeff(14920-1, zu) << std::endl;
         std::cout << std::endl;
+
+        // test max_of_col
+        int maxmol = rd.max_of_col("mol");
+        int minmol = rd.min_of_col("mol");
+        double maxxu_d = rd.max_of_col("xu");
+        int maxxu_i = rd.max_of_col("xu");
+        std::cout << "max mol: " << maxmol << std::endl;
+        std::cout << "min mol: " << minmol << std::endl;
+        std::cout << "max xu (double): " << maxxu_d << std::endl;
+        std::cout << "max xu (int): " << maxxu_i << std::endl;
     }
     std::cout << "num_frames: " << rd.num_frames << std::endl;
 }
