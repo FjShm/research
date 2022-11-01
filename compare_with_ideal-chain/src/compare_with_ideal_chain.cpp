@@ -10,8 +10,6 @@ int main(int argc, char* argv[]){
     const int N = param["N"].as<int>(-1);
     const int M = param["M"].as<int>(-1);
 
-    const int NM = N * M;
-
     // -------------------------------
     // max loop
     int max_loop = 0;
@@ -25,7 +23,7 @@ int main(int argc, char* argv[]){
     while(rd.read_1frame()){
         rd.header_validation("id", "xu", "yu", "zu");
         rd.add_column_if_not_exist("mol", N, M);
-        compute_R2_n(rd, N, M, NM, R2, R4, Rgcm);
+        compute_R2_n(rd, R2, R4, Rgcm);
     
         // update progress bar
         ++show_progress;
@@ -36,8 +34,8 @@ int main(int argc, char* argv[]){
 
     // output
     std::ofstream out{opath, std::ios::out | std::ios::trunc};
-    out << "<R4>/<(R2)>^2 = " << R4/(R2*R2) << std::endl;
-    out << "<R2>/<RG2>    = " << R2/Rgcm << std::endl;
+    out << "<R4>/<(R2)>^2 = " << R4/(R2*R2) << std::endl
+        << "<R2>/<RG2>    = " << R2/Rgcm << std::endl;
 }
 
 
@@ -46,7 +44,7 @@ void compute_R2_n(ReadDump::ExtraReadDump& rd, double& R2, double& R4, double& R
     rd.join_3columns(pos, "xu", "yu", "zu");
     double R2_tmp(0), R4_tmp(0), Rgcm_tmp(0);
 
-    int M = (int)rd.max_of_column("mol");
+    int M = rd.max_of_col("mol");
     int N = rd.num_atoms / M;
     for (int i = 0; i < M; i++){
         int idx_head = i*N;

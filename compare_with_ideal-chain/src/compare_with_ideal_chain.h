@@ -12,4 +12,4 @@
 
 
 void count_number_of_rows(const std::string&, int&);
-void compute_R2_n(std::ifstream&, int, int, int, double&, double&, double&);
+void compute_R2_n(ReadDump::ExtraReadDump&, double&, double&, double&);
