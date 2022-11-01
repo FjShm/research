@@ -356,6 +356,18 @@ namespace ReadDump
                 }
             }
 
+            double max_of_col(std::string colname){
+                int col = header_map->at(colname);
+                double val = atoms_all_data->col(col).array().maxCoeff();
+                return val;
+            }
+
+            double min_of_col(std::string colname){
+                int col = header_map->at(colname);
+                double val = atoms_all_data->col(col).array().minCoeff();
+                return val;
+            }
+
         private:
             void add_mol(int N, int M){
                 if (header_map->count("mol") == 0){
