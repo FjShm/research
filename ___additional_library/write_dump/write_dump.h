@@ -60,6 +60,17 @@ namespace WriteDump
                 header_map = rd.header_map;
             }
 
+            void set_by_ReadDump(ReadDump::ExtraReadDump &rd){
+                timestep = &rd.timestep;
+                num_atoms = &rd.num_atoms;
+                cellbox_a = &rd.cellbox_a;
+                cellbox_b = &rd.cellbox_b;
+                cellbox_c = &rd.cellbox_c;
+                cellbox_origin = &rd.cellbox_origin;
+                atoms_all_data = rd.atoms_all_data;
+                header_map = rd.header_map;
+            }
+
             void set_headers(const std::vector<std::string> &headers){
                 if (header_map == nullptr){
                     std::cout << "Set header_map first.\n";
