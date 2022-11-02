@@ -69,7 +69,7 @@ int main(int argc, char* argv[]){
 
     // -------------------------------
     // max loop
-    int max_loop = count_rows(dump_path, "TIMESTEP");
+    int max_loop = std::count_rows(dump_path, "TIMESTEP");
     boost::progress_display show_progress(max_loop);
 
     // -------------------------------
