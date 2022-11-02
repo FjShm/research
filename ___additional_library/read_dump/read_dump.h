@@ -9,6 +9,7 @@
 #include <fstream>
 #include <sstream>
 #include <eigen3/Eigen/Dense>
+#include <general/mytools.h>
 
 
 namespace ReadDump
@@ -118,11 +119,11 @@ namespace ReadDump
                         << "search_nearest_timestep (read_dump.h)\n";
                     std::exit(EXIT_FAILURE);
                 }
-                int timestep_max = vec_max(timestep_v);
+                int timestep_max = std::vec_max(timestep_v);
                 std::vector<double> diffs(timestep_v.size());
                 for (size_t i = 0; i < diffs.size(); i++)
                     diffs[i] = std::abs((double)timestep_v[i]/(double)timestep_max - ratio);
-                return timestep_v[vec_minid(diffs)];
+                return timestep_v[std::vec_minid(diffs)];
             }
 
             bool check_if_wanted_frame(){
@@ -151,44 +152,6 @@ namespace ReadDump
             std::vector<Eigen::Vector3d> ca_v, cb_v, cc_v, co_v;
             std::vector<Eigen::MatrixXd*> atoms_all_data_v;
             std::vector< std::map<std::string, int>* > header_map_v;
-
-            // 汎用関数 -------------------------------------------------------------------
-            std::vector<std::string> split(const std::string &s, char delim){
-                std::vector<std::string> elems;
-                std::stringstream ss(s);
-                std::string item;
-                while (std::getline(ss, item, delim)) {
-                    if (!item.empty()) {
-                        elems.push_back(item);
-                    }
-                }
-                return elems;
-            }
-
-            template<typename T> T vec_max(std::vector<T> &vec){
-                typename std::vector<T>::iterator iter = std::max_element(vec.begin(), vec.end());
-                size_t idx = std::distance(vec.begin(), iter);
-                return vec[idx];
-            }
-
-            template<typename T> size_t vec_maxid(std::vector<T> &vec){
-                typename std::vector<T>::iterator iter = std::max_element(vec.begin(), vec.end());
-                size_t idx = std::distance(vec.begin(), iter);
-                return idx;
-            }
-
-            template<typename T> T vec_min(std::vector<T> &vec){
-                typename std::vector<T>::iterator iter = std::min_element(vec.begin(), vec.end());
-                size_t idx = std::distance(vec.begin(), iter);
-                return vec[idx];
-            }
-
-            template<typename T> size_t vec_minid(std::vector<T> &vec){
-                typename std::vector<T>::iterator iter = std::min_element(vec.begin(), vec.end());
-                size_t idx = std::distance(vec.begin(), iter);
-                return idx;
-            }
-            // ----------------------------------------------------------------------------
 
             void init(){
                 num_frames = 0;
@@ -278,7 +241,7 @@ namespace ReadDump
                 header_map = new std::map<std::string, int>;
                 while(std::getline(dump, row)){
                     line_number++;
-                    std::vector<std::string> splited_row = split(row, ':');
+                    std::vector<std::string> splited_row = std::split(row, ':');
                     if (splited_row[0] != "ITEM"){
                         std::cout << "Error: Invalid dumpfile format.\n"
                             << "line " << line_number << ": " << row << std::endl;
@@ -367,6 +330,7 @@ namespace ReadDump
                 double val = atoms_all_data->col(col).array().minCoeff();
                 return val;
             }
+
 
         private:
             void add_mol(int N, int M){
