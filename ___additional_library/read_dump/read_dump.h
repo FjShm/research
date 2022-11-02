@@ -9,6 +9,7 @@
 #include <fstream>
 #include <sstream>
 #include <eigen3/Eigen/Dense>
+#include <general/mytools.h>
 
 
 namespace ReadDump
@@ -153,18 +154,6 @@ namespace ReadDump
             std::vector< std::map<std::string, int>* > header_map_v;
 
             // 汎用関数 -------------------------------------------------------------------
-            std::vector<std::string> split(const std::string &s, char delim){
-                std::vector<std::string> elems;
-                std::stringstream ss(s);
-                std::string item;
-                while (std::getline(ss, item, delim)) {
-                    if (!item.empty()) {
-                        elems.push_back(item);
-                    }
-                }
-                return elems;
-            }
-
             template<typename T> T vec_max(std::vector<T> &vec){
                 typename std::vector<T>::iterator iter = std::max_element(vec.begin(), vec.end());
                 size_t idx = std::distance(vec.begin(), iter);
@@ -278,7 +267,7 @@ namespace ReadDump
                 header_map = new std::map<std::string, int>;
                 while(std::getline(dump, row)){
                     line_number++;
-                    std::vector<std::string> splited_row = split(row, ':');
+                    std::vector<std::string> splited_row = std::split(row, ':');
                     if (splited_row[0] != "ITEM"){
                         std::cout << "Error: Invalid dumpfile format.\n"
                             << "line " << line_number << ": " << row << std::endl;
