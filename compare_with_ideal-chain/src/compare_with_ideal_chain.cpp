@@ -22,7 +22,7 @@ int main(int argc, char* argv[]){
     while(rd.read_1frame()){
         rd.header_validation("id", "xu", "yu", "zu");
         rd.add_column_if_not_exist("mol", N, M);
-        compute_R2_n(rd, R2, R4, Rgcm);
+        compute(rd, R2, R4, Rgcm);
     
         // update progress bar
         ++show_progress;
@@ -38,7 +38,7 @@ int main(int argc, char* argv[]){
 }
 
 
-void compute_R2_n(ReadDump::ExtraReadDump& rd, double& R2, double& R4, double& Rgcm){
+void compute(ReadDump::ExtraReadDump& rd, double& R2, double& R4, double& Rgcm){
     std::vector<Eigen::Vector3d> pos;
     rd.join_3columns(pos, "xu", "yu", "zu");
     double R2_tmp(0), R4_tmp(0), Rgcm_tmp(0);

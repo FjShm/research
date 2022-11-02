@@ -12,4 +12,4 @@
 #include <general/mytools.h>
 
 
-void compute_R2_n(ReadDump::ExtraReadDump&, double&, double&, double&);
+void compute(ReadDump::ExtraReadDump&, double&, double&, double&);
