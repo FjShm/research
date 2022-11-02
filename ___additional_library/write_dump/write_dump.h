@@ -10,6 +10,7 @@
 #include <sstream>
 #include <ios>
 #include <eigen3/Eigen/Dense>
+#include <read_dump/read_dump.h>
 #include <general/mytools.h>
 
 
@@ -46,6 +47,17 @@ namespace WriteDump
                     set_headers(headers);
                 }
                 _write_1frame();
+            }
+
+            void set_by_ReadDump(ReadDump::ReadDump &rd){
+                timestep = &rd.timestep;
+                num_atoms = &rd.num_atoms;
+                cellbox_a = &rd.cellbox_a;
+                cellbox_b = &rd.cellbox_b;
+                cellbox_c = &rd.cellbox_c;
+                cellbox_origin = &rd.cellbox_origin;
+                atoms_all_data = rd.atoms_all_data;
+                header_map = rd.header_map;
             }
 
             void set_headers(const std::vector<std::string> &headers){
@@ -198,6 +210,10 @@ namespace WriteDump
             }
 
             std::vector<std::string> keys_of_map_sorted_by_value(std::map<std::string, int> *map){
+                if (header_map == nullptr){
+                    std::cout << "'header_map' is not set.\n";
+                    std::exit(EXIT_FAILURE);
+                }
                 std::vector<std::string> keys(map->size(), "null");
                 int counter = 0;
                 for (auto const &[key, val]: *map){
@@ -215,7 +231,6 @@ namespace WriteDump
                 }
                 return keys;
             }
-
     }; // class WriteDump
 }
 
