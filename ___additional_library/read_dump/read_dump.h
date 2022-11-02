@@ -331,6 +331,7 @@ namespace ReadDump
                 return val;
             }
 
+
         private:
             void add_mol(int N, int M){
                 if (header_map->count("mol") == 0){
