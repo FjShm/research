@@ -10,8 +10,7 @@ int main(int argc, char* argv[]){
 
     // -------------------------------
     // max loop
-    int max_loop = 0;
-    count_number_of_rows(ipath, max_loop);
+    int max_loop = std::count_rows(ipath, "TIMESTEP");
     boost::progress_display show_progress(max_loop);
 
     // -------------------------------
@@ -55,10 +54,3 @@ void compute_R2_n(ReadDump::ReadDump &rd, int N, int M, Eigen::VectorXd& R2_n){
     R2_n += R2_n_tmp;
 }
 
-void count_number_of_rows(const std::string &path, int &max_loop){
-    std::ifstream in{path};
-    std::string row;
-    while(std::getline(in, row))
-        if (row == "ITEM: TIMESTEP")
-            max_loop++;
-}
