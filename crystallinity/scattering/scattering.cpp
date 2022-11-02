@@ -14,7 +14,7 @@ int main(int argc, char* argv[]){
     const std::string read_frame = param["frame"]["type"].as<std::string>("all");
     // read_frame: "all", "timestep", "ratio"
 
-    const std::vector<double> freq_axis = linspace(freq_min, freq_max, resolution);
+    const std::vector<double> freq_axis = std::linspace(freq_min, freq_max, resolution);
     int ax0, ax1;
     if ((aspect == "xy") || (aspect == "yx")){
         ax0 = 0;
@@ -69,8 +69,7 @@ int main(int argc, char* argv[]){
 
     // -------------------------------
     // max loop
-    int max_loop = 0;
-    count_number_of_rows(dump_path, max_loop);
+    int max_loop = count_rows(dump_path, "TIMESTEP");
     boost::progress_display show_progress(max_loop);
 
     // -------------------------------
@@ -148,13 +147,6 @@ int main(int argc, char* argv[]){
 }
 
 
-std::vector<double> linspace(const double &min, const double &max, int num){
-    std::vector<double> ret(num);
-    double dx = (max - min) / ((double)num - 1.);
-    for (size_t i = 0; i < num; i++) ret[i] = min + dx*(double)i;
-    return ret;
-}
-
 void dumpcell_to_vector_converter(
         double &xlo_b, double &xhi_b, double &xy,
         double &ylo_b, double &yhi_b, double &xz,
@@ -178,21 +170,8 @@ void dumpcell_to_vector_converter(
 }
 
 
-std::vector<std::string> split(const std::string &s, char delim){
-    std::vector<std::string> elems;
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        if (!item.empty()) {
-            elems.push_back(item);
-        }
-    }
-    return elems;
-}
-
-
 void rotationtxt2rotmatrix(std::string &row, Eigen::Matrix3d &rot, int &timestep){
-    std::vector<std::string> row_split = split(row, ' ');
+    std::vector<std::string> row_split = std::split(row, ' ');
     timestep = std::stoi(row_split[0]);
     rot(0, 0) = std::stod(row_split[1]);
     rot(0, 1) = std::stod(row_split[2]);
@@ -235,15 +214,5 @@ void vector_to_dumpcell_converter(
     dumpcell << xlo_b, xhi_b, xy,
              ylo_b, yhi_b, xz,
              zlo_b, zhi_b, yz;
-}
-
-
-void count_number_of_rows(const std::string &path, int &max_loop){
-    std::ifstream in{path};
-    std::string row;
-    while(std::getline(in, row)){
-        if ("ITEM: TIMESTEP" == row)
-            max_loop++;
-    }
 }
 
