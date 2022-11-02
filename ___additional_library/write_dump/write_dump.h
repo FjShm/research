@@ -1,5 +1,5 @@
-#ifndef __READ_DUMP_H__
-#define __READ_DUMP_H__
+#ifndef __WRITE_DUMP_H__
+#define __WRITE_DUMP_H__
 
 #include <cstdlib>
 #include <map>
@@ -8,6 +8,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <ios>
 #include <eigen3/Eigen/Dense>
 #include <general/mytools.h>
 
@@ -35,23 +36,15 @@ namespace WriteDump
             void clear(){
                 dump.close();
                 init();
+                delete dumpcell;
             }
 
             void write_1frame(){
-                if (timestep == nullptr ||
-                    num_atoms == nullptr ||
-                    cellbox_a == nullptr ||
-                    cellbox_b == nullptr ||
-                    cellbox_c == nullptr ||
-                    cellbox_origin == nullptr ||
-                    atoms_all_data == nullptr ||
-                    header_map == nullptr)
-                {
-                    std::cout << "The information required to output"
-                        << "the lammpstrj file is missing.\n";
-                    std::exit(EXIT_FAILURE);
+                if (!header_set){
+                    std::vector<std::string> headers
+                        = keys_of_map_sorted_by_value(header_map);
+                    set_headers(headers);
                 }
-
                 _write_1frame();
             }
 
@@ -62,10 +55,13 @@ namespace WriteDump
                 }
                 for (std::string s : headers){
                     if (header_validation(s)){
-                        write_col_idx.push_back(header_map->at(s));
                         write_col_name.push_back(s);
+                    } else {
+                        std::cout << "'" << s << "' is ignored because it is not exist "
+                            << "in dump file header_map.\n";
                     }
                 }
+                header_set = true;
             }
 
             template<class... T> void set_headers(T... args){
@@ -74,19 +70,23 @@ namespace WriteDump
                     std::exit(EXIT_FAILURE);
                 }
                 for (std::string s : std::initializer_list<std::string>{args...}){
-                    if (header_validation(s))
-                        write_col_idx.push_back(header_map->at(s));
+                    if (header_validation(s)){
                         write_col_name.push_back(s);
+                    } else {
+                        std::cout << "'" << s << "' is ignored because it is not exist "
+                            << "in dump file header_map.\n";
+                    }
                 }
+                header_set = true;
             }
 
 
         private:
             std::string opath;
             std::ofstream dump;
-            Eigen::Matrix3d *dumpcell;
-            std::vector<int> write_col_idx;
+            Eigen::Matrix3d *dumpcell = new Eigen::Matrix3d;
             std::vector<std::string> write_col_name;
+            bool header_set;
 
             void init(){
                 timestep = nullptr;
@@ -97,20 +97,48 @@ namespace WriteDump
                 cellbox_origin = nullptr;
                 atoms_all_data = nullptr;
                 header_map = nullptr;
-                write_col_idx.clear();
                 write_col_name.clear();
+                header_set = false;
             }
 
             void write_timestep(){
-                dump << "ITEM: TIMESTEP\n";
+                if (timestep == nullptr){
+                    std::cout << "'timestep' is not set.\n";
+                    std::exit(EXIT_FAILURE);
+                }
+                dump << "ITEM: TIMESTEP\n"
+                    << *timestep << std::endl;
             }
 
             void write_number_of_atoms(){
-                dump << "ITEM: NUMBER OF ATOMS\n";
+                if (num_atoms == nullptr){
+                    std::cout << "'num_atoms' is not set.\n";
+                    std::exit(EXIT_FAILURE);
+                }
+                dump << "ITEM: NUMBER OF ATOMS\n"
+                    << *num_atoms << std::endl;
             }
 
             void write_box(){
+                if (cellbox_a == nullptr ||
+                    cellbox_b == nullptr ||
+                    cellbox_c == nullptr ||
+                    cellbox_origin == nullptr)
+                {
+                    std::cout << "'cellbox_*' is not set.\n";
+                    std::exit(EXIT_FAILURE);
+                }
+                vector_to_dumpcell_converter();
                 dump << "ITEM: BOX BOUNDS xy xz yz pp pp pp\n";
+                std::ios::fmtflags flagsSaved = dump.flags();
+                dump << std::scientific;
+                for (int i = 0; i < 3; i++){
+                    for (int j = 0; j < 3; j++)
+                        dump << dumpcell->coeff(i, j) << " ";
+                    dump << std::endl;
+                }
+                dump.flags(flagsSaved);
+
             }
 
             void write_atoms(){
@@ -119,8 +147,8 @@ namespace WriteDump
                     dump << " " + header;
                 dump << std::endl;
                 for (int rowidx = 0; rowidx < *num_atoms; rowidx++){
-                    for (int colidx : write_col_idx){
-                        dump << atoms_all_data->coeff(rowidx, colidx) << " ";
+                    for (std::string col : write_col_name){
+                        dump << atoms_all_data->coeff(rowidx, header_map->at(col)) << " ";
                     }
                     dump << std::endl;
                 }
@@ -163,12 +191,29 @@ namespace WriteDump
                 bool flg = true;
                 for (std::string header : std::initializer_list<std::string>{headers...}){
                     if (header_map->count(header) == 0){
-                        std::cout << "'" << header << "' is ignored because it is not exist "
-                            << "in dump file header_map.\n";
                         flg = false;
                     }
                 }
                 return flg;
+            }
+
+            std::vector<std::string> keys_of_map_sorted_by_value(std::map<std::string, int> *map){
+                std::vector<std::string> keys(map->size(), "null");
+                int counter = 0;
+                for (auto const &[key, val]: *map){
+                    if (keys[val] == "null"){
+                        keys[val] = key;
+                        counter++;
+                    } else {
+                        std::cout << "'" << key << "' and '" << keys[val] << "' have "
+                            << "same value at header_map.\n"
+                            << "'" << keys[val] << "' is not exported to dumpfile.\n";
+                    }
+                }
+                if (map->size() != counter){
+                    keys.resize(counter);
+                }
+                return keys;
             }
 
     }; // class WriteDump
