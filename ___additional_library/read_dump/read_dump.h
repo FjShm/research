@@ -309,6 +309,7 @@ namespace ReadDump
 
         public:
             template<class... T> void add_column_if_not_exist(std::string colname, T... args){
+                if (header_map->count(colname) != 0) return;
                 if (colname == "mol"){
                     Eigen::VectorXd molcol(atoms_all_data->rows());
                     calc_mol(molcol, args...);
@@ -336,6 +337,26 @@ namespace ReadDump
                 }
                 for (size_t i = 0; i < atoms_all_data->rows(); i++)
                     (*atoms_all_data)(i, col) = apcol(i);
+            }
+
+            template<typename... T> void append_columns(
+                    const Eigen::MatrixXd &apcol,
+                    bool replace_all=false,
+                    const T &...colnames_arg)
+            {
+                std::vector<std::string> colnames;
+                for (std::string s : std::initializer_list<std::string>{colnames_arg...})
+                    colnames.push_back(s);
+                if (apcol.cols() != colnames.size()){
+                    std::cout << "# of columns and # of colnames must be same.\n"
+                        << "ReadDump::ExtraReadDump.append_columns()\n";
+                    std::exit(EXIT_FAILURE);
+                }
+                for (size_t i = 0; i < colnames.size(); i++){
+                    Eigen::VectorXd col(apcol.rows());
+                    col << apcol.col(i);
+                    append_column(col, colnames[i], replace_all);
+                }
             }
 
             double max_of_col(std::string colname){

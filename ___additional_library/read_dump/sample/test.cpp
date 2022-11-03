@@ -131,6 +131,17 @@ int main(){
             << " = 2 * " << tmp  << ")" << std::endl;
         std::cout << " <<< test append_column over <<<\n";
 
+        // test append_columns
+        double abef = rd.atoms_all_data->coeff(id, apcolidx);
+        std::cout << abef << "*" << 3 << "=" << abef*3 << std::endl;
+        Eigen::MatrixXd apcols(apcol.rows(), 3);
+        apcols << apcol*3, apcol, apcol;
+        rd.append_columns(apcols, true, "apcol", "apcol2", "apcol3");
+        std::cout << rd.atoms_all_data->coeff(id, apcolidx) << std::endl;
+        int a2 = rd.header_map->at("apcol2");
+        int a3 = rd.header_map->at("apcol3");
+        std::cout << rd.atoms_all_data->coeff(id, a2) << std::endl;
+        std::cout << rd.atoms_all_data->coeff(id, a3) << std::endl;
     }
     std::cout << "num_frames: " << rd.num_frames << std::endl;
 }
