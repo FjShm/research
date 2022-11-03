@@ -260,7 +260,7 @@ namespace ReadDump
                     } else if (splited_row[1] == " BOX BOUNDS pp pp pp"){
                         read_box("orthogonal");
                     } else {
-                        std::vector<std::string> atoms_header = split(splited_row[1], ' ');
+                        std::vector<std::string> atoms_header = std::split(splited_row[1], ' ');
                         if (atoms_header[0] != "ATOMS"){
                             std::cout << "Error: Invalid dumpfile format.\n"
                                 << "ITEM: ATOMS must be come\n"
@@ -311,7 +311,9 @@ namespace ReadDump
         public:
             template<class... T> void add_column_if_not_exist(std::string colname, T... args){
                 if (colname == "mol"){
-                    add_mol(args...);
+                    Eigen::VectorXd molcol(atoms_all_data->rows());
+                    calc_mol(molcol, args...);
+                    append_column(molcol, "mol");
                 } else {
                     std::cout << "Invalid column name: " << colname << std::endl
                         << "This message can be ignored but may cause an error.\n"
@@ -319,7 +321,11 @@ namespace ReadDump
                 }
             }
 
-            void append_column(const Eigen::VectorXd &apcol, const std::string& colname, bool replace=false){
+            void append_column(
+                    const Eigen::VectorXd &apcol,
+                    const std::string& colname,
+                    bool replace=false)
+            {
                 int col;
                 if (header_map->count(colname) != 0){
                     if (!replace) return;
@@ -327,7 +333,7 @@ namespace ReadDump
                 } else {
                     col = atoms_all_data->cols();
                     header_map->insert(std::make_pair(colname, col));
-                    atoms_all_data->conservativeResize(num_atoms, mol+1);
+                    atoms_all_data->conservativeResize(num_atoms, col+1);
                 }
                 for (size_t i = 0; i < atoms_all_data->rows(); i++)
                     (*atoms_all_data)(i, col) = apcol(i);
@@ -347,25 +353,16 @@ namespace ReadDump
 
 
         private:
-            void add_mol(int N, int M){
-                if (header_map->count("mol") == 0){
-                    int id = header_map->at("id");
-                    int mol = atoms_all_data->cols();
-                    header_map->insert(std::make_pair("mol", mol));
-                    atoms_all_data->conservativeResize(num_atoms, mol+1);
-                    if (N != -1){
-                        for (int i = 0; i < num_atoms; i++)
-                            (*atoms_all_data)(i, mol) = ((int)atoms_all_data->coeff(i, id) - 1) / N + 1;
-                    } else if (M != -1){
-                        N = num_atoms / M;
-                        for (int i = 0; i < num_atoms; i++)
-                            (*atoms_all_data)(i, mol) = ((int)atoms_all_data->coeff(i, id) - 1) / N + 1;
-                    } else {
-                        std::cout << "Since there is no 'mol' in ATOMS in the dump file,"
-                            << " it is necessary to write N or M in the input file.\n";
-                        std::exit(EXIT_FAILURE);
-                    }
+            void calc_mol(Eigen::VectorXd &molcol, int N, int M){
+                int id = header_map->at("id");
+                N = N != -1 ? N : num_atoms/M;
+                if (N < 0){
+                    std::cout << "Since there is no 'mol' in ATOMS in the dump file,"
+                        << " it is necessary to write N or M in the input file.\n";
+                    std::exit(EXIT_FAILURE);
                 }
+                for (int i = 0; i < num_atoms; i++)
+                    molcol(i) = ((int)atoms_all_data->coeff(i, id) - 1) / N + 1;
             }
     }; // class ExtraReadDump
 }
