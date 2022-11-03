@@ -105,6 +105,7 @@ int main(int argc, char* argv[]){
         std::vector<double> lambdas(rd.num_atoms);
         std::vector<Eigen::Vector3d> stem_vecs(rd.num_atoms);
         std::vector<double> stem_vec_norms(rd.num_atoms);
+        std::vector<bool> isStem(rd.num_atoms, false);
         int lb = k + beta;
         int ub = N - k - beta;
         for (int i = 0; i < rd.num_atoms; i++){
@@ -115,6 +116,7 @@ int main(int argc, char* argv[]){
                 stem_vec_norms[i] = 0.;
             } else {
                 Eigen::Vector3d sum_d;
+                isStem[i] = true;
                 for (int kk = -k; kk <= k; kk++){
                     Eigen::Vector3d d;
                     d = position_fixed_coordinations[i+kk+beta]
@@ -138,8 +140,7 @@ int main(int argc, char* argv[]){
         std::vector<Point> points(27*M*(ub-lb));
         int counter = 0;
         for (int i = 0; i < rd.num_atoms; i++){
-            int n = i % N;
-            if (n < lb || ub <= n) continue;
+            if (!isStem[i]) continue;
             for (int xi = 0; xi < 3; xi++)
                 for (int yi = 0; yi < 3; yi++)
                     for (int zi = 0; zi < 3; zi++)
@@ -155,8 +156,7 @@ int main(int argc, char* argv[]){
         Point query;
         Eigen::Vector3d stem_i, stem_j;
         for (int i = 0; i < rd.num_atoms; i++){
-            int n = i % N;
-            if (n < lb || ub <= n) continue;
+            if (!isStem[i]) continue;
             stem_i = stem_vecs[i];
             std::set<int> idxes_set;
             // stem_i の両末端, 中央の3点についてquery作成
@@ -166,7 +166,7 @@ int main(int argc, char* argv[]){
                 for (int v : idxes) idxes_set.insert(v);
             }
             idxes_set.erase(i);
-            total_neighbor_stems[i] = idxes_set.size();
+            total_neighbor_stems(i) = idxes_set.size();
             for (auto idxj : idxes_set){
                 int jj = idxj / 27;
                 int nj = jj % (ub - lb) + lb;
@@ -174,17 +174,22 @@ int main(int argc, char* argv[]){
                 if (lambdas[i] >= lath && lambdas[nj] >= lath){
                     double cos =
                         std::abs(stem_i.dot(stem_j)) / (stem_vec_norms[i]*stem_vec_norms[nj]);
-                    if (cos >= cos_thth) cry_neighbor_stems[i]++;
+                    if (cos >= cos_thth) cry_neighbor_stems(i) += 1;
                 }
             }
         }
+
+        // calculate ratio
+        Eigen::VectorXd ratio(rd.num_atoms);
+        for (size_t i = 0; i < rd.num_atoms; i++)
+            ratio(i) =
+                total_neighbor_stems(i) == 0 ? 0 : cry_neighbor_stems(i)/total_neighbor_stems(i);
 
         // output cry text
         if (f1rst_loop){
             out_cry << "TimeStep";
             for (size_t i = 0; i < rd.num_atoms; i++){
-                int n = i % N;
-                if (n < lb || ub <= n) continue;
+                if (!isStem[i]) continue;
                 out_cry << " " << i;
             }
             out_cry << std::endl;
@@ -192,18 +197,18 @@ int main(int argc, char* argv[]){
         }
         out_cry << rd.timestep;
         for (size_t i = 0; i < rd.num_atoms; i++){
-            int n = i % N;
-            if (n < lb || ub <= n) continue;
-            if (total_neighbor_stems[i] != 0){
-                out_cry << " " << (double)cry_neighbor_stems[i] / (double)total_neighbor_stems[i];
-            } else {
-                out_cry << " 0";
-            }
+            if (!isStem[i]) continue;
+            out_cry << " " << ratio(i);
         }
         out_cry << std::endl;
 
         // output dump
-
+        rd.append_column(cry_neighbor_stems, "cry_neighbor_stems");
+        rd.append_column(ratio, "cry_neighbor_stems(ratio)");
+        wd.set_by_ReadDump(rd);
+        wd.set_headers("id", "mol", "xu", "yu", "zu",
+                "cry_neighbor_stems", "cry_neighbor_stems(ratio)");
+        wd.write_1frame();
 
         // update progress bar
         ++show_progress;
