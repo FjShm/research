@@ -10,9 +10,12 @@ int main(int argc, char* argv[]){
     const std::string out_cry_path = param["output_cry_text_path"].as<std::string>();
     const int k = param["k"].as<int>();
     const int beta = param["beta"].as<int>();
+    const int N = param["N"].as<int>(-1);
+    const int M = param["M"].as<int>(-1);
     const double lath = param["lambda_threshold"].as<double>();
     const double dith = param["neighbor_stem_distance_threshold"].as<double>();
     const double thth = param["theta_deg_threshold"].as<double>();
+
     const double sqrdDith = dith*dith;
     const double cos_thth = std::cos(thth * M_PI/180.);
 
