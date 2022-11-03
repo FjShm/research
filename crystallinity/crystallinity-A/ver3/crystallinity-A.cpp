@@ -64,14 +64,14 @@ int main(int argc, char* argv[]){
 
         // calc center of gravity of each polymers
         std::vector<Eigen::Vector3d> cogs(M);
-        Eigen::Vector3d sum_tmp;
+        Eigen::Vector3d sum_tmp = {0., 0., 0.};
         for (int i = 0; i < rd.num_atoms; i++){
             sum_tmp += coordinations[i];
             if (i == rd.num_atoms - 1 ||
                 rd.atoms_all_data->coeff(i, mol) < rd.atoms_all_data->coeff(i+1, mol))
             {
                 cogs[(int)rd.atoms_all_data->coeff(i, mol)-1] = sum_tmp / (double)N;
-                sum_tmp << 0., 0., 0.;
+                sum_tmp << Eigen::Vector3d::Zero();
             }
         }
 
@@ -115,14 +115,13 @@ int main(int argc, char* argv[]){
                 stem_vecs[i] << 0., 0., 0.;
                 stem_vec_norms[i] = 0.;
             } else {
-                Eigen::Vector3d sum_d;
+                Eigen::Vector3d sum_d = {0., 0., 0.};
                 isStem[i] = true;
                 for (int kk = -k; kk <= k; kk++){
                     Eigen::Vector3d d;
                     d = position_fixed_coordinations[i+kk+beta]
                         - position_fixed_coordinations[i+kk-beta];
-                    d /= d.norm();
-                    sum_d += d;
+                    sum_d += d/d.norm();
                 }
                 double sum_d_norm = sum_d.norm();
                 lambdas[i] = sum_d_norm / (2.*(double)k + 1.);
@@ -152,7 +151,9 @@ int main(int argc, char* argv[]){
 
         // 隣接stemの総数とcrystal条件を満たすstemの数
         Eigen::VectorXd total_neighbor_stems(rd.num_atoms);
+        total_neighbor_stems << Eigen::VectorXd::Zero(rd.num_atoms);
         Eigen::VectorXd cry_neighbor_stems(rd.num_atoms);
+        cry_neighbor_stems << Eigen::VectorXd::Zero(rd.num_atoms);
         Point query;
         Eigen::Vector3d stem_i, stem_j;
         for (int i = 0; i < rd.num_atoms; i++){
@@ -174,6 +175,7 @@ int main(int argc, char* argv[]){
                 if (lambdas[i] >= lath && lambdas[nj] >= lath){
                     double cos =
                         std::abs(stem_i.dot(stem_j)) / (stem_vec_norms[i]*stem_vec_norms[nj]);
+                    std::cout << cos << std::endl;
                     if (cos >= cos_thth) cry_neighbor_stems(i) += 1;
                 }
             }
@@ -183,7 +185,7 @@ int main(int argc, char* argv[]){
         Eigen::VectorXd ratio(rd.num_atoms);
         for (size_t i = 0; i < rd.num_atoms; i++)
             ratio(i) =
-                total_neighbor_stems(i) == 0 ? 0 : cry_neighbor_stems(i)/total_neighbor_stems(i);
+                (int)total_neighbor_stems(i) == 0 ? 0 : cry_neighbor_stems(i)/total_neighbor_stems(i);
 
         // output cry text
         if (f1rst_loop){
@@ -203,11 +205,13 @@ int main(int argc, char* argv[]){
         out_cry << std::endl;
 
         // output dump
+        int xu = rd.header_map->at("xu"); // 使わないけど, これがないとatoms_all_dataがbugる
         rd.append_column(cry_neighbor_stems, "cry_neighbor_stems");
+        rd.append_column(total_neighbor_stems, "total_neighbor_stems");
         rd.append_column(ratio, "cry_neighbor_stems(ratio)");
         wd.set_by_ReadDump(rd);
         wd.set_headers("id", "mol", "xu", "yu", "zu",
-                "cry_neighbor_stems", "cry_neighbor_stems(ratio)");
+                "total_neighbor_stems", "cry_neighbor_stems", "cry_neighbor_stems(ratio)");
         wd.write_1frame();
 
         // update progress bar
