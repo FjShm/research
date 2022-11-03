@@ -10,11 +10,11 @@ int main(int argc, char* argv[]){
     const std::string out_cry_path = param["output_cry_text_path"].as<std::string>();
     const int k = param["k"].as<int>();
     const int beta = param["beta"].as<int>();
-    const int N = param["N"].as<int>(-1);
-    const int M = param["M"].as<int>(-1);
     const double lath = param["lambda_threshold"].as<double>();
     const double dith = param["neighbor_stem_distance_threshold"].as<double>();
     const double thth = param["theta_deg_threshold"].as<double>();
+    int N = param["N"].as<int>(-1);
+    int M = param["M"].as<int>(-1);
 
     const double sqrdDith = dith*dith;
     const double cos_thth = std::cos(thth * M_PI/180.);
@@ -54,51 +54,59 @@ int main(int argc, char* argv[]){
         // validation
         rd.header_validation("id", "xu", "yu", "zu");
         rd.add_column_if_not_exist("mol", N, M);
+        int mol = rd.header_map->at("mol");
 
+        // set coordination, N, M
         std::vector<Eigen::Vector3d> coordinations;
         rd.join_3columns(coordinations, "xu", "yu", "zu");
+        M = M != -1 ? M : rd.max_of_col("mol");
+        N = N != -1 ? N : rd.num_atoms/M;
+
         // calc center of gravity of each polymers
-        std::vector<Eigen::Vector3d> cogs(mol_max);
+        std::vector<Eigen::Vector3d> cogs(M);
         Eigen::Vector3d sum_tmp;
-        sum_tmp << 0., 0., 0.;
-        for (int i = 0; i < num_atoms; i++){
+        for (int i = 0; i < rd.num_atoms; i++){
             sum_tmp += coordinations[i];
-            if (i == num_atoms - 1 || mols[i] < mols[i+1]){
-                cogs[mols[i]-1] = sum_tmp / (double)bead_per_chain;
+            if (i == rd.num_atoms - 1 ||
+                rd.atoms_all_data->coeff(i, mol) < rd.atoms_all_data->coeff(i+1, mol))
+            {
+                cogs[(int)rd.atoms_all_data->coeff(i, mol)-1] = sum_tmp / (double)N;
                 sum_tmp << 0., 0., 0.;
             }
         }
 
         // move vector
-        std::vector<Eigen::Vector3d> movecs(mol_max);
-        for (int i = 0; i < mol_max; i++){
+        std::vector<Eigen::Vector3d> movecs(M);
+        for (int i = 0; i < M; i++){
             cogs[i] -= cell_origin;
             int xi, yi, zi;
-            zi = std::floor(cogs[i](2) / c(2));
-            yi = std::floor((cogs[i](1) - (double)zi*c(1)) / b(1));
-            xi = std::floor((cogs[i](0) - (double)yi*b(0) - (double)zi*c(0)) / a(0));
-            movecs[i] = (double)xi*a + (double)yi*b + (double)zi*c;
+            zi = std::floor(cogs[i](2) / rd.c(2));
+            yi = std::floor((cogs[i](1) - (double)zi*rd.c(1)) / rd.b(1));
+            xi = std::floor((cogs[i](0) - (double)yi*rd.b(0) - (double)zi*rd.c(0)) / rd.a(0));
+            movecs[i] = (double)xi*rd.a + (double)yi*rd.b + (double)zi*rd.c;
         }
 
         // move polymer into simulation box
-        std::vector<Eigen::Vector3d> position_fixed_coordinations(num_atoms);
-        for (int i = 0; i < num_atoms; i++){
-            position_fixed_coordinations[i] = coordinations[i] - movecs[mols[i]-1];
+        std::vector<Eigen::Vector3d> position_fixed_coordinations(rd.num_atoms);
+        for (int i = 0; i < rd.num_atoms; i++){
+            position_fixed_coordinations[i]
+                = coordinations[i] - movecs[(int)rd.atoms_all_data->coeff(i, mol)-1];
         }
 
         // rotate coordinations
-        std::vector<Eigen::Vector3d> output_coordinations(num_atoms);
-        for (int i = 0; i < num_atoms; i++){
-            output_coordinations[i] = position_fixed_coordinations[i].transpose() * rot;
+        Eigen::MatrixXd output_coordinations(rd.num_atoms, 3);
+        for (int i = 0; i < rd.num_atoms; i++){
+            output_coordinations.row(i) = position_fixed_coordinations[i].transpose() * rot;
+            //output_coordinations.row(i) << position_fixed_coordinations[i].transpose() * rot;
         }
 
         // store alpha (bead index)
-        int num_stems = mol_max*(bead_per_chain - 2*k - 2*beta);
+        int num_stems = M*(N - 2*k - 2*beta);
         int idx = 0;
         std::vector<int> alphas(num_stems);
-        for (int i = 0; i < mol_max; i++)
-            for (int alpha = k+beta; alpha < bead_per_chain-k-beta; alpha++)
-                alphas[idx++] = i*bead_per_chain + alpha;
+        for (int i = 0; i < M; i++)
+            for (int alpha = k+beta; alpha < N-k-beta; alpha++)
+                alphas[idx++] = i*N + alpha;
 
         // store lamda
         std::vector<double> lambdas(num_stems);
