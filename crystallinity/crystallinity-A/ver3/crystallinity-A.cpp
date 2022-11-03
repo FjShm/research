@@ -95,57 +95,57 @@ int main(int argc, char* argv[]){
 
         // rotate coordinations
         Eigen::MatrixXd output_coordinations(rd.num_atoms, 3);
-        for (int i = 0; i < rd.num_atoms; i++){
-            output_coordinations.row(i) = position_fixed_coordinations[i].transpose() * rot;
-            //output_coordinations.row(i) << position_fixed_coordinations[i].transpose() * rot;
-        }
-
-        // store alpha (bead index)
-        int num_stems = M*(N - 2*k - 2*beta);
-        int idx = 0;
-        std::vector<int> alphas(num_stems);
-        for (int i = 0; i < M; i++)
-            for (int alpha = k+beta; alpha < N-k-beta; alpha++)
-                alphas[idx++] = i*N + alpha;
+        for (int i = 0; i < rd.num_atoms; i++)
+            output_coordinations.row(i) << position_fixed_coordinations[i].transpose() * rot;
+        rd.append_column(output_coordinations.col(0), "xu", true);
+        rd.append_column(output_coordinations.col(1), "yu", true);
+        rd.append_column(output_coordinations.col(2), "zu", true);
 
         // store lamda
-        std::vector<double> lambdas(num_stems);
-        std::vector<Eigen::Vector3d> stem_vecs(num_stems);
-        std::vector<double> stem_vec_norms(num_stems);
-        for (int i = 0; i < num_stems; i++){
-            Eigen::Vector3d sum_d;
-            sum_d << 0., 0., 0.;
-            for (int kk = -k; kk <= k; kk++){
-                Eigen::Vector3d d;
-                d = position_fixed_coordinations[alphas[i]+kk+beta]
-                    - position_fixed_coordinations[alphas[i]+kk-beta];
-                d /= d.norm();
-                sum_d += d;
+        std::vector<double> lambdas(rd.num_atoms);
+        std::vector<Eigen::Vector3d> stem_vecs(rd.num_atoms);
+        std::vector<double> stem_vec_norms(rd.num_atoms);
+        int lb = k + beta;
+        int ub = N - k - beta;
+        for (int i = 0; i < rd.num_atoms; i++){
+            int n = i % N;
+            if (n < lb || ub <= n){
+                lambdas[i] = 0.;
+                stem_vecs[i] << 0., 0., 0.;
+                stem_vec_norms[i] = 0.;
+            } else {
+                Eigen::Vector3d sum_d;
+                for (int kk = -k; kk <= k; kk++){
+                    Eigen::Vector3d d;
+                    d = position_fixed_coordinations[i+kk+beta]
+                        - position_fixed_coordinations[i+kk-beta];
+                    d /= d.norm();
+                    sum_d += d;
+                }
+                double sum_d_norm = sum_d.norm();
+                lambdas[i] = sum_d_norm / (2.*(double)k + 1.);
+                stem_vecs[i] = sum_d;
+                stem_vec_norms[i] = sum_d_norm;
             }
-            double sum_d_norm = sum_d.norm();
-            lambdas[i] = sum_d_norm / (2.*(double)k + 1.);
-            stem_vecs[i] = sum_d;
-            stem_vec_norms[i] = sum_d_norm;
         }
 
         // 周期境界条件も考えてKD-tree作成
         Eigen::Vector3d zeros = {0., 0., 0.};
-        std::vector<Eigen::Vector3d> _a_ = {-a, zeros, a};
-        std::vector<Eigen::Vector3d> _b_ = {-b, zeros, b};
-        std::vector<Eigen::Vector3d> _c_ = {-c, zeros, c};
+        std::vector<Eigen::Vector3d> _a_ = {-rd.a, zeros, rd.a};
+        std::vector<Eigen::Vector3d> _b_ = {-rd.b, zeros, rd.b};
+        std::vector<Eigen::Vector3d> _c_ = {-rd.c, zeros, rd.c};
 
-        std::vector<Point> points(27*num_stems);
+        std::vector<Point> points(27*(ub-lb));
         int counter = 0;
-        for (int i = 0; i < num_stems; i++)
+        for (int i = 0; i < rd.num_atoms; i++){
+            if (n < lb || ub <= n) continue;
             for (int xi = 0; xi < 3; xi++)
                 for (int yi = 0; yi < 3; yi++)
                     for (int zi = 0; zi < 3; zi++)
                         points[counter++] = Point(
-                                position_fixed_coordinations[alphas[i]]
-                                + _a_[xi]
-                                + _b_[yi]
-                                + _c_[zi]
-                                );
+                                position_fixed_coordinations[i]
+                                + _a_[xi] + _b_[yi] + _c_[zi]);
+        }
         kdt::KDTree<Point> kdtree(points);
 
         // 隣接stemの総数とcrystal条件を満たすstemの数
