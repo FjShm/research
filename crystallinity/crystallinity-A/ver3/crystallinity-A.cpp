@@ -74,6 +74,8 @@ int main(int argc, char* argv[]){
                 sum_tmp << 0., 0., 0.;
             }
         }
+        int ___ = 0;
+        std::cout << ___++ << "\n";
 
         // move vector
         std::vector<Eigen::Vector3d> movecs(M);
@@ -87,6 +89,7 @@ int main(int argc, char* argv[]){
                     / rd.cellbox_a(0));
             movecs[i] = (double)xi*rd.cellbox_a + (double)yi*rd.cellbox_b + (double)zi*rd.cellbox_c;
         }
+        std::cout << ___++ << "\n";
 
         // move polymer into simulation box
         std::vector<Eigen::Vector3d> position_fixed_coordinations(rd.num_atoms);
@@ -94,12 +97,15 @@ int main(int argc, char* argv[]){
             position_fixed_coordinations[i]
                 = coordinations[i] - movecs[(int)rd.atoms_all_data->coeff(i, mol)-1];
         }
+        std::cout << ___++ << "\n";
 
         // rotate coordinations
         Eigen::MatrixXd output_coordinations(rd.num_atoms, 3);
         for (int i = 0; i < rd.num_atoms; i++)
             output_coordinations.row(i) << position_fixed_coordinations[i].transpose() * rot;
+        std::cout << ___++ << "\n";
         rd.append_columns(output_coordinations, true, "xu", "yu", "zu");
+        std::cout << ___++ << "\n";
 
         // store lamda
         std::vector<double> lambdas(rd.num_atoms);
