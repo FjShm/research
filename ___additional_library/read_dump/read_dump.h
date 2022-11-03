@@ -338,6 +338,26 @@ namespace ReadDump
                     (*atoms_all_data)(i, col) = apcol(i);
             }
 
+            template<typename... T> void append_columns(
+                    const Eigen::MatrixXd &apcol,
+                    bool replace_all=false,
+                    const T &...colnames_arg)
+            {
+                std::vector<std::string> colnames;
+                for (std::string s : std::initializer_list<std::string>{colnames_arg...})
+                    colnames.push_back(s);
+                if (apcol.cols() != colnames.size()){
+                    std::cout << "# of columns and # of colnames must be same.\n"
+                        << "ReadDump::ExtraReadDump.append_columns()\n";
+                    std::exit(EXIT_FAILURE);
+                }
+                for (size_t i = 0; i < colnames.size(); i++){
+                    Eigen::VectorXd col;
+                    col << apcol.col(i);
+                    append_column(col, colnames[i], replace_all);
+                }
+            }
+
             double max_of_col(std::string colname){
                 int col = header_map->at(colname);
                 double val = atoms_all_data->col(col).array().maxCoeff();
