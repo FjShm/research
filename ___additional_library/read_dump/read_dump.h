@@ -319,6 +319,20 @@ namespace ReadDump
                 }
             }
 
+            void append_column(const Eigen::VectorXd &apcol, const std::string& colname, bool replace=false){
+                int col;
+                if (header_map->count(colname) != 0){
+                    if (!replace) return;
+                    col = header_map->at(colname);
+                } else {
+                    col = atoms_all_data->cols();
+                    header_map->insert(std::make_pair(colname, col));
+                    atoms_all_data->conservativeResize(num_atoms, mol+1);
+                }
+                for (size_t i = 0; i < atoms_all_data->rows(); i++)
+                    (*atoms_all_data)(i, col) = apcol(i);
+            }
+
             double max_of_col(std::string colname){
                 int col = header_map->at(colname);
                 double val = atoms_all_data->col(col).array().maxCoeff();
