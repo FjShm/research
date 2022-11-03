@@ -23,12 +23,12 @@ namespace ReadDump
 
             ReadDump() {init();}
             ReadDump(const std::string &arg_ipath) : ipath(arg_ipath){
-                fileopen(ipath);
+                open(ipath);
                 init();
             }
             ~ReadDump() {clear();}
 
-            void fileopen(const std::string &arg_ipath){
+            void open(const std::string &arg_ipath){
                 dump.open(arg_ipath);
             }
 
