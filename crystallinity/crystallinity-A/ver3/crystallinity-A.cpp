@@ -33,36 +33,27 @@ int main(int argc, char* argv[]){
     // skip header of rotation.txt
     for (int i = 0; i < 2; i++) std::getline(rotxt, rotxt_row);
 
-
     while(rd.read_1frame()){
-    std::getline(rotxt, rotxt_row)
+        std::getline(rotxt, rotxt_row)
         // read rotation.txt
         int timestep;
         Eigen::Matrix3d rot;
         rotationtxt2rotmatrix(rotxt_row, rot, timestep);
 
-
-        // read dump one timestep
-        // coordinations, molsは
-        // read_one_timestep_of_dump内でresize
-        Eigen::Vector3d a, b, c, cell_origin;
-        std::vector<Eigen::Vector3d> coordinations;
-        std::vector<int> mols;
-        int timestep_dump, num_atoms;
-        read_one_timestep_of_dump(
-                dump, a, b, c, cell_origin, coordinations, mols, timestep_dump, num_atoms);
-
-        int mol_max = *std::max_element(mols.begin(), mols.end());
-        int bead_per_chain = num_atoms / mol_max;
-
         // check timestep
-        if (timestep != timestep_dump){
+        if (timestep != rd.timestep){
             std::cout << "The timestep in the dump file and rotation.txt do not match.\n"
-                << "rotation.txt: " << timestep
+                << "rotation.txt: " << timestep << std::endl
                 << "dump file:    " << timestep_dump << std::endl;
-            return 1;
+            std::exit(EXIT_FAILURE);
         }
 
+        // validation
+        rd.header_validation("id", "xu", "yu", "zu");
+        rd.add_column_if_not_exist("mol", N, M);
+
+        std::vector<Eigen::Vector3d> coordinations;
+        rd.join_3columns(coordinations, "xu", "yu", "zu");
         // calc center of gravity of each polymers
         std::vector<Eigen::Vector3d> cogs(mol_max);
         Eigen::Vector3d sum_tmp;
@@ -157,8 +148,6 @@ int main(int argc, char* argv[]){
             std::vector<int> idxes = kdtree.radiusSearch(query, dith);
             total_neighbor_stems[i] = idxes.size();
             for (int j = 0; j < idxes.size(); j++){
-            //for (int j = 1; j < idxes.size(); j++){
-                // int jj = idxes[j] / 27;
                 int jj = idxes[j] % num_stems;
                 stem_j = stem_vecs[jj];
                 if (lambdas[i] >= lath && lambdas[jj] >= lath){
@@ -168,14 +157,6 @@ int main(int argc, char* argv[]){
                 }
             }
         }
-
-
-        // output new dump
-        write_to_newdump(
-                out_dump, timestep, num_atoms, a, b, c,
-                cell_origin, output_coordinations, mols,
-                total_neighbor_stems, cry_neighbor_stems, alphas
-                );
 
         // output cry text
         if (f1rst_loop){
