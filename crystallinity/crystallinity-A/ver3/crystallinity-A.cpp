@@ -37,7 +37,7 @@ int main(int argc, char* argv[]){
     for (int i = 0; i < 2; i++) std::getline(rotxt, rotxt_row);
 
     while(rd.read_1frame()){
-        std::getline(rotxt, rotxt_row)
+        std::getline(rotxt, rotxt_row);
         // read rotation.txt
         int timestep;
         Eigen::Matrix3d rot;
@@ -47,7 +47,7 @@ int main(int argc, char* argv[]){
         if (timestep != rd.timestep){
             std::cout << "The timestep in the dump file and rotation.txt do not match.\n"
                 << "rotation.txt: " << timestep << std::endl
-                << "dump file:    " << timestep_dump << std::endl;
+                << "dump file:    " << rd.timestep << std::endl;
             std::exit(EXIT_FAILURE);
         }
 
@@ -78,12 +78,14 @@ int main(int argc, char* argv[]){
         // move vector
         std::vector<Eigen::Vector3d> movecs(M);
         for (int i = 0; i < M; i++){
-            cogs[i] -= cell_origin;
+            cogs[i] -= rd.cellbox_origin;
             int xi, yi, zi;
-            zi = std::floor(cogs[i](2) / rd.c(2));
-            yi = std::floor((cogs[i](1) - (double)zi*rd.c(1)) / rd.b(1));
-            xi = std::floor((cogs[i](0) - (double)yi*rd.b(0) - (double)zi*rd.c(0)) / rd.a(0));
-            movecs[i] = (double)xi*rd.a + (double)yi*rd.b + (double)zi*rd.c;
+            zi = std::floor(cogs[i](2) / rd.cellbox_c(2));
+            yi = std::floor((cogs[i](1) - (double)zi*rd.cellbox_c(1)) / rd.cellbox_b(1));
+            xi = std::floor(
+                    (cogs[i](0) - (double)yi*rd.cellbox_b(0) - (double)zi*rd.cellbox_c(0))
+                    / rd.cellbox_a(0));
+            movecs[i] = (double)xi*rd.cellbox_a + (double)yi*rd.cellbox_b + (double)zi*rd.cellbox_c;
         }
 
         // move polymer into simulation box
@@ -97,9 +99,7 @@ int main(int argc, char* argv[]){
         Eigen::MatrixXd output_coordinations(rd.num_atoms, 3);
         for (int i = 0; i < rd.num_atoms; i++)
             output_coordinations.row(i) << position_fixed_coordinations[i].transpose() * rot;
-        rd.append_column(output_coordinations.col(0), "xu", true);
-        rd.append_column(output_coordinations.col(1), "yu", true);
-        rd.append_column(output_coordinations.col(2), "zu", true);
+        rd.append_columns(output_coordinations, true, "xu", "yu", "zu");
 
         // store lamda
         std::vector<double> lambdas(rd.num_atoms);
@@ -133,9 +133,9 @@ int main(int argc, char* argv[]){
 
         // 周期境界条件も考えてKD-tree作成
         Eigen::Vector3d zeros = {0., 0., 0.};
-        std::vector<Eigen::Vector3d> _a_ = {-rd.a, zeros, rd.a};
-        std::vector<Eigen::Vector3d> _b_ = {-rd.b, zeros, rd.b};
-        std::vector<Eigen::Vector3d> _c_ = {-rd.c, zeros, rd.c};
+        std::vector<Eigen::Vector3d> _a_ = {-rd.cellbox_a, zeros, rd.cellbox_a};
+        std::vector<Eigen::Vector3d> _b_ = {-rd.cellbox_b, zeros, rd.cellbox_b};
+        std::vector<Eigen::Vector3d> _c_ = {-rd.cellbox_c, zeros, rd.cellbox_c};
 
         std::vector<Point> points(27*M*(ub-lb));
         int counter = 0;
