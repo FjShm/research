@@ -23,18 +23,23 @@ namespace ReadDump
 
             ReadDump() {init();}
             ReadDump(const std::string &arg_ipath) : ipath(arg_ipath){
-                fileopen(ipath);
+                open(ipath);
                 init();
             }
             ~ReadDump() {clear();}
 
-            void fileopen(const std::string &arg_ipath){
+            void open(const std::string &arg_ipath){
                 dump.open(arg_ipath);
             }
 
             void clear(){
                 dump.close();
                 header_map->clear();
+                for (size_t i = 0; i < atoms_all_data_v.size(); i++){
+                    delete atoms_all_data_v[i], header_map_v[i];
+                }
+                header_map = nullptr;
+                atoms_all_data = nullptr;
             }
 
             void join_3columns(
@@ -52,11 +57,7 @@ namespace ReadDump
             }
 
             bool read_1frame(){
-                if (!all_frames_loaded){
-                    return _read_1frame();
-                } else {
-                    return change_now_frame(1);
-                }
+                return all_frames_loaded ? change_now_frame(1) : _read_1frame();
             }
 
             void read_all_frames(){
@@ -131,21 +132,16 @@ namespace ReadDump
                 if (want_timesteps.size() == 0) return true;
                 std::vector<int>::iterator itr
                     = std::find(want_timesteps.begin(), want_timesteps.end(), timestep);
-                if (itr == want_timesteps.end()){
-                    return false;
-                } else {
-                    return true;
-                }
+                return itr != want_timesteps.end();
             }
 
 
 
         private:
-            int line_number = 0;
-            int now_frame = -1;
+            int line_number, now_frame;
             std::string ipath, tmp;
             std::ifstream dump;
-            bool all_frames_loaded = false;
+            bool all_frames_loaded;
 
             // 全frameのデータを格納するvector
             std::vector<int> timestep_v, num_atoms_v, want_timesteps;
@@ -155,6 +151,9 @@ namespace ReadDump
 
             void init(){
                 num_frames = 0;
+                line_number = 0;
+                now_frame = -1;
+                all_frames_loaded = false;
             }
 
             void read_timestep(){
@@ -260,7 +259,7 @@ namespace ReadDump
                     } else if (splited_row[1] == " BOX BOUNDS pp pp pp"){
                         read_box("orthogonal");
                     } else {
-                        std::vector<std::string> atoms_header = split(splited_row[1], ' ');
+                        std::vector<std::string> atoms_header = std::split(splited_row[1], ' ');
                         if (atoms_header[0] != "ATOMS"){
                             std::cout << "Error: Invalid dumpfile format.\n"
                                 << "ITEM: ATOMS must be come\n"
@@ -268,11 +267,11 @@ namespace ReadDump
                             std::exit(EXIT_FAILURE);
                         }
 
-                        // header index をマッピング
+                        // map 'header index'
                         for (size_t i = 1; i < atoms_header.size(); i++)
                             header_map->insert(std::make_pair(atoms_header[i], i-1));
 
-                        // ATOMS 読み込み
+                        // read 'ATOMS' here
                         int num_column = atoms_header.size() - 1;
                         atoms_all_data->conservativeResize(num_atoms, num_column);
                         read_atoms(num_column);
@@ -311,12 +310,32 @@ namespace ReadDump
         public:
             template<class... T> void add_column_if_not_exist(std::string colname, T... args){
                 if (colname == "mol"){
-                    add_mol(args...);
+                    Eigen::VectorXd molcol(atoms_all_data->rows());
+                    calc_mol(molcol, args...);
+                    append_column(molcol, "mol");
                 } else {
                     std::cout << "Invalid column name: " << colname << std::endl
                         << "This message can be ignored but may cause an error.\n"
                         << "(add_column_if_not_exist, read_dump.h)\n";
                 }
+            }
+
+            void append_column(
+                    const Eigen::VectorXd &apcol,
+                    const std::string& colname,
+                    bool replace=false)
+            {
+                int col;
+                if (header_map->count(colname) != 0){
+                    if (!replace) return;
+                    col = header_map->at(colname);
+                } else {
+                    col = atoms_all_data->cols();
+                    header_map->insert(std::make_pair(colname, col));
+                    atoms_all_data->conservativeResize(num_atoms, col+1);
+                }
+                for (size_t i = 0; i < atoms_all_data->rows(); i++)
+                    (*atoms_all_data)(i, col) = apcol(i);
             }
 
             double max_of_col(std::string colname){
@@ -333,25 +352,16 @@ namespace ReadDump
 
 
         private:
-            void add_mol(int N, int M){
-                if (header_map->count("mol") == 0){
-                    int id = header_map->at("id");
-                    int mol = atoms_all_data->cols();
-                    header_map->insert(std::make_pair("mol", mol));
-                    atoms_all_data->conservativeResize(num_atoms, mol+1);
-                    if (N != -1){
-                        for (int i = 0; i < num_atoms; i++)
-                            (*atoms_all_data)(i, mol) = ((int)atoms_all_data->coeff(i, id) - 1) / N + 1;
-                    } else if (M != -1){
-                        N = num_atoms / M;
-                        for (int i = 0; i < num_atoms; i++)
-                            (*atoms_all_data)(i, mol) = ((int)atoms_all_data->coeff(i, id) - 1) / N + 1;
-                    } else {
-                        std::cout << "Since there is no 'mol' in ATOMS in the dump file,"
-                            << " it is necessary to write N or M in the input file.\n";
-                        std::exit(EXIT_FAILURE);
-                    }
+            void calc_mol(Eigen::VectorXd &molcol, int N, int M){
+                int id = header_map->at("id");
+                N = N != -1 ? N : num_atoms/M;
+                if (N < 0){
+                    std::cout << "Since there is no 'mol' in ATOMS in the dump file,"
+                        << " it is necessary to write N or M in the input file.\n";
+                    std::exit(EXIT_FAILURE);
                 }
+                for (int i = 0; i < num_atoms; i++)
+                    molcol(i) = ((int)atoms_all_data->coeff(i, id) - 1) / N + 1;
             }
     }; // class ExtraReadDump
 }
