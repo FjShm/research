@@ -309,6 +309,7 @@ namespace ReadDump
 
         public:
             template<class... T> void add_column_if_not_exist(std::string colname, T... args){
+                if (header_map->count(colname) != 0) return;
                 if (colname == "mol"){
                     Eigen::VectorXd molcol(atoms_all_data->rows());
                     calc_mol(molcol, args...);
