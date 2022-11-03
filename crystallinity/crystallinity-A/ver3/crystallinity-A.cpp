@@ -135,9 +135,10 @@ int main(int argc, char* argv[]){
         std::vector<Eigen::Vector3d> _b_ = {-rd.b, zeros, rd.b};
         std::vector<Eigen::Vector3d> _c_ = {-rd.c, zeros, rd.c};
 
-        std::vector<Point> points(27*(ub-lb));
+        std::vector<Point> points(27*M*(ub-lb));
         int counter = 0;
         for (int i = 0; i < rd.num_atoms; i++){
+            int n = i % N;
             if (n < lb || ub <= n) continue;
             for (int xi = 0; xi < 3; xi++)
                 for (int yi = 0; yi < 3; yi++)
@@ -149,21 +150,30 @@ int main(int argc, char* argv[]){
         kdt::KDTree<Point> kdtree(points);
 
         // 隣接stemの総数とcrystal条件を満たすstemの数
-        std::vector<int> total_neighbor_stems(num_stems, 0);
-        std::vector<int> cry_neighbor_stems(num_stems, 0);
+        Eigen::VectorXd total_neighbor_stems(rd.num_atoms);
+        Eigen::VectorXd cry_neighbor_stems(rd.num_atoms);
         Point query;
         Eigen::Vector3d stem_i, stem_j;
-        for (int i = 0; i < num_stems; i++){
+        for (int i = 0; i < rd.num_atoms; i++){
+            int n = i % N;
+            if (n < lb || ub <= n) continue;
             stem_i = stem_vecs[i];
-            query = Point(stem_i);
-            std::vector<int> idxes = kdtree.radiusSearch(query, dith);
-            total_neighbor_stems[i] = idxes.size();
-            for (int j = 0; j < idxes.size(); j++){
-                int jj = idxes[j] % num_stems;
-                stem_j = stem_vecs[jj];
-                if (lambdas[i] >= lath && lambdas[jj] >= lath){
+            std::set<int> idxes_set;
+            // stem_i の両末端, 中央の3点についてquery作成
+            for (int is = -1; is <= 1; is++){
+                query = Point(position_fixed_coordinations[i] + is*stem_i*0.5);
+                std::vector<int> idxes = kdtree.radiusSearch(query, dith);
+                for (int v : idxes) idxes_set.insert(v);
+            }
+            idxes_set.erase(i);
+            total_neighbor_stems[i] = idxes_set.size();
+            for (auto idxj : idxes_set){
+                int jj = idxj / 27;
+                int nj = jj % (ub - lb) + lb;
+                stem_j = stem_vecs[nj];
+                if (lambdas[i] >= lath && lambdas[nj] >= lath){
                     double cos =
-                        std::abs(stem_i.dot(stem_j)) / (stem_vec_norms[i]*stem_vec_norms[jj]);
+                        std::abs(stem_i.dot(stem_j)) / (stem_vec_norms[i]*stem_vec_norms[nj]);
                     if (cos >= cos_thth) cry_neighbor_stems[i]++;
                 }
             }
@@ -172,13 +182,18 @@ int main(int argc, char* argv[]){
         // output cry text
         if (f1rst_loop){
             out_cry << "TimeStep";
-            for (size_t i = 0; i < num_stems; i++)
-                out_cry << " " << alphas[i];
+            for (size_t i = 0; i < rd.num_atoms; i++){
+                int n = i % N;
+                if (n < lb || ub <= n) continue;
+                out_cry << " " << i;
+            }
             out_cry << std::endl;
             f1rst_loop = false;
         }
-        out_cry << timestep;
-        for (size_t i = 0; i < num_stems; i++){
+        out_cry << rd.timestep;
+        for (size_t i = 0; i < rd.num_atoms; i++){
+            int n = i % N;
+            if (n < lb || ub <= n) continue;
             if (total_neighbor_stems[i] != 0){
                 out_cry << " " << (double)cry_neighbor_stems[i] / (double)total_neighbor_stems[i];
             } else {
@@ -186,6 +201,8 @@ int main(int argc, char* argv[]){
             }
         }
         out_cry << std::endl;
+
+        // output dump
 
 
         // update progress bar
