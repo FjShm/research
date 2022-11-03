@@ -35,6 +35,11 @@ namespace ReadDump
             void clear(){
                 dump.close();
                 header_map->clear();
+                for (size_t i = 0; i < atoms_all_data_v.size(); i++){
+                    delete atoms_all_data_v[i], header_map_v[i];
+                }
+                header_map = nullptr;
+                atoms_all_data = nullptr;
             }
 
             void join_3columns(
@@ -133,11 +138,10 @@ namespace ReadDump
 
 
         private:
-            int line_number = 0;
-            int now_frame = -1;
+            int line_number, now_frame;
             std::string ipath, tmp;
             std::ifstream dump;
-            bool all_frames_loaded = false;
+            bool all_frames_loaded;
 
             // 全frameのデータを格納するvector
             std::vector<int> timestep_v, num_atoms_v, want_timesteps;
@@ -147,6 +151,9 @@ namespace ReadDump
 
             void init(){
                 num_frames = 0;
+                line_number = 0;
+                now_frame = -1;
+                all_frames_loaded = false;
             }
 
             void read_timestep(){
