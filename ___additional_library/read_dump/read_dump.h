@@ -52,11 +52,7 @@ namespace ReadDump
             }
 
             bool read_1frame(){
-                if (!all_frames_loaded){
-                    return _read_1frame();
-                } else {
-                    return change_now_frame(1);
-                }
+                return all_frames_loaded ? change_now_frame(1) : _read_1frame();
             }
 
             void read_all_frames(){
@@ -131,11 +127,7 @@ namespace ReadDump
                 if (want_timesteps.size() == 0) return true;
                 std::vector<int>::iterator itr
                     = std::find(want_timesteps.begin(), want_timesteps.end(), timestep);
-                if (itr == want_timesteps.end()){
-                    return false;
-                } else {
-                    return true;
-                }
+                return itr != want_timesteps.end();
             }
 
 
@@ -268,11 +260,11 @@ namespace ReadDump
                             std::exit(EXIT_FAILURE);
                         }
 
-                        // header index をマッピング
+                        // map 'header index'
                         for (size_t i = 1; i < atoms_header.size(); i++)
                             header_map->insert(std::make_pair(atoms_header[i], i-1));
 
-                        // ATOMS 読み込み
+                        // read 'ATOMS' here
                         int num_column = atoms_header.size() - 1;
                         atoms_all_data->conservativeResize(num_atoms, num_column);
                         read_atoms(num_column);
