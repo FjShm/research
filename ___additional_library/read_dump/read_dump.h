@@ -352,7 +352,7 @@ namespace ReadDump
                     std::exit(EXIT_FAILURE);
                 }
                 for (size_t i = 0; i < colnames.size(); i++){
-                    Eigen::VectorXd col;
+                    Eigen::VectorXd col(apcol.rows());
                     col << apcol.col(i);
                     append_column(col, colnames[i], replace_all);
                 }
