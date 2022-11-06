@@ -77,19 +77,6 @@ namespace ReadDump
                 all_frames_loaded = true;
             }
 
-            void jump_frames(int fn, bool absolute=false){
-                if (!all_frames_loaded){
-                    std::cout << "method 'read_all_frames' must be called "
-                        << "before call 'jump_frames'\n";
-                    std::exit(EXIT_FAILURE);
-                }
-                if (!change_now_frame(fn, absolute)){
-                    std::cout << "Invalid frame number: " << fn
-                        << "\n(jump_frames())" << std::endl;
-                    std::exit(EXIT_FAILURE);
-                }
-            }
-
             void header_validation(const std::vector<std::string> &headers){
                 bool abort = false;
                 for (std::string header : headers){
@@ -150,11 +137,32 @@ namespace ReadDump
 
 
 
+        protected:
+            bool all_frames_loaded;
+
+            bool change_now_frame(int frame, bool absolute = false){
+                if (absolute){
+                    now_frame = frame;
+                } else {
+                    now_frame += frame;
+                }
+                if (now_frame < 0 || num_frames <= now_frame) return false;
+                timestep = timestep_v[now_frame];
+                num_atoms = num_atoms_v[now_frame];
+                cellbox_a = ca_v[now_frame];
+                cellbox_b = cb_v[now_frame];
+                cellbox_c = cc_v[now_frame];
+                cellbox_origin = co_v[now_frame];
+                atoms_all_data = atoms_all_data_v[now_frame];
+                header_map = header_map_v[now_frame];
+                return true;
+            }
+
+
         private:
             int line_number, now_frame;
             std::string ipath, tmp;
             std::ifstream dump;
-            bool all_frames_loaded;
 
             // 全frameのデータを格納するvector
             std::vector<int> timestep_v, num_atoms_v, want_timesteps;
@@ -294,25 +302,6 @@ namespace ReadDump
                 }
                 return false; // ファイル末尾の場合はここ
             }
-
-            bool change_now_frame(int frame, bool absolute = false){
-                if (absolute){
-                    now_frame = frame;
-                } else {
-                    now_frame += frame;
-                }
-                if (now_frame < 0 || num_frames <= now_frame) return false;
-                timestep = timestep_v[now_frame];
-                num_atoms = num_atoms_v[now_frame];
-                cellbox_a = ca_v[now_frame];
-                cellbox_b = cb_v[now_frame];
-                cellbox_c = cc_v[now_frame];
-                cellbox_origin = co_v[now_frame];
-                atoms_all_data = atoms_all_data_v[now_frame];
-                header_map = header_map_v[now_frame];
-                return true;
-            }
-
     }; // class ReadDump
 
 
@@ -382,6 +371,19 @@ namespace ReadDump
                 int col = header_map->at(colname);
                 double val = atoms_all_data->col(col).array().minCoeff();
                 return val;
+            }
+
+            void jump_frames(int fn, bool absolute=false){
+                if (!all_frames_loaded){
+                    std::cout << "method 'read_all_frames' must be called "
+                        << "before call 'jump_frames'\n";
+                    std::exit(EXIT_FAILURE);
+                }
+                if (!change_now_frame(fn, absolute)){
+                    std::cout << "Invalid frame number: " << fn
+                        << "\n(jump_frames())" << std::endl;
+                    std::exit(EXIT_FAILURE);
+                }
             }
 
 
