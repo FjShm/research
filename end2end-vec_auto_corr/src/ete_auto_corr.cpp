@@ -6,7 +6,7 @@ int main(int argc, char* argv[]){
     const std::string ipath = param["input_dump_path"].as<std::string>();
     const std::string opath = param["output_path"].as<std::string>("ete_auto_corr.log");
     const double dt = param["dt_fs"].as<double>();
-    const int max_frames = param["max_frames_to_average"].as<int>(100);
+    const int ave_frames = param["max_frames_to_average"].as<int>(100);
     int N = param["beads_per_chain"].as<int>();
     int M = param["num_chain"].as<int>();
     constexpr double fs2ns = 1.e-6;
@@ -22,20 +22,20 @@ int main(int argc, char* argv[]){
 
     int dframes;
     std::vector<double> time(rd.num_frames), auto_corr(rd.num_frames);
-    for (size_t f = 0; f < rd.num_frames; f++){
+    for (size_t fp = 0; fp < rd.num_frames; fp++){
         // calc time
         rd.jump_frames(0, true);
         int timestep0 = rd.timestep;
-        rd.jump_frames(f);
-        time[f] = ((double)rd.timestep - timestep0)*dt*fs2ns;
+        rd.jump_frames(fp);
+        time[fp] = ((double)rd.timestep - timestep0)*dt*fs2ns;
 
         // calc auto corr
         rd.header_validation("id", "xu", "yu", "zu");
-        int frames_to_average_max = rd.num_frames - f;
-        dframes = frames_to_average_max > max_frames ?
-            frames_to_average_max / max_frames : 1;
-        auto_corr[f] =
-            calc_auto_corr(rd, f, dframes, frames_to_average_max, N, M);
+        int f0_max = rd.num_frames - fp;
+        int ave_frames_ = std::min(ave_frames, f0_max);
+        double df = ((double)rd.num_frames - (double)fp) / (double)ave_frames_;
+        auto_corr[fp] =
+            calc_auto_corr(rd, fp, df, ave_frames_, N, M);
         ++show_progress;
     }
 
@@ -47,15 +47,15 @@ int main(int argc, char* argv[]){
 
 
 double calc_auto_corr(
-    ReadDump::ExtraReadDump &rd, int tframes, int dframes, int num_use_frames, int N, int M
+    ReadDump::ExtraReadDump &rd, int fp, const double &df, int num_use_frames, int N, int M
 ){
     double auto_corr = 0.;
     for (int i = 0; i < num_use_frames; i++){
-        int now_frame = i*dframes;
+        int now_frame = std::round(i*df);
         std::vector<Eigen::Vector3d> coord_t, coord_0;
         rd.jump_frames(now_frame, true);
         rd.join_3columns(coord_0, "xu", "yu", "zu");
-        rd.jump_frames(tframes);
+        rd.jump_frames(fp);
         rd.join_3columns(coord_t, "xu", "yu", "zu");
         for (int m = 0; m < M; m++){
             int start_id = m*N;

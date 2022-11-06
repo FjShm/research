@@ -11,4 +11,4 @@
 #include <read_dump/read_dump.h>
 #include <general/mytools.h>
 
-double calc_auto_corr(ReadDump::ExtraReadDump &, int, int, int, int, int);
+double calc_auto_corr(ReadDump::ExtraReadDump&, int, const double&, int, int, int);
