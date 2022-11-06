@@ -77,6 +77,19 @@ namespace ReadDump
                 all_frames_loaded = true;
             }
 
+            void jump_frames(int fn, bool absolute=false){
+                if (!all_frames_loaded){
+                    std::cout << "method 'read_all_frames' must be called "
+                        << "before call 'jump_frames'\n";
+                    std::exit(EXIT_FAILURE);
+                }
+                if (!change_now_frame(fn, absolute)){
+                    std::cout << "Invalid frame number: " << fn
+                        << "\n(jump_frames())" << std::endl;
+                    std::exit(EXIT_FAILURE);
+                }
+            }
+
             void header_validation(const std::vector<std::string> &headers){
                 bool abort = false;
                 for (std::string header : headers){
