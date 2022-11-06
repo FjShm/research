@@ -9,6 +9,8 @@ int main(){
     const std::string dir = "./";
     const std::string fname = "_dump.u.lammpstrj";
     const int N(49), M(512);
+    std::uniform_int_distribution<> dist(0, N*M-1);
+    const int id = dist(gen);
     ReadDump::ExtraReadDump rd(dir + fname);
 
     // test read_all_frames, or read_1frame
@@ -57,8 +59,6 @@ int main(){
         }
 
         // test add_mol
-        std::uniform_int_distribution<> dist(0, N*M-1);
-        int id = dist(gen);
         rd.add_column_if_not_exist("mol", N, M);
         int mol = rd.header_map->at("mol");
         int mol_origin = rd.header_map->at("mol_origin");
@@ -144,4 +144,9 @@ int main(){
         std::cout << rd.atoms_all_data->coeff(id, a3) << std::endl;
     }
     std::cout << "num_frames: " << rd.num_frames << std::endl;
+
+    // test jump_frames]
+    rd.jump_frames(0, true);
+    int xu = rd.header_map->at("xu");
+    std::cout << rd.atoms_all_data->coeff(14920-1, xu) << std::endl;
 }
