@@ -1,9 +1,8 @@
 #!/bin/bash
 
-./R2n.o param.yaml
+./Ete_auto_corr.o param.yaml
 if [ $? -eq 0 ]; then
-    echo "R2n.o finished."
-    python plot.py sample_data/r2_n.txt
+    echo "Ete_auto_corr.o finished."
 else
-    echo "R2n.o failed..."
+    echo "Ete_auto_corr.o failed..."
 fi
