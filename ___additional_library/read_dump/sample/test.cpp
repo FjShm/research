@@ -18,7 +18,8 @@ int main(){
         << dir + fname << "\n\n Y/[n]: ";
     char yn = std::cin.get();
     std::cout << std::endl;
-    if (yn == 'Y') rd.read_all_frames();
+    if (yn == 'Y') rd.read_all_frames(6);
+    //if (yn == 'Y') rd.read_all_frames();
 
     // test set_want_frames
     int mode;
