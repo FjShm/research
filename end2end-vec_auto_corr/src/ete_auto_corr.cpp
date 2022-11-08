@@ -7,13 +7,14 @@ int main(int argc, char* argv[]){
     const std::string opath = param["output_path"].as<std::string>("ete_auto_corr.log");
     const double dt = param["dt_fs"].as<double>();
     const int ave_frames = param["max_frames_to_average"].as<int>(100);
+    const int total_frames_dump = param["total_frames_dump"].as<int>(-1);
     int N = param["beads_per_chain"].as<int>();
     int M = param["num_chain"].as<int>();
     constexpr double fs2ns = 1.e-6;
 
 
     ReadDump::ExtraReadDump rd(ipath);
-    rd.read_all_frames();
+    rd.read_all_frames(total_frames_dump);
 
     // -------------------------------
     // max loop
