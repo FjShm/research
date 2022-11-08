@@ -386,6 +386,15 @@ namespace ReadDump
                 }
             }
 
+            template<typename T> T ref_private_vars(const std::string &name){
+                if (name == "now_frame"){
+                    return now_frame;
+                } else {
+                    std::cout << "variable '" << name << "' is not exist.\n"
+                        << "(ref_private_vars)\n";
+                }
+            }
+
 
         private:
             void calc_mol(Eigen::VectorXd &molcol, int N, int M){
