@@ -25,7 +25,7 @@ int main(int argc, char* argv[]){
     for (size_t fp = 0; fp < rd.num_frames; fp++){
         // calc time
         rd.jump_frames(0, true);
-        int timestep0 = rd.timestep;
+        double timestep0 = (double)rd.timestep;
         rd.jump_frames(fp);
         time[fp] = ((double)rd.timestep - timestep0)*dt*fs2ns;
 
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]){
         rd.header_validation("id", "xu", "yu", "zu");
         int f0_max = rd.num_frames - fp;
         int ave_frames_ = std::min(ave_frames, f0_max);
-        double df = ((double)rd.num_frames - (double)fp) / (double)ave_frames_;
+        double df = (double)f0_max / (double)ave_frames_;
         auto_corr[fp] =
             calc_auto_corr(rd, fp, df, ave_frames_, N, M);
         ++show_progress;
@@ -54,6 +54,7 @@ double calc_auto_corr(
         int now_frame = std::round(i*df);
         std::vector<Eigen::Vector3d> coord_t, coord_0;
         rd.jump_frames(now_frame, true);
+        std::cout << rd.now_frame << std::endl;
         rd.join_3columns(coord_0, "xu", "yu", "zu");
         rd.jump_frames(fp);
         rd.join_3columns(coord_t, "xu", "yu", "zu");
