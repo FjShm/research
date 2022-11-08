@@ -1,0 +1,8 @@
+input_dump_path: /home6/fujii/master/data/analysis/cis100percent_360K_density0.85/kujira_step_200_pc/analysys/end-to-end-vector-autocorr/dump.corr.lammpstrj
+  #input_dump_path: sample_data/sample.lammpstrj
+output_path: sample_data/ete_auto-corr.txt
+beads_per_chain: 49
+num_chain: 512
+dt_fs: 5
+max_frames_to_average: 10
+total_frames_dump: 9769
