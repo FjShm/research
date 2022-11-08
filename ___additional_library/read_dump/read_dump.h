@@ -393,6 +393,7 @@ namespace ReadDump
                 } else {
                     std::cout << "variable '" << name << "' is not exist.\n"
                         << "(ref_private_vars)\n";
+                    return "";
                 }
             }
 
