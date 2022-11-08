@@ -60,10 +60,11 @@ namespace ReadDump
                 return all_frames_loaded ? change_now_frame(1) : _read_1frame();
             }
 
-            void read_all_frames(){
+            void read_all_frames(const int &total = -1){
+                int counter = 0;
                 std::cout << ipath << " : now loading...\n";
+                if (total > 0) std::cout << "\r>>> 0 %";
                 while(_read_1frame()){
-                    std::cout << "\r>>> timestep: " + std::to_string(timestep);
                     timestep_v.push_back(timestep);
                     num_atoms_v.push_back(num_atoms);
                     ca_v.push_back(cellbox_a);
@@ -72,6 +73,9 @@ namespace ReadDump
                     co_v.push_back(cellbox_origin);
                     atoms_all_data_v.push_back(atoms_all_data);
                     header_map_v.push_back(header_map);
+                    total > 0 ?
+                        std::cout << "\r>>> "<< 100*(++counter)/total << " %":
+                        std::cout << "\r>>> timestep: " + std::to_string(timestep);
                 }
                 std::cout << std::endl << "done" << std::endl;
                 all_frames_loaded = true;
@@ -142,11 +146,9 @@ namespace ReadDump
             int now_frame;
 
             bool change_now_frame(int frame, bool absolute = false){
-                if (absolute){
-                    now_frame = frame;
-                } else {
+                absolute?
+                    now_frame = frame:
                     now_frame += frame;
-                }
                 if (now_frame < 0 || num_frames <= now_frame) return false;
                 timestep = timestep_v[now_frame];
                 num_atoms = num_atoms_v[now_frame];
