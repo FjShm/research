@@ -54,9 +54,10 @@ double calc_auto_corr(
         int now_frame = std::round(i*df);
         std::vector<Eigen::Vector3d> coord_t, coord_0;
         rd.jump_frames(now_frame, true);
-        std::cout << rd.now_frame << std::endl;
+        std::cout << rd.ref_private_vars("now_frame") << std::endl;
         rd.join_3columns(coord_0, "xu", "yu", "zu");
         rd.jump_frames(fp);
+        std::cout << rd.ref_private_vars("now_frame") << std::endl;
         rd.join_3columns(coord_t, "xu", "yu", "zu");
         for (int m = 0; m < M; m++){
             int start_id = m*N;
