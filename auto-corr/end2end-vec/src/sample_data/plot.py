@@ -15,4 +15,4 @@ if __name__ == "__main__":
     ax.plot(cg[0]*tsf, cg[2], label="CG")
     ax.plot(fa[0], fa[1], label="FA")
     ax.legend()
-    fig.savefig("test.png")
+    fig.savefig("compare.png")
