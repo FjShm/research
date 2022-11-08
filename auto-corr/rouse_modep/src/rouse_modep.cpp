@@ -13,7 +13,6 @@ int main(int argc, char* argv[]){
     const int M = param["num_chain"].as<int>();
     constexpr double fs2ns = 1.e-6;
 
-
     ReadDump::ExtraReadDump rd(ipath);
     rd.read_all_frames(total_frames_dump);
 
@@ -82,9 +81,9 @@ void calc_Xp(
     const int &N,
     const int &M
 ){
-    const double sqrt_2_N = std::sqrt(2./N);
     const int now_frame = std::stoi(rd.ref_private_vars("now_frame"));
     if (Xp[now_frame] != nullptr) return;
+    const double sqrt_2_N = std::sqrt(2./(double)N);
 
     std::vector<Eigen::Vector3d> coods;
     rd.join_3columns(coods, "xu", "yu", "zu");
@@ -92,9 +91,9 @@ void calc_Xp(
     Xp[now_frame] = new std::vector<Eigen::Vector3d>(M, Eigen::Vector3d::Zero());
     for (int m = 0; m < M; m++){
         int start_id = m*N;
-        for (int n = 0; n < N; n++){
-            (*Xp[now_frame])[m] += std::cos(((double)n + 0.5)*(double)p*M_PI/(double)N) * coods[start_id+n];
-        }
+        for (int n = 0; n < N; n++)
+            (*Xp[now_frame])[m]
+                += std::cos(((double)n + 0.5)*(double)p*M_PI/(double)N) * coods[start_id+n];
         (*Xp[now_frame])[m] *= sqrt_2_N;
     }
 }
