@@ -139,6 +139,7 @@ namespace ReadDump
 
         protected:
             bool all_frames_loaded;
+            int now_frame;
 
             bool change_now_frame(int frame, bool absolute = false){
                 if (absolute){
@@ -160,7 +161,7 @@ namespace ReadDump
 
 
         private:
-            int line_number, now_frame;
+            int line_number;
             std::string ipath, tmp;
             std::ifstream dump;
 
@@ -386,9 +387,9 @@ namespace ReadDump
                 }
             }
 
-            template<typename T> T ref_private_vars(const std::string &name){
+            std::string ref_private_vars(const std::string &name){
                 if (name == "now_frame"){
-                    return now_frame;
+                    return std::to_string(now_frame);
                 } else {
                     std::cout << "variable '" << name << "' is not exist.\n"
                         << "(ref_private_vars)\n";
