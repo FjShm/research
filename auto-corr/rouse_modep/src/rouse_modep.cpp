@@ -40,6 +40,8 @@ int main(int argc, char* argv[]){
             calc_auto_corr(rd, Xp, fp, df, p, ave_frames_, N, M);
         ++show_progress;
     }
+    for (int i = 0; i < rd.num_frames; i++)
+        delete Xp[i];
 
     // output
     std::ofstream out{opath, std::ios::out | std::ios::trunc};
