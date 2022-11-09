@@ -25,10 +25,10 @@ $$
 
 ## Output
 ```
-0 800 1.00
-0.001 697 0.87125
-    :
-    :
+0 802.494 1
+0.1 792.869 0.988006
+        :
+        :
 ```
 column1: $t'$, column2: auto-correlation of $\boldsymbol R$, column3: standardization of column3
 
