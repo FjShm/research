@@ -4,7 +4,7 @@
 #$ -cwd
 #$ -j y
 #$ -q ara.q
-#$ -pe openmp 40
+#$ -pe openmp 4
 ##$ -o out.txt
 
 #$ -v KMP_AFFINITY=verbose,compact,1

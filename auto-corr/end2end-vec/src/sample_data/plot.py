@@ -5,14 +5,15 @@ import matplotlib.pyplot as plt
 
 
 if __name__ == "__main__":
-    cg = pd.read_csv("ete_auto-corr_fix.txt", header=None)
+    cg = pd.read_csv("ete_auto-corr.txt", header=None, sep="\s+")
     fa = pd.read_csv("pure-cis-Ct-1per.dat", header=None, sep="\s+")
-    tsf = float(sys.argv[1])
-    fig = plt.figure(dpi=600)
+    fig = plt.figure()
     ax = fig.add_subplot(111,
-            xlabel=r"unscaled $t\ {\rm [ns]}$",
-            ylabel=r"$C(t)\ [-]$")
-    ax.plot(cg[0]*tsf, cg[2], label="CG")
-    ax.plot(fa[0], fa[1], label="FA")
+            xlabel=r"$st\ {\rm [ns]}$",
+            ylabel=r"$C(t)=\frac{\langle R(t) R(0)\rangle}{\langle R(0)^2\rangle}\ [-]$",
+                         )
+    tsf = float(sys.argv[1])
+    ax.plot(cg[0]*tsf, cg[2], label=rf"AB-model ($s=${tsf})")
+    ax.plot(fa[0], fa[1], label=r"FA ($s=$1)")
     ax.legend()
-    fig.savefig("compare.png")
+    fig.savefig("compare.png", bbox_inches="tight")

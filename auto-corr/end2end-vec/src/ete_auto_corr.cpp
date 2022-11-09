@@ -12,7 +12,6 @@ int main(int argc, char* argv[]){
     int M = param["num_chain"].as<int>();
     constexpr double fs2ns = 1.e-6;
 
-
     ReadDump::ExtraReadDump rd(ipath);
     rd.read_all_frames(total_frames_dump);
 
@@ -42,7 +41,8 @@ int main(int argc, char* argv[]){
     // output
     std::ofstream out{opath, std::ios::out | std::ios::trunc};
     for (int i = 0; i < rd.num_frames; i++)
-        out << time[i] << " " << auto_corr[i] << std::endl;
+        out << time[i] << " " << auto_corr[i]
+            << " " << auto_corr[i]/auto_corr[0] << std::endl;
 }
 
 
@@ -68,3 +68,4 @@ double calc_auto_corr(
     }
     return auto_corr / ((double)num_use_frames * (double)M);
 }
+
