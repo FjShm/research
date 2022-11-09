@@ -42,7 +42,8 @@ int main(int argc, char* argv[]){
     // output
     std::ofstream out{opath, std::ios::out | std::ios::trunc};
     for (int i = 0; i < rd.num_frames; i++)
-        out << time[i] << " " << auto_corr[i] << std::endl;
+        out << time[i] << " " << auto_corr[i]
+            << " " << auto_corr[i]/auto_corr[0] << std::endl;
 }
 
 
