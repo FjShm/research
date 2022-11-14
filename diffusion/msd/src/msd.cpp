@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
         }
 
         // calc MSD
-        out << (double)rd.timestep * fs2ns << " ";
+        out << (double)rd.timestep * fs2ns * dt << " ";
         double sum = 0.;
         for (int m = 0; m < M; m++){
             double distance = (positions[m] - initial_positions[m]).squaredNorm();
