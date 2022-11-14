@@ -2,10 +2,10 @@
 
 ## list
 - `std::split`
-- `std::row_counter`
+- `std::linspace`
+- `std::count_rows`
+- `vec_max`
+- `vec_maxid`
+- `vec_min`
+- `vec_minid`
 
-## `std::split`
-```c++
-std::vector<std::string> std::split(std::string line, char delim)
-std::vector<std::string> std::split(std::string line, std::string delim)
-```
