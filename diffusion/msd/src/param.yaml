@@ -3,4 +3,4 @@ output_path: sample_data/msd.txt
 beads_per_chain: 49
 num_chain: 512
 dt_fs: 5
-total_frames_dump: 100
+total_frames_dump: 50
