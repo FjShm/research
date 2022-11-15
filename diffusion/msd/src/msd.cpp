@@ -63,7 +63,5 @@ int main(int argc, char* argv[]){
 
         ++show_progress;
     }
-
-    // output                                                                       :q
 }
 
