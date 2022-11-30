@@ -25,4 +25,12 @@ int main(){
     std::cout << "# of 'ITEM: TIMESTEP': " << counter << std::endl;
     counter = std::count_rows(fname, "ITEM:");
     std::cout << "# of 'ITEM:': " << counter << std::endl;
+
+    // test vec_mean
+    std::vector<double> v = {1, 3.7, 6.2};
+    double mean_v = std::vec_mean(v);
+    std::cout << "test vec_mean\nelems:\n";
+    for (auto val : v)
+        std::cout << val << std::endl;
+    std::cout << "mean: " << mean_v << std::endl;
 }
