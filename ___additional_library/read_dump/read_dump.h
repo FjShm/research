@@ -276,6 +276,8 @@ namespace ReadDump
                         num_frames++;
                     } else if (splited_row[1] == " NUMBER OF ATOMS"){
                         read_number_of_atoms();
+                    } else if (splited_row[1] == " NUMBER OF ENTRIES"){
+                        read_number_of_atoms();
                     } else if (splited_row[1] == " BOX BOUNDS xy xz yz pp pp pp"){
                         read_box("triclinic");
                     } else if (splited_row[1] == " BOX BOUNDS xx yy zz pp pp pp"){
@@ -284,7 +286,7 @@ namespace ReadDump
                         read_box("orthogonal");
                     } else {
                         std::vector<std::string> atoms_header = std::split(splited_row[1], ' ');
-                        if (atoms_header[0] != "ATOMS"){
+                        if (atoms_header[0] != "ATOMS" && atoms_header[0] != "ENTRIES"){
                             std::cout << "Error: Invalid dumpfile format.\n"
                                 << "ITEM: ATOMS must be come\n"
                                 << "line " << line_number << ": " << row << std::endl;
