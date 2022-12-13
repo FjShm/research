@@ -1,11 +1,11 @@
-mass_g_per_mole: ~
-bond_length_Ang:
+mass: ~
+bond_length:
   1: 2.5
   2: 3.1
 angle_degree:
   1: 90.
   2: 180.
-cell_length_Ang: 150.
+cell_length: 150.
 N: 49
 M: 512
 origin: "center"  # "center" or not

@@ -19,7 +19,7 @@ from tqdm import tqdm
 python create_A-model.py
 
 # See help
-python create_A-model.py -h
+python create_straight_chains.py -h
 ```
 """
 
@@ -76,12 +76,12 @@ class DefaultParams:
     polyisoprene unit = C5H8
     """
 
-    __mass: dict = {1: 28.0531, 2: 40.0637}  # C2H4, C3H4 [g/cm3]
-    __l: dict = {1: 2.0, 2: 3.0}  # [Ang]
-    __theta: dict = {1: 0.5 * np.pi, 2: np.pi}  # [rad]
+    __mass: dict = {1: 68.12}  # cis-isoprene [g/cm3]
+    __l: dict = {1: 5.}
+    __theta: dict = {1: 2./3. * np.pi}  # [rad]
     __cell_length: float = 120.0  # [Ang]
-    __M: int = 512
-    __N: int = 49
+    __N: int = 24
+    __M: int = 50
     __origin: str = ""
     # "center" or not.  Where does the
     # simulation box coincide with the origin
@@ -242,15 +242,15 @@ class DefaultParams:
 class PARAMs(DefaultParams):
     def __init__(self, inputs: dict) -> None:
         for key, val in inputs.items():
-            if key == "mass_g_per_mole":
+            if key == "mass":
                 self._mass = val
-            elif key == "bond_length_Ang":
+            elif key == "bond_length":
                 self._l = val
             elif key == "angle_degree":
                 for k in val.keys():
                     val[k] = np.deg2rad(val[k])
                 self._theta = val
-            elif key == "cell_length_Ang":
+            elif key == "cell_length":
                 self._cell_length = val
             elif key == "N":
                 self._N = val
