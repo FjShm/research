@@ -77,8 +77,8 @@ class DefaultParams:
     """
 
     __mass: dict = {1: 68.12}  # cis-isoprene [g/cm3]
-    __l: dict = {1: 5.}
-    __theta: dict = {1: 2./3. * np.pi}  # [rad]
+    __l: dict = {1: 5.0}
+    __theta: dict = {1: 2.0 / 3.0 * np.pi}  # [rad]
     __cell_length: float = 120.0  # [Ang]
     __N: int = 24
     __M: int = 50
@@ -103,6 +103,8 @@ class DefaultParams:
     __btype: dict = {1: 1}
     __atype: dict = {1: 1}
     __dtype: dict = {1: 1}
+
+    __special_bonds: int = 3
 
     @property
     def mass(self) -> dict:
@@ -159,6 +161,10 @@ class DefaultParams:
     @property
     def dtype(self) -> dict:
         return self.__dtype.copy()
+
+    @property
+    def special_bonds(self) -> int:
+        return self.__special_bonds
 
     @mass.setter
     def _mass(self, val: dict) -> None:
@@ -238,6 +244,13 @@ class DefaultParams:
                 exit("The value of 'dtype' must be dict.")
             self.__dtype = dict((k, v) for k, v in sorted(val.items()))
 
+    @special_bonds.setter
+    def _special_bonds(self, val: int) -> None:
+        if val is not None:
+            if val < 0:
+                exit(f"special_bonds must be over 0.\ninvalid value: {val}")
+            self.__special_bonds = val
+
 
 class PARAMs(DefaultParams):
     def __init__(self, inputs: dict) -> None:
@@ -272,6 +285,8 @@ class PARAMs(DefaultParams):
                 self._atype = val
             elif key == "dtype":
                 self._dtype = val
+            elif key == "special_bonds":
+                self._special_bonds = val
         self._expand_types()
 
     def __expand_types(self, xtype, Nmax) -> dict:
@@ -307,10 +322,9 @@ class ATOMS:
         self.__sigma_angle = params.sigma_angle
         self.__overlap_threa = params.overlap_threa
         self.__origin = params.origin
-        # self.__bead_type = params.bead_type
         self.__btype = params.btype
         self.__atype = params.atype
-        # self.__dtype = params.dtype
+        self.__special_bonds = params.special_bonds
         self.atom_coordinations = np.full(
             (self.__N * self.__M, 3), (self.__cell_length + self.__overlap_threa) + 1.0
         )
@@ -321,10 +335,12 @@ class ATOMS:
             while True:
                 chain = self.__generate_1_chain()
                 chain, mirror = self.__fix_periodic(chain)
-                self.atom_coordinations[m * self.__N : (m + 1) * self.__N, :] = chain
-                self.mirror_indexes[m * self.__N : (m + 1) * self.__N, :] = mirror
-                X = self.atom_coordinations[: (m + 1) * self.__N, :].copy()
-                if self.__overlapped(chain, X) is False:
+                X = self.atom_coordinations[: m * self.__N, :].copy()
+                if not self.__overlapped(chain, X):
+                    self.atom_coordinations[
+                        m * self.__N : (m + 1) * self.__N, :
+                    ] = chain
+                    self.mirror_indexes[m * self.__N : (m + 1) * self.__N, :] = mirror
                     break
         if self.__origin == "center":
             self.atom_coordinations -= 0.5 * self.__cell_length
@@ -357,7 +373,7 @@ class ATOMS:
         # t = np.random.normal(
         #     loc=self.__theta[self.__atype[1]], scale=self.__sigma_angle, size=1
         # )[0]
-        t = random.uniform(0., np.pi)
+        t = random.uniform(0.0, np.pi)
         p = random.uniform(-np.pi, np.pi)
         return self.__spherical2rect(np.array([r, t, p]))
 
@@ -383,21 +399,34 @@ class ATOMS:
             r[n, :] = r[n - 1, :] + bond_vec
         return r
 
-    def __overlapped(self, query: np.ndarray, X: np.ndarray) -> bool:
-        # consider periodic boundary conditions
+    def __append_periodic_skin(self, arr: np.ndarray) -> np.ndarray:
+        if len(arr) == 0:
+            return arr
         for i in range(3):
             rng = (
-                X[:, i] <= self.__overlap_threa,
-                self.__cell_length - self.__overlap_threa <= X[:, i],
+                arr[:, i] <= self.__overlap_threa,
+                self.__cell_length - self.__overlap_threa <= arr[:, i],
             )
-            skin = [X[rng[0]].copy(), X[rng[1]].copy()]
+            skin = [arr[rng[0]].copy(), arr[rng[1]].copy()]
             skin[0][:, i] += (self.__cell_length,)
             skin[1][:, i] -= (self.__cell_length,)
-            X = np.array(list(X) + list(skin[0]) + list(skin[1]))
-        tree = KDTree(X)
-        n = tree.query_radius(query, r=self.__overlap_threa, count_only=True)
-        n = np.array(n) - np.ones(len(n))
-        return True if n.sum() > 0 else False
+            arr = np.array(list(arr) + list(skin[0]) + list(skin[1]))
+        return arr
+
+    def __overlapped(self, query: np.ndarray, X: np.ndarray) -> bool:
+        X = self.__append_periodic_skin(X.copy())
+        query = self.__append_periodic_skin(query.copy())
+        tree = KDTree(np.array(list(X) + list(query)))
+        ind = tree.query_radius(query, r=self.__overlap_threa)
+
+        # check overlapped bead except for special_bonds
+        ind -= len(X)
+        flgs = np.empty(len(ind), dtype=bool)
+        for i in range(len(ind)):
+            flgs[i] = (ind[i] < 0).sum() > 0 or (
+                np.abs(ind[i] - i) > self.__special_bonds
+            ).sum() > 0
+        return flgs.sum() > 0
 
     def __fix_periodic(self, positions: np.ndarray) -> None:
         mod = positions % self.__cell_length
