@@ -18,7 +18,8 @@ M: 512
 origin: "center"  # "center" or not
 sigma_bond: 0.01
 sigma_angle: 0.1
-overlap_threashold: 1.
+overlap_threashold: 3.
+special_bonds: 3
 
 # < Structures > #
 
