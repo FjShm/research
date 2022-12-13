@@ -27,6 +27,7 @@ python create_straight_chains.py [-in path/to/input-yaml-file (default=input.yam
 |`sigma_bond`|`float`|1.0|The bond length is calculated randomly according to a normal distribution with the value set by `bond_length` as μ and `sigma_bond` as σ.|
 |`sigma_angle`|`float`|1.0|Same as `sigma_bond`|
 |`overlap_threashold`|`float`|1e-10|Threshold at which particles are judged to overlap. If there are other particles within this distance of a particle when generating coordinates, the coordinate generation is redone.|
+|`special_bonds`|`int`|0|Beads specified in special_bonds are not included in the overlap calculation.|
 |`type`|`dict`|{1: 1}|Types of each beads.<br>key: id of bead in chain (1, 2, ..., N)<br>value: type of bead<br>If the number of types in the input file is less than `N`, types are expanded repeatedly.<br>e.g. (N=5)<br>1: 1<br>2: 2<br>This is same as below.<br>1: 1<br>2: 2<br>3: 1<br>4: 2<br>5: 1|
 |`btype`|`dict`|{1: 1}|Types of each bonds.<br>key: id of bond in chain (1, 2, ..., N-1)<br>value: type of bond<br>The expansion rule is same as `type`.|
 |`atype`|`dict`|{1: 1}|Types of each angles.<br>key: id of angle in chain (1, 2, ..., N-2)<br>value: type of angle<br>The expansion rule is same as `type`.|
