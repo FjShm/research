@@ -370,9 +370,6 @@ class ATOMS:
         r = np.random.normal(
             loc=self.__l[self.__btype[1]], scale=self.__sigma_bond, size=1
         )[0]
-        # t = np.random.normal(
-        #     loc=self.__theta[self.__atype[1]], scale=self.__sigma_angle, size=1
-        # )[0]
         t = random.uniform(0.0, np.pi)
         p = random.uniform(-np.pi, np.pi)
         return self.__spherical2rect(np.array([r, t, p]))
