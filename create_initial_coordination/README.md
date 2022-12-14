@@ -30,8 +30,8 @@ python create_straight_chains.py [-in path/to/input-yaml-file (default=input.yam
 |`special_bonds`|`int`|0|Beads specified in special_bonds are not included in the overlap calculation.|
 |`type`|`dict`|{1: 1}|Types of each beads.<br>key: id of bead in chain (1, 2, ..., N)<br>value: type of bead<br>If the number of types in the input file is less than `N`, types are expanded repeatedly.<br>e.g. (N=5)<br>1: 1<br>2: 2<br>This is same as below.<br>1: 1<br>2: 2<br>3: 1<br>4: 2<br>5: 1|
 |`btype`|`dict`|{1: 1}|Types of each bonds.<br>key: id of bond in chain (1, 2, ..., N-1)<br>value: type of bond<br>The expansion rule is same as `type`.|
-|`atype`|`dict`|None|Types of each angles.<br>key: id of angle in chain (1, 2, ..., N-2)<br>value: type of angle<br>The expansion rule is same as `type`.<br>If you don't set this parameter, "Angles" is not written in data file.|
-|`dtype`|`dict`|None|Types of each dihedrals.<br>key: id of dihedral in chain (1, 2, ..., N-3)<br>value: type of dihedral<br>The expansion rule is same as `type`.<br>If you don't set this parameter, "Angles" is not written in data file.|
+|`atype`|`dict`|None|Types of each angles.<br>key: id of angle in chain (1, 2, ..., N-2)<br>value: type of angle<br>The expansion rule is same as `type`.<br>If you don't set this parameter, "Angles" is not written in LAMMPS data file.|
+|`dtype`|`dict`|None|Types of each dihedrals.<br>key: id of dihedral in chain (1, 2, ..., N-3)<br>value: type of dihedral<br>The expansion rule is same as `type`.<br>If you don't set this parameter, "Dihedrals" is not written in LAMMPS data file.|
 
 
 ## About program
