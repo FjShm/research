@@ -1,4 +1,6 @@
-mass: ~
+mass:
+  1: 28.05316
+  2: 40.06386
 bond_length:
   1: 2.5
   2: 3.1
@@ -11,7 +13,8 @@ M: 512
 origin: "center"  # "center" or not
 sigma_bond: 0.01
 sigma_angle: 0.1
-overlap_threashold: 1.
+overlap_threashold: 1.5
+special_bonds: 3
 
 # < Structures > #
 
