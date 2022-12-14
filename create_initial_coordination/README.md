@@ -39,7 +39,7 @@ python create_straight_chains.py [-in path/to/input-yaml-file (default=input.yam
 ### checking overlap
 Every time one coordinate of a chain is generated, it is checked for overlap.
 The rate of coordinate generation gradually slows down as the probability of overlap increases with the progress of coordinate generation.
-[KDtree](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KDTree.html) was used to check for duplicates.
+[KDtree](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KDTree.html) is used to check for duplicates.
 If you want to set `overlap_threashold` larger than the bond length, set also `special_bonds` larger than 1.
 
 ### decide dihedral angle
