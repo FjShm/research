@@ -101,8 +101,11 @@ class DefaultParams:
 
     __bead_type: dict = {1: 1}
     __btype: dict = {1: 1}
-    __atype: dict = {1: 1}
-    __dtype: dict = {1: 1}
+    __atype: dict = None
+    __dtype: dict = None
+
+    __isAngle: bool = False
+    __isDihedral: bool = False
 
     __special_bonds: int = 3
 
@@ -156,15 +159,23 @@ class DefaultParams:
 
     @property
     def atype(self) -> dict:
-        return self.__atype.copy()
+        return None if self.__atype is None else self.__atype.copy()
 
     @property
     def dtype(self) -> dict:
-        return self.__dtype.copy()
+        return None if self.__dtype is None else self.__dtype.copy()
 
     @property
     def special_bonds(self) -> int:
         return self.__special_bonds
+
+    @property
+    def isAngle(self) -> bool:
+        return self.__isAngle
+
+    @property
+    def isDihedral(self) -> bool:
+        return self.__isDihedral
 
     @mass.setter
     def _mass(self, val: dict) -> None:
@@ -177,9 +188,14 @@ class DefaultParams:
             self.__l = val.copy() if type(val) == dict else {1: val}
 
     @theta.setter
-    def _theta(self, val: dict) -> None:
+    def _thetafdeg(self, val: dict) -> None:
         if val is not None:
-            self.__theta = val.copy() if type(val) == dict else {1: val}
+            if type(val) == dict:
+                for k in val.keys():
+                    val[k] = np.deg2rad(val[k])
+                self.__theta = val.copy()
+            else:
+                self.__theta = {1: val}
 
     @cell_length.setter
     def _cell_length(self, val: float) -> None:
@@ -235,6 +251,7 @@ class DefaultParams:
         if val is not None:
             if type(val) != dict:
                 exit("The value of 'atype' must be dict.")
+            self.__isAngle = True
             self.__atype = dict((k, v) for k, v in sorted(val.items()))
 
     @dtype.setter
@@ -242,6 +259,7 @@ class DefaultParams:
         if val is not None:
             if type(val) != dict:
                 exit("The value of 'dtype' must be dict.")
+            self.__isDihedral = True
             self.__dtype = dict((k, v) for k, v in sorted(val.items()))
 
     @special_bonds.setter
@@ -260,9 +278,7 @@ class PARAMs(DefaultParams):
             elif key == "bond_length":
                 self._l = val
             elif key == "angle_degree":
-                for k in val.keys():
-                    val[k] = np.deg2rad(val[k])
-                self._theta = val
+                self._thetafdeg = val
             elif key == "cell_length":
                 self._cell_length = val
             elif key == "N":
@@ -289,7 +305,9 @@ class PARAMs(DefaultParams):
                 self._special_bonds = val
         self._expand_types()
 
-    def __expand_types(self, xtype, Nmax) -> dict:
+    def __expand_types(self, xtype: dict, Nmax: int) -> dict:
+        if xtype is None:
+            return xtype
         nxtype = len(xtype)
         if nxtype < Nmax:
             for i in range(nxtype + 1, Nmax + 1):
@@ -349,17 +367,21 @@ class ATOMS:
         self, vec_before: np.array, bead_id: int
     ) -> np.array:
         next_vec = self.__rect2spherical(vec_before)
+        # decide bond length
         next_vec[0] = np.random.normal(
             loc=self.__l[self.__btype[bead_id - 1]], scale=self.__sigma_bond, size=1
         )[0]
-        next_vec[1] += (
+        # decide angle
+        dtheta = (
             random.randrange(-1, 2, 2)
             * np.random.normal(
                 loc=np.pi - self.__theta[self.__atype[bead_id - 2]],
                 scale=self.__sigma_angle,
                 size=1,
             )[0]
-        )
+        ) if self.__atype is not None else random.uniform(-np.pi, np.pi)
+        next_vec[1] += dtheta
+        # rotate according to Rodrigues' rotation formula
         next_vec = self.__spherical2rect(next_vec)
         phi = random.uniform(-np.pi, np.pi)
         n = vec_before / np.linalg.norm(vec_before)
@@ -452,16 +474,18 @@ class Writer:
         M = params.M
         nbead_type = len(set(params.bead_type.values()))
         nbtype = len(set(params.btype.values()))
-        natype = len(set(params.atype.values()))
-        ndtype = len(set(params.dtype.values()))
         self.__contents += f"{N * M} atoms\n"
         self.__contents += f"{nbead_type} atom types\n"
         self.__contents += f"{(N - 1) * M} bonds\n"
         self.__contents += f"{nbtype} bond types\n"
-        self.__contents += f"{(N - 2) * M} angles\n"
-        self.__contents += f"{natype} angle types\n"
-        self.__contents += f"{(N - 3) * M} dihedrals\n"
-        self.__contents += f"{ndtype} dihedral types\n\n"
+        if params.isAngle:
+            natype = len(set(params.atype.values()))
+            self.__contents += f"{(N - 2) * M} angles\n"
+            self.__contents += f"{natype} angle types\n"
+        if params.isDihedral:
+            ndtype = len(set(params.dtype.values()))
+            self.__contents += f"{(N - 3) * M} dihedrals\n"
+            self.__contents += f"{ndtype} dihedral types\n\n"
 
     def cells(self, params: PARAMs) -> None:
         origin = np.array([0.0, 0.0, 0.0])
@@ -502,6 +526,8 @@ class Writer:
         self.__contents += "\n\n"
 
     def angles(self, params: PARAMs) -> None:
+        if not params.isAngle:
+            return
         self.__contents += "Angles\n\n"
         aN = params.N - 2
         for m in range(params.M):
@@ -513,6 +539,8 @@ class Writer:
         self.__contents += "\n\n"
 
     def dihedrals(self, params: PARAMs) -> None:
+        if not params.isDihedral:
+            return
         self.__contents += "Dihedrals\n\n"
         dN = params.N - 3
         for m in range(params.M):
