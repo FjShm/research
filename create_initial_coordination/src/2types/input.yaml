@@ -1,0 +1,55 @@
+mass:
+  1: 28.05316
+  2: 40.06386
+bond_length:
+  1: 2.5
+  2: 3.1
+angle_degree:
+  1: 90.
+  2: 180.
+cell_length: 150.
+N: 49
+M: 512
+origin: "center"  # "center" or not
+sigma_bond: 0.01
+sigma_angle: 0.1
+overlap_threashold: 1.5
+special_bonds: 3
+
+# < Structures > #
+
+# type = bead type
+# key: id of bead in chain (1, 2, ..., N)
+# value: type of bead
+# If (the max of key) < N, The specified bead type is repeated.
+# ex.
+# N = 10, and type: {1: 1, 2: 2}
+# => The types of beads with an (id >= 3) are as follows.
+# {3: 1, 4: 2, 5: 1, ..., 10: 2}
+type:
+  1: 1
+  2: 2
+
+# btype = bond type
+# key: id of bond in chain (1, 2, ..., N-1)
+# value: type of bond
+# The rule is same as "type" above.
+btype:
+  1: 1
+  2: 2
+
+# atype = angle type
+# key: id of angle in chain (1, 2, ..., N-2)
+# value: type of angle
+# The rule is same as "type" above.
+atype:
+  1: 1
+  2: 2
+
+# dtype = dihedral type
+# key: id of dihedral in chain (1, 2, ..., N-3)
+# value: type of dihedral
+# The rule is same as "type" above.
+dtype:
+  1: 1
+  2: 2
