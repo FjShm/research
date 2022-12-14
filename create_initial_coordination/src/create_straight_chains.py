@@ -39,6 +39,7 @@ def main():
     f.close()
 
     params = PARAMs(inputs.copy())
+    params.validate()
     params.show()
     del inputs
 
@@ -321,6 +322,14 @@ class PARAMs(DefaultParams):
         self._btype = self.__expand_types(self.btype, self.N - 1)
         self._atype = self.__expand_types(self.atype, self.N - 2)
         self._dtype = self.__expand_types(self.dtype, self.N - 3)
+
+    def validate(self) -> None:
+        # bead type
+        types_of_mass = sorted(set(self.mass.keys()))
+        types = sorted(set(self.bead_type.values()))
+        if types_of_mass != types:
+            logging.error("invalid bead type\n")
+            exit(f"types of mass: {types_of_mass}\ntype: {types}")
 
     def show(self) -> None:
         pprint.pprint(vars(self))
