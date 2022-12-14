@@ -420,3 +420,10 @@ dtype:
 
 WallTime: 18m 3s
 
+### crazy system
+
+Any chain that does not contain side chains can be made.
+
+![crazy](https://user-images.githubusercontent.com/100293098/207538334-8ece507a-65d9-43f8-860f-a3efa5a637c1.png)
+
+WallTime: 8m 43s
