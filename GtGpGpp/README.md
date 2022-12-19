@@ -34,14 +34,17 @@ $$
 Since the system is isotropic, the normal stress difference should relate to the off-diagonal parts of the stress tensor such as
 
 $$
-\frac{1}{4}\left[
-\langle N_{xy}(t)N_{xy}(0)\rangle
-+\langle N_{xz}(t)N_{xz}(0)\rangle
-+\langle N_{yz}(t)N_{yz}(0)\rangle
-\right]=
-\langle\Pi_{xy}(t)\Pi_{xy}(0)\rangle
-+\langle\Pi_{xz}(t)\Pi_{xz}(0)\rangle
-+\langle\Pi_{yz}(t)\Pi_{yz}(0)\rangle\ \ (=X)
+\begin{align}
+    &\frac{1}{4}\left[
+    \langle N_{xy}(t)N_{xy}(0)\rangle
+    +\langle N_{xz}(t)N_{xz}(0)\rangle
+    +\langle N_{yz}(t)N_{yz}(0)\rangle
+    \right]=
+    \langle\Pi_{xy}(t)\Pi_{xy}(0)\rangle
+    +\langle\Pi_{xz}(t)\Pi_{xz}(0)\rangle
+    +\langle\Pi_{yz}(t)\Pi_{yz}(0)\rangle\ \ (=X)\\
+    &\left(N_{\alpha\beta}=\Pi_{\alpha\alpha}-\Pi_{\beta\beta};\ \alpha,\beta\in\\{x,y,z\\}\right)
+\end{align}
 $$
 
 Substitute this expression for $rX$ above. If $r=2/5$,
