@@ -44,11 +44,14 @@ def calc_gt(stress: Stress, V: float, T: float, r: float = 0.5) -> np.ndarray:
 
 
 def calc_gpgpp(gt: np.ndarray, inputs: dict) -> np.ndarray:
-    def load(gt: np.ndarray, udr: list[float]) -> tuple[np.array]:
+    def load(gt: np.ndarray, udr: list[float], drop_minus: bool = False) -> tuple[np.array]:
         rng1 = udr[0] <= gt[:, 0]
         rng2 = gt[:, 0] <= udr[1]
         rng = rng1 * rng2
         data = gt[rng].copy()
+        if drop_minus:
+            rng = data[:, 1] > 0
+            data = data[rng].copy()
         t = data[:, 0]
         G = data[:, 1]
         return t, G
@@ -98,7 +101,8 @@ def calc_gpgpp(gt: np.ndarray, inputs: dict) -> np.ndarray:
         return w, -w * res.imag, +w * res.real
 
     ndiv = 10
-    t, G = load(gt, inputs["using_data_range"])
+    drop_minus = inputs["drop_minusGt"]
+    t, G = load(gt, inputs["using_data_range"], drop_minus=drop_minus)
     G = windowing(G, (np.pi / t[-1]) * t)
 
     wmax, wmin, factor = get_freq_range(t, ndiv)
@@ -133,7 +137,7 @@ def fitting_gpgpp(gpgpp: np.ndarray, ftrng: list[float]) -> tuple:
     data = gpgpp[rng].copy()
 
     popt_gp, pcov = curve_fit(
-        linfunc_gp, data[:, 0], data[:, 1], bounds=[[0.0, 0.0], [np.inf, np.inf]]
+        linfunc_gp, data[:, 0], data[:, 1], bounds=[[ftrng[0], 0.0], [ftrng[1], np.inf]]
     )
     popt_gpp, pcov = curve_fit(linfunc_gpp, data[:, 0], data[:, 2])
     return popt_gp, popt_gpp
