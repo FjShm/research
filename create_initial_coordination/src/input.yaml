@@ -1,0 +1,58 @@
+# YAML
+# If you want to use default value,
+# comment out line or set "~" to value.
+# e.g.
+# - "# N: 50"
+# - "N: ~"
+
+mass:                  # dict
+  1: 28.05316
+  2: 40.06386
+bond_length:           # dict
+  1: 2.5
+  2: 3.1
+angle_degree: ~        # dict
+cell_length: 150.      # float
+N: 49                  # int
+M: 512                 # int
+origin: "center"       # str; "center" or not
+sigma_bond: 0.01       # float
+sigma_angle: 0.1       # float
+overlap_threashold: 1. # float
+special_bonds: 2       # int
+
+### < Structures of Single Chain > ###
+
+# type = bead type
+# key: id of bead in chain (1, 2, ..., N)
+# value: type of bead
+# If (the max of key) < N, The specified bead type is repeated.
+# e.g.
+# N = 10, and type: {1: 1, 2: 2}
+# => The types of beads with an (id >= 3) are as follows.
+# {3: 1, 4: 2, 5: 1, ..., 10: 2}
+type:
+  1: 1
+  2: 2
+
+# btype = bond type
+# key: id of bond in chain (1, 2, ..., N-1)
+# value: type of bond
+# The rule is same as "type" above.
+btype:
+  1: 1
+  2: 2
+
+# atype = angle type
+# key: id of angle in chain (1, 2, ..., N-2)
+# value: type of angle
+# The rule is same as "type" above.
+atype: ~
+
+# dtype = dihedral type
+# key: id of dihedral in chain (1, 2, ..., N-3)
+# value: type of dihedral
+# The rule is same as "type" above.
+dtype:
+  1: 1
+  2: 2
