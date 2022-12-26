@@ -3,7 +3,7 @@ output_path: sample_data/rouse_mode-p_autocorr.txt
 beads_per_chain: 49
 num_chain: 512
 dt_fs: 5
-timesteps_1frame: 2000
+timesteps_1frame: 20000
 total_frames_dump: 10
 mode-p: 1
 normalize_autocorr: true

@@ -20,10 +20,3 @@ void _calc_Xp(
     const int&
 );
 
-void calc_Xp(
-    Eigen::Vector3d&,
-    ReadDump::ExtraReadDump&,
-    const int&,
-    const int&,
-    const int&
-);
