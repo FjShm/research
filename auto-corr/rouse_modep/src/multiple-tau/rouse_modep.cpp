@@ -12,7 +12,9 @@ int main(int argc, char* argv[]){
     const int N = param["N"].as<int>();
     const int M = param["M"].as<int>();
     const bool normalize_autocorr = param["normalize_autocorr"].as<bool>(false);
+    const bool overwrite = param["overwrite"].as<bool>(false);
     constexpr double fs2ns = 1.e-6;
+    const double t_scale = dt * (double)timesteps_1frame * fs2ns;
 
     ReadDump::ExtraReadDump rd(ipath);
 
@@ -31,11 +33,24 @@ int main(int argc, char* argv[]){
             _calc_Xp(xp, coods, p, N, m*N);
             corr[m](xp);
         }
+        if (overwrite) output(opath, t_scale, corr, M, normalize_autocorr);
         ++show_progress;
     }
 
-    // average <Xp>
-    double t_scale = dt * (double)timesteps_1frame * fs2ns;
+    output(opath, t_scale, corr, M, normalize_autocorr);
+}
+
+
+void output(
+    const std::string &opath,
+    const double &t_scale,
+    multipletau::correlator *corr,
+    const int &M,
+    const bool &normalize_autocorr
+){
+    std::ofstream out{opath, std::ios::out | std::ios::trunc};
+
+    // average <Xp>m
     std::vector<double> t = corr[0].get_time_vec();
     std::vector<double> f = corr[0].get_corr_vec();
     for (int m = 1; m < M; m++){
@@ -46,9 +61,7 @@ int main(int argc, char* argv[]){
     for (size_t i = 0; i < f.size(); i++)
         f[i] /= (double)M;
 
-
     // output
-    std::ofstream out{opath, std::ios::out | std::ios::trunc};
     for (size_t i = 0; i < t.size(); i++){
         double dat = normalize_autocorr ? f[i]/f[0] : f[i];
         out << t[i]*t_scale << " " << dat << std::endl;

@@ -20,3 +20,10 @@ void _calc_Xp(
     const int&
 );
 
+void output(
+    const std::string&,
+    const double&,
+    multipletau::correlator*,
+    const int&,
+    const bool&
+);

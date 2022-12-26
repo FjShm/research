@@ -7,3 +7,4 @@ timesteps_1frame: 20000
 total_frames_dump: 10
 mode-p: 1
 normalize_autocorr: true
+overwrite: true
