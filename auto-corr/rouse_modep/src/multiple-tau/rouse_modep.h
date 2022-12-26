@@ -10,6 +10,7 @@
 #include <yaml-cpp/yaml.h>
 #include <read_dump/read_dump.h>
 #include <general/mytools.h>
+#include "mtcorr.h"
 
 void _calc_Xp(
     Eigen::Vector3d&,

@@ -6,11 +6,12 @@ int main(int argc, char* argv[]){
     const std::string ipath = param["input_dump_path"].as<std::string>();
     const std::string opath = param["output_path"].as<std::string>("ete_auto_corr.log");
     const double dt = param["dt_fs"].as<double>();
-    const int ave_frames = param["max_frames_to_average"].as<int>(100);
+    const int timesteps_1frame = param["timesteps_1frame"].as<int>();
     const int total_frames_dump = param["total_frames_dump"].as<int>(-1);
     const int p = param["mode-p"].as<int>(1);
     const int N = param["beads_per_chain"].as<int>();
     const int M = param["num_chain"].as<int>();
+    const bool normalize_autocorr = param["normalize_autocorr"].as<bool>(false);
     constexpr double fs2ns = 1.e-6;
 
     ReadDump::ExtraReadDump rd(ipath);
@@ -20,17 +21,26 @@ int main(int argc, char* argv[]){
     boost::progress_display show_progress(total_frames_dump);
     // -------------------------------
 
+    multipletau::correlator corr;
     while (rd.read_1frame()){
         //rd.header_validation("id", "xu", "yu", "zu");
         Eigen::Vector3d xp(0., 0., 0.);
         calc_Xp(xp, rd, p, N, M);
+        corr(xp);
         ++show_progress;
     }
 
+    std::vector<double> t = corr.get_time_vec();
+    std::vector<double> f = corr.get_corr_vec();
+
     // output
-    //std::ofstream out{opath, std::ios::out | std::ios::trunc};
-    //for (int i = 0; i < rd.num_frames; i++)
-    //    out << time[i] << " " << auto_corr[i] << std::endl;
+    double t_scale = dt * (double)timesteps_1frame * fs2ns;
+    std::ofstream out{opath, std::ios::out | std::ios::trunc};
+    for (size_t i = 0; i < t.size(); i++){
+        double dat = normalize_autocorr ?
+            f[i]/f[0] : f[i];
+        out << t[i]*t_scale << " " << dat << std::endl;
+    }
 }
 
 
@@ -57,9 +67,10 @@ void calc_Xp(
 ){
     std::vector<Eigen::Vector3d> coods;
     rd.join_3columns(coods, "xu", "yu", "zu");
-    for (int m; m < M; m++){
+    for (int m = 0; m < M; m++){
         Eigen::Vector3d xp_tmp(0., 0., 0.);
         _calc_Xp(xp_tmp, coods, p, N, m*N);
+        xp += xp_tmp;
     }
     xp /= (double)M;
 }

@@ -11,7 +11,7 @@ if __name__ == "__main__":
     oh = pd.read_csv("ohkuma_CGpc_rescaled.csv", header=None)
 
     fa[0] -= 8.70600033
-    fig = plt.figure()
+    fig = plt.figure(dpi=100)
     ax = fig.add_subplot(
         111,
         xlabel=r"$st\ {\rm [ns]}$",
