@@ -4,13 +4,13 @@
 int main(int argc, char* argv[]){
     YAML::Node param = YAML::LoadFile(argv[1]);
     const std::string ipath = param["input_dump_path"].as<std::string>();
-    const std::string opath = param["output_path"].as<std::string>("ete_auto_corr.log");
+    const std::string opath = param["output_path"].as<std::string>("Xp_auto_corr.log");
     const double dt = param["dt_fs"].as<double>();
     const int timesteps_1frame = param["timesteps_1frame"].as<int>();
     const int total_frames_dump = param["total_frames_dump"].as<int>(-1);
     const int p = param["mode-p"].as<int>(1);
-    const int N = param["beads_per_chain"].as<int>();
-    const int M = param["num_chain"].as<int>();
+    const int N = param["N"].as<int>();
+    const int M = param["M"].as<int>();
     const bool normalize_autocorr = param["normalize_autocorr"].as<bool>(false);
     constexpr double fs2ns = 1.e-6;
 
@@ -27,7 +27,6 @@ int main(int argc, char* argv[]){
         Eigen::Vector3d xp;
         std::vector<Eigen::Vector3d> coods;
         rd.join_3columns(coods, "xu", "yu", "zu");
-        //store_all_Xp(xp, rd, p, N, M);
         for (int m = 0; m < M; m++){
             _calc_Xp(xp, coods, p, N, m*N);
             corr[m](xp);
@@ -35,6 +34,7 @@ int main(int argc, char* argv[]){
         ++show_progress;
     }
 
+    // average <Xp>
     double t_scale = dt * (double)timesteps_1frame * fs2ns;
     std::vector<double> t = corr[0].get_time_vec();
     std::vector<double> f = corr[0].get_corr_vec();
@@ -71,18 +71,3 @@ void _calc_Xp(
     xp *= sqrt_2_N;
 }
 
-//void store_all_Xp(
-//    std::vector<Eigen::Vector3d> &xp,
-//    ReadDump::ExtraReadDump &rd,
-//    const int &p,
-//    const int &N,
-//    const int &M
-//){
-//    std::vector<Eigen::Vector3d> coods;
-//    rd.join_3columns(coods, "xu", "yu", "zu");
-//    for (int m = 0; m < M; m++){
-//        Eigen::Vector3d xp_tmp(0., 0., 0.);
-//        _calc_Xp(xp_tmp, coods, p, N, m*N);
-//        xp[m] = xp_tmp;
-//    }
-//}

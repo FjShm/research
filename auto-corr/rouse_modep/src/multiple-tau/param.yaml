@@ -1,7 +1,7 @@
 input_dump_path: sample_data/sample.lammpstrj
 output_path: sample_data/rouse_mode-p_autocorr.txt
-beads_per_chain: 49
-num_chain: 512
+N: 49
+M: 512
 dt_fs: 5
 timesteps_1frame: 20000
 total_frames_dump: 10
