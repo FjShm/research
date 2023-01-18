@@ -64,7 +64,7 @@ int main(int argc, char* argv[]){
 
         // calc center of gravity of each polymers
         std::vector<Eigen::Vector3d> cogs(M);
-        Eigen::Vector3d sum_tmp = {0., 0., 0.};
+        Eigen::Vector3d sum_tmp = Eigen::Vector3d::Zero();
         for (int i = 0; i < rd.num_atoms; i++){
             sum_tmp += coordinations[i];
             if (i == rd.num_atoms - 1 ||
@@ -112,10 +112,10 @@ int main(int argc, char* argv[]){
             int n = i % N;
             if (n < lb || ub <= n){
                 lambdas[i] = 0.;
-                stem_vecs[i] << 0., 0., 0.;
+                stem_vecs[i].setZero();
                 stem_vec_norms[i] = 0.;
             } else {
-                Eigen::Vector3d sum_d = {0., 0., 0.};
+                Eigen::Vector3d sum_d = Eigen::Vector3d::Zero();
                 isStem[i] = true;
                 for (int kk = -k; kk <= k; kk++){
                     Eigen::Vector3d d;
@@ -131,10 +131,10 @@ int main(int argc, char* argv[]){
         }
 
         // 周期境界条件も考えてKD-tree作成
-        Eigen::Vector3d zeros = {0., 0., 0.};
-        std::vector<Eigen::Vector3d> _a_ = {-rd.cellbox_a, zeros, rd.cellbox_a};
-        std::vector<Eigen::Vector3d> _b_ = {-rd.cellbox_b, zeros, rd.cellbox_b};
-        std::vector<Eigen::Vector3d> _c_ = {-rd.cellbox_c, zeros, rd.cellbox_c};
+        const Eigen::Vector3d zeros = Eigen::Vector3d::Zero();
+        const std::vector<Eigen::Vector3d> _a_ = {-rd.cellbox_a, zeros, rd.cellbox_a};
+        const std::vector<Eigen::Vector3d> _b_ = {-rd.cellbox_b, zeros, rd.cellbox_b};
+        const std::vector<Eigen::Vector3d> _c_ = {-rd.cellbox_c, zeros, rd.cellbox_c};
 
         std::vector<Point> points(27*M*(ub-lb));
         int counter = 0;
@@ -150,10 +150,10 @@ int main(int argc, char* argv[]){
         kdt::KDTree<Point> kdtree(points);
 
         // 隣接stemの総数とcrystal条件を満たすstemの数
-        Eigen::VectorXd total_neighbor_stems(rd.num_atoms);
-        total_neighbor_stems << Eigen::VectorXd::Zero(rd.num_atoms);
-        Eigen::VectorXd cry_neighbor_stems(rd.num_atoms);
-        cry_neighbor_stems << Eigen::VectorXd::Zero(rd.num_atoms);
+        //auto total_neighbor_stems = Eigen::VectorXd::Zero(rd.num_atoms);
+        Eigen::VectorXd total_neighbor_stems = Eigen::VectorXd::Zero(rd.num_atoms);
+        Eigen::VectorXd cry_neighbor_stems = Eigen::VectorXd::Zero(rd.num_atoms);
+        //auto cry_neighbor_stems = Eigen::VectorXd::Zero(rd.num_atoms);
         Point query;
         Eigen::Vector3d stem_i, stem_j;
         for (int i = 0; i < rd.num_atoms; i++){
@@ -175,7 +175,6 @@ int main(int argc, char* argv[]){
                 if (lambdas[i] >= lath && lambdas[nj] >= lath){
                     double cos =
                         std::abs(stem_i.dot(stem_j)) / (stem_vec_norms[i]*stem_vec_norms[nj]);
-                    std::cout << cos << std::endl;
                     if (cos >= cos_thth) cry_neighbor_stems(i) += 1;
                 }
             }
@@ -205,7 +204,6 @@ int main(int argc, char* argv[]){
         out_cry << std::endl;
 
         // output dump
-        int xu = rd.header_map->at("xu"); // 使わないけど, これがないとatoms_all_dataがbugる
         rd.append_column(cry_neighbor_stems, "cry_neighbor_stems");
         rd.append_column(total_neighbor_stems, "total_neighbor_stems");
         rd.append_column(ratio, "cry_neighbor_stems(ratio)");
