@@ -1,0 +1,5 @@
+input_dump_path: sample_data/sample.lammpstrj
+  #output_path: sample_data/LOG.out.txt
+smax: 30
+encount_cutoff: 6.0
+total_frames: 11
