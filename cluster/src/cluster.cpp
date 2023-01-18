@@ -15,7 +15,7 @@ int main(int argc, char* argv[]){
     boost::progress_display show_progress(total_frames);
 
     // -------------------------------
-    ReadDump::ExtraReadDump rd(dump_path);
+    ReadDump::ExtraReadDump rd(dump_path, false); // turn off sort by id
     std::ofstream out{outpath, std::ios::out | std::ios::trunc};
 
     // output header
