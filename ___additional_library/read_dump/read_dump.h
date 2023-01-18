@@ -22,14 +22,15 @@ namespace ReadDump
             std::map<std::string, int> *header_map;
 
             ReadDump() {init();}
-            ReadDump(const std::string &arg_ipath) : ipath(arg_ipath){
-                open(ipath);
+            ReadDump(const std::string &arg_ipath, bool _sort_id = true) : ipath(arg_ipath){
+                open(ipath, _sort_id);
                 init();
             }
             ~ReadDump() {clear();}
 
-            void open(const std::string &arg_ipath){
+            void open(const std::string &arg_ipath, bool _sort_id = true){
                 dump.open(arg_ipath);
+                sort_id = _sort_id;
             }
 
             void clear(){
@@ -142,7 +143,7 @@ namespace ReadDump
 
 
         protected:
-            bool all_frames_loaded;
+            bool all_frames_loaded, sort_id;
             int now_frame;
 
             bool change_now_frame(int frame, bool absolute = false){
@@ -219,7 +220,7 @@ namespace ReadDump
             }
 
             void read_atoms(int num_column){
-                if (header_map->count("id") == 0){
+                if (header_map->count("id") == 0 || sort_id == false){
                     for (int r = 0; r < num_atoms; r++){
                         for (int c = 0; c < num_column; c++){
                             dump >> (*atoms_all_data)(r, c);
