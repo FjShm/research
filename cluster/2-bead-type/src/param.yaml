@@ -2,7 +2,7 @@
 dumppath_particles_make_up_cluster: sample_data/sample.particles.lammpstrj
 
 # path to lammpstrj that only has coordinations of cluster cores
-dumppath_cluster_core: sample_data/sample.cluster.lammpstrj
+dumppath_cluster_core: sample_data/sample.core.lammpstrj
 
 # the number of frames of dump above
 # two dump files must have same # of frames
