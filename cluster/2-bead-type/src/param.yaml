@@ -1,0 +1,19 @@
+# path to lammpstrj that only has coordinations of cluster particles
+dumppath_particles_make_up_cluster: sample_data/sample.particles.lammpstrj
+
+# path to lammpstrj that only has coordinations of cluster cores
+dumppath_cluster_core: sample_data/sample.core.lammpstrj
+
+# the number of frames of dump above
+# two dump files must have same # of frames
+total_frames: 11
+
+# output file name
+#output_path: sample_data/LOG.out.txt
+
+# max size to measure
+smax: 30
+
+# association distance
+encount_cutoff: 6.0
+
