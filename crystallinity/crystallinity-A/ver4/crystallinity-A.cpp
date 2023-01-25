@@ -8,6 +8,7 @@ int main(int argc, char* argv[]){
     const std::string rot_path = param["input_rotationtxt_path"].as<std::string>();
     const std::string out_dump_path = param["output_cry_dump_path"].as<std::string>();
     const std::string out_cry_path = param["output_cry_text_path"].as<std::string>();
+    const std::vector<bool> special_bonds = param["special_bonds"].as< std::vector<bool> >(std::vector<bool>(3, false));
     const int k = param["k"].as<int>();
     const int beta = param["beta"].as<int>();
     const double lath = param["lambda_threshold"].as<double>();
@@ -16,7 +17,6 @@ int main(int argc, char* argv[]){
     int N = param["N"].as<int>(-1);
     int M = param["M"].as<int>(-1);
 
-    const double sqrdDith = dith*dith;
     const double cos_thth = std::cos(thth * M_PI/180.);
 
     // -------------------------------
@@ -56,9 +56,9 @@ int main(int argc, char* argv[]){
         rd.add_column_if_not_exist("mol", N, M);
         int mol = rd.header_map->at("mol");
 
-        // set coordination, N, M
-        std::vector<Eigen::Vector3d> coordinations;
-        rd.join_3columns(coordinations, "xu", "yu", "zu");
+        // set unwrapped_coordination, N, M
+        std::vector<Eigen::Vector3d> u_coordinations;
+        rd.join_3columns(u_coordinations, "xu", "yu", "zu");
         M = M != -1 ? M : rd.max_of_col("mol");
         N = N != -1 ? N : rd.num_atoms/M;
 
@@ -66,16 +66,18 @@ int main(int argc, char* argv[]){
         std::vector<Eigen::Vector3d> cogs(M);
         Eigen::Vector3d sum_tmp = Eigen::Vector3d::Zero();
         for (int i = 0; i < rd.num_atoms; i++){
-            sum_tmp += coordinations[i];
-            if (i == rd.num_atoms - 1 ||
-                rd.atoms_all_data->coeff(i, mol) < rd.atoms_all_data->coeff(i+1, mol))
-            {
+            sum_tmp += u_coordinations[i];
+            if (
+                i == rd.num_atoms - 1 ||
+                rd.atoms_all_data->coeff(i, mol) < rd.atoms_all_data->coeff(i+1, mol)
+            ){
                 cogs[(int)rd.atoms_all_data->coeff(i, mol)-1] = sum_tmp / (double)N;
                 sum_tmp << Eigen::Vector3d::Zero();
             }
         }
 
         // move vector
+        // 各鎖の重心をセルボックス内へ移動させるために使うベクトル
         std::vector<Eigen::Vector3d> movecs(M);
         for (int i = 0; i < M; i++){
             cogs[i] -= rd.cellbox_origin;
@@ -83,8 +85,8 @@ int main(int argc, char* argv[]){
             zi = std::floor(cogs[i](2) / rd.cellbox_c(2));
             yi = std::floor((cogs[i](1) - (double)zi*rd.cellbox_c(1)) / rd.cellbox_b(1));
             xi = std::floor(
-                    (cogs[i](0) - (double)yi*rd.cellbox_b(0) - (double)zi*rd.cellbox_c(0))
-                    / rd.cellbox_a(0));
+                (cogs[i](0) - (double)yi*rd.cellbox_b(0) - (double)zi*rd.cellbox_c(0)) / rd.cellbox_a(0)
+            );
             movecs[i] = (double)xi*rd.cellbox_a + (double)yi*rd.cellbox_b + (double)zi*rd.cellbox_c;
         }
 
@@ -92,7 +94,7 @@ int main(int argc, char* argv[]){
         std::vector<Eigen::Vector3d> position_fixed_coordinations(rd.num_atoms);
         for (int i = 0; i < rd.num_atoms; i++){
             position_fixed_coordinations[i]
-                = coordinations[i] - movecs[(int)rd.atoms_all_data->coeff(i, mol)-1];
+                = u_coordinations[i] - movecs[(int)rd.atoms_all_data->coeff(i, mol)-1];
         }
 
         // rotate coordinations
@@ -106,14 +108,16 @@ int main(int argc, char* argv[]){
         std::vector<Eigen::Vector3d> stem_vecs(rd.num_atoms);
         std::vector<double> stem_vec_norms(rd.num_atoms);
         std::vector<bool> isStem(rd.num_atoms, false);
-        int lb = k + beta;
+        int lb = k + beta; // 1本の鎖内でstemを定義出来るビーズindexの下限
         int ub = N - k - beta;
         for (int i = 0; i < rd.num_atoms; i++){
             int n = i % N;
+            // stemを定義出来ない範囲
             if (n < lb || ub <= n){
                 lambdas[i] = 0.;
                 stem_vecs[i].setZero();
                 stem_vec_norms[i] = 0.;
+            // stem定義可能
             } else {
                 Eigen::Vector3d sum_d = Eigen::Vector3d::Zero();
                 isStem[i] = true;
@@ -139,42 +143,54 @@ int main(int argc, char* argv[]){
         const std::vector<Eigen::Vector3d> _c_ = {-rd.cellbox_c, zeros, rd.cellbox_c};
 
         std::vector<Point> points(27*M*(ub-lb));
+        std::vector<int> kdtree_idx_to_molcule_id(27*M*(ub-lb));
         int counter = 0;
         for (int i = 0; i < rd.num_atoms; i++){
             if (!isStem[i]) continue;
             for (int xi = 0; xi < 3; xi++)
                 for (int yi = 0; yi < 3; yi++)
-                    for (int zi = 0; zi < 3; zi++)
+                    for (int zi = 0; zi < 3; zi++){
+                        kdtree_idx_to_molcule_id[counter] = i;
                         points[counter++] = Point(
-                                wrapped_coordinations[i]
-                                + _a_[xi] + _b_[yi] + _c_[zi]);
+                            wrapped_coordinations[i]
+                            + _a_[xi] + _b_[yi] + _c_[zi]
+                        );
+                    }
         }
         kdt::KDTree<Point> kdtree(points);
 
         // 隣接stemの総数とcrystal条件を満たすstemの数
-        //auto total_neighbor_stems = Eigen::VectorXd::Zero(rd.num_atoms);
         Eigen::VectorXd total_neighbor_stems = Eigen::VectorXd::Zero(rd.num_atoms);
         Eigen::VectorXd cry_neighbor_stems = Eigen::VectorXd::Zero(rd.num_atoms);
-        //auto cry_neighbor_stems = Eigen::VectorXd::Zero(rd.num_atoms);
         Point query;
         Eigen::Vector3d stem_i, stem_j;
         for (int i = 0; i < rd.num_atoms; i++){
             if (!isStem[i]) continue;
             stem_i = stem_vecs[i];
-            std::set<int> idxes_set;
+            
             // stem_i の中央のみについてquery作成
             query = Point(wrapped_coordinations[i]);
-            std::vector<int> idxes = kdtree.radiusSearch(query, dith);
-            for (int v : idxes) idxes_set.insert(v);
-            idxes_set.erase(i);
-            total_neighbor_stems(i) = idxes_set.size();
-            for (auto idxj : idxes_set){
-                int jj = idxj / 27;
-                int nj = jj % (ub - lb) + lb;
-                stem_j = stem_vecs[nj];
-                if (lambdas[i] >= lath && lambdas[nj] >= lath){
+            
+            // idx == i, isStem[idx] == false, special_bonds == false は除外する
+            std::vector<int> idxes;
+            for (int idx : kdtree.radiusSearch(query, dith)){
+                int molecule_idx = kdtree_idx_to_molcule_id[idx]; // 0 <= id < N
+                int mol_i = rd.atoms_all_data->coeff(i, mol);
+                int mol_j = rd.atoms_all_data->coeff(molecule_idx, mol);
+                if (
+                    molecule_idx != i &&
+                    isStem[molecule_idx] &&
+                    is_special_bond(special_bonds, i, molecule_idx, mol_i, mol_j)
+                ){
+                    idxes.emplace_back(molecule_idx);
+                }
+            }
+            total_neighbor_stems(i) = idxes.size();
+            for (auto j : idxes){
+                stem_j = stem_vecs[j];
+                if (lambdas[i] >= lath && lambdas[j] >= lath){
                     double cos =
-                        std::abs(stem_i.dot(stem_j)) / (stem_vec_norms[i]*stem_vec_norms[nj]);
+                        std::abs(stem_i.dot(stem_j)) / (stem_vec_norms[i]*stem_vec_norms[j]);
                     if (cos >= cos_thth) cry_neighbor_stems(i) += 1;
                 }
             }
@@ -230,5 +246,20 @@ void rotationtxt2rotmatrix(std::string &row, Eigen::Matrix3d &rot, int &timestep
     rot(2, 0) = std::stod(row_split[7]);
     rot(2, 1) = std::stod(row_split[8]);
     rot(2, 2) = std::stod(row_split[9]);
+}
+
+// special_bond かどうか判定する
+// special_bond ... 同一鎖内, nつ隣のビーズであり, 結晶化度の計算に含めるもの
+bool is_special_bond(
+    const std::vector<bool> &special_bonds,
+    const int &i,
+    const int &j,
+    const int &mol_i,
+    const int &mol_j
+){
+    if (mol_i != mol_j) return true;
+    int diff = std::abs(i - j);
+    if (diff > special_bonds.size()) return true;
+    return special_bonds[diff - 1];
 }
 
