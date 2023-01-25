@@ -11,6 +11,7 @@ int main(int argc, char* argv[]){
     const std::vector<bool> special_bonds = param["special_bonds"].as< std::vector<bool> >(std::vector<bool>(3, false));
     const int k = param["k"].as<int>();
     const int beta = param["beta"].as<int>();
+    const int frames = param["dump_frames"].as<int>(-1);
     const double lath = param["lambda_threshold"].as<double>();
     const double dith = param["neighbor_stem_distance_threshold"].as<double>();
     const double thth = param["theta_deg_threshold"].as<double>();
@@ -21,7 +22,14 @@ int main(int argc, char* argv[]){
 
     // -------------------------------
     // max loop
-    int max_loop = std::count_rows(dump_path, "TIMESTEP");
+    if (frames == -1){
+        std::cout << "It is recommended to put 'dump_frames' in the input file.\n"
+            << "This will automatically start counting the number of frames,\n"
+            << "but this process puts a heavy load on the I/O of the system.\n";
+    }
+    int max_loop = frames == -1 ?
+        std::count_rows(dump_path, "TIMESTEP"):
+        frames;
     boost::progress_display show_progress(max_loop);
 
     // -------------------------------
