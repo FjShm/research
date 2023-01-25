@@ -9,3 +9,7 @@ neighbor_stem_distance_threshold: 8
 theta_deg_threshold: 5
 N: 49
 M: 512
+special_bonds:
+  - false # 同一鎖内, 1つ隣のstemを計算から除外する場合はfalse
+  - false # 同一鎖内, 2つ隣のstemを計算から除外する場合はfalse
+  - false # 同一鎖内, 3つ隣のstemを計算から除外する場合はfalse
