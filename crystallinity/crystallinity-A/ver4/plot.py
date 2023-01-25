@@ -17,7 +17,9 @@ class PRM:
 if __name__ == "__main__":
     df = pd.read_csv(sys.argv[1], sep="\s+")
     erate = float(input("please type erate [ns^-1]: "))
+    print(erate)
     dt = float(input("type dt [fs]: "))
+    print(dt)
 
     mod_column_name = {}
     for h in df.columns:

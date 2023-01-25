@@ -17,6 +17,13 @@
 
 
 void rotationtxt2rotmatrix(std::string&, Eigen::Matrix3d&, int&);
+bool is_special_bond(
+    const std::vector<bool>&,
+    const int&,
+    const int&,
+    const int&,
+    const int&
+);
 
 
 class Point : public std::array<double, 3>
