@@ -1,0 +1,17 @@
+# string
+input_dump_path: __DUMP_PATH__
+input_rotationtxt_path: __ROTATIONTXT_PATH__
+output_dir: __ODIR__
+aspect: __ASPECT__
+
+# integer
+dump_frames: __DUMP_FRAMES__
+N: __N__
+M: __M__
+
+# list
+kx: __KX__
+ky: __KY__
+idx: __IDX__
+ratio: __RATIO__
+
