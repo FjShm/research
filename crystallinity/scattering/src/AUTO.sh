@@ -21,7 +21,6 @@ function round (){
         number_tmp=`bc -l <<< $1*$root+0.5`
     fi
     number_tmp=`awk "BEGIN {printf(\"%d\", $number_tmp)}"`
-    #number_tmp=`bc -l <<< $number_tmp/$root`
     number_tmp=`awk "BEGIN {printf(\"%f\", $number_tmp/$root)}"`
     echo $number_tmp
 }
