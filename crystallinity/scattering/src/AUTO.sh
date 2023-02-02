@@ -233,6 +233,6 @@ set +e
 set -e
 timestamp=$(printf "%d:%02d:%02d" "$hrs" "$min" "$sec")
 echo "-------------------------------------------------"
-echo "Processing time is $timestamp"
+echo "Wall Time:  $timestamp"
 
 exit 0
