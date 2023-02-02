@@ -69,11 +69,10 @@ function array_to_yamllist (){
 function monitor_job (){
     while :
     do
-        qstat | grep $1 > /dev/null
-        if [ $? -eq 1 ]; then
+        if [ -f $1 ]; then
             break
         fi
-        sleep 10s
+        sleep 3s
     done
 }
 
@@ -153,6 +152,7 @@ echo " done"
 
 # make dir and copy files
 echo "[`date +\"%Y-%m-%d %H:%M:%S\"`] parallelizing..."
+absdatapath=$(cd $(dirname .) && pwd)/$(basename .)
 for c in `seq 1 $CORES`
 do
     echo -e "\rnow $c/$CORES..."
@@ -193,11 +193,8 @@ do
         echo run at `hostname`
         ./Scattering.o param.yaml > /dev/null &
     else
-        res=`qsub qsub.sh`
-        res_splited=(${res// / })
-        jobID=${res_splited[2]}
-        monitor_job $jobID &
-        echo $res
+        qsub qsub.sh
+        monitor_job $absdatapath/$c/COMPLETED &
     fi
     cd ..
 done
