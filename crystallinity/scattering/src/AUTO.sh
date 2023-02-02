@@ -124,10 +124,14 @@ RATIO=`array_to_yamllist "${RATIO[*]}"`
 ky=`array_to_yamllist "${ky[*]}"`
 
 ## 自nodeが$NODESに含まれていれば-1しておく
+set +e
 hostnode="`qstat -f | grep \`hostname\``"
-hostnode=(${hostnode// / })
-if [ -n ${NODES[${hostnode[0]%@*}]} ]; then
-    NODES[${hostnode[0]%@*}]=`bc <<< ${NODES[${hostnode[0]%@*}]}-1`
+set -e
+if [ -n "$hostnode" ]; then # hostnodeが空文字でない場合
+    hostnode=(${hostnode// / })
+    if [ -n ${NODES[${hostnode[0]%@*}]} ]; then
+        NODES[${hostnode[0]%@*}]=`bc <<< ${NODES[${hostnode[0]%@*}]}-1`
+    fi
 fi
 echo " done"
 
@@ -225,7 +229,7 @@ do
     cat .tmp pmt. > joined/$f
     rm .tmp pmt.
 done
-echo -e "[`date +\"%Y-%m-%d %H:%M:%S\"`] All done!\n\n"
+echo -e "[`date +\"%Y-%m-%d %H:%M:%S\"`] All done!\n"
 
 i=$SECONDS
 set +e
@@ -233,6 +237,6 @@ set +e
 set -e
 timestamp=$(printf "%d:%02d:%02d" "$hrs" "$min" "$sec")
 echo "-------------------------------------------------"
-echo "Wall Time:  $timestamp"
+echo -e "Wall Time:  $timestamp\n"
 
 exit 0
