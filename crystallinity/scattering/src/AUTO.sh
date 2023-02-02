@@ -83,7 +83,7 @@ function monitor_job (){
 echo -n "[`date +\"%Y-%m-%d %H:%M:%S\"`] checking environments..."
 ## output directory
 if [ -d results/data ]; then
-    echo "directory 'results/data' exists."
+    echo -e " failed\ndirectory 'results/data' exists."
     echo "excute \`rm -r results/data\`"
     exit 1
 fi
