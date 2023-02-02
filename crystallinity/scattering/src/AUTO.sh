@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -eu
 
 # input
 DUMP_PATH=../../../sample_data/erate_0.1_dt_5.u.lammpstrj
@@ -12,11 +12,13 @@ M=512
 
 RATIO=(0 0.5 1.0)
 
-CORES=4
 K=2
 RESOLUTION=101
 
-NODE=ika1.q
+declare -A NODES=(
+    ["ika1.q"]=4
+    ["tuna0.q"]=4
+)
 
 # functions
 function round (){
@@ -78,26 +80,61 @@ function array_to_yamllist (){
     done
 }
 
+function monitor_job (){
+    while :
+    do
+        qstat | grep $1 > /dev/null
+        if [ $? -eq 1 ]; then
+            break
+        fi
+        sleep 10s
+    done
+}
 
-# prepare
+
+# validation
+## cores
 if [ $CORES -gt $RESOLUTION ]; then
     echo "CORES has to be smaller than RESOLUTION"
     echo "fix CORES from $CORES to $RESOLUTION"
     CORES=$RESOLUTION
 fi
+
+## output directory
 if [ -d results/data ]; then
     echo "directory 'results/data' exists."
     echo "excute \`rm -r results/data\`"
     exit 1
 fi
+
+## node names
+for NODE in ${!NODES[@]}
+do
+    qstat -f | grep $NODE@ > /dev/null
+    if [ $? -eq 1 ]; then
+        echo Invalid node name: $NODE
+        exit 1
+    fi
+done
+
+
+# prepare
 cwd=`pwd`
 mkdir -p results/data && cd results/data
 kx_all=(`linspace -$K $K $RESOLUTION float`)
 ky=(`reshape_for_ky "${kx_all[*]}"`)
+
 ## core-n has jobs of idx[n] <= id < idx[n+1]
 idx=(`linspace 0 $RESOLUTION $(($CORES+1)) int`)
 RATIO=`array_to_yamllist "${RATIO[*]}"`
 ky=`array_to_yamllist "${ky[*]}"`
+
+## cores
+CORES=0
+for CORE in ${NODES[@]}
+do
+    CORES=`bc <<< $CORES+$CORE`
+done
 
 # make dir and copy files
 for c in `seq 1 $CORES`
@@ -123,7 +160,24 @@ do
     sed -i -e "s;__KY__;$ky;g" param.yaml
     sed -i -e "s;__IDX__;$kx_idx;g" param.yaml
     sed -i -e "s;__RATIO__;$RATIO;g" param.yaml
-    sed -i -e "s;__NODE__;$NODE;g" run.sh
+    ## select node
+    for NODE in ${!NODES[@]}
+    do
+        if [ ${NODES[$NODE]} -eq 0 ]; then
+            continue
+        fi
+        sed -i -e "s;__NODE__;$NODE;g" run.sh
+        ${NODES[$NODE]}=`bc <<< ${NODES[$NODE]}-1`
+    done
+    if [ $c -eq $CORES ]; then
+        ./Scattering.o param.yaml &
+    else
+        echo qsub
+        res=`qsub run.sh`
+        res_splited=(${res// / })
+        jobID=${res_splited[2]}
+        monitor_job jobID &
+    fi
     cd ..
 done
 
