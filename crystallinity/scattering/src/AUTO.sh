@@ -124,6 +124,7 @@ RATIO=`array_to_yamllist "${RATIO[*]}"`
 ky=`array_to_yamllist "${ky[*]}"`
 
 ## 自nodeが$NODESに含まれていれば-1しておく
+HAS_SELF_NODE=false
 set +e
 hostnode="`qstat -f | grep \`hostname\``"
 set -e
@@ -131,6 +132,7 @@ if [ -n "$hostnode" ]; then # hostnodeが空文字でない場合
     hostnode=(${hostnode// / })
     if [ -n ${NODES[${hostnode[0]%@*}]} ]; then
         NODES[${hostnode[0]%@*}]=`bc <<< ${NODES[${hostnode[0]%@*}]}-1`
+        HAS_SELF_NODE=true
     fi
 fi
 echo " done"
@@ -161,7 +163,7 @@ do
     cd $c
     kx_idx=(`seq ${idx[$(($c-1))]} $((${idx[$c]}-1))`)
     kx_idx=`array_to_yamllist "${kx_idx[*]}"`
-    kx=(`echo "${kx_all[@]: ${idx[$(($c-1))]}: ${idx[$c]}}"`)
+    kx=(`echo "${kx_all[@] : ${idx[$(($c-1))]} : ${#kx_idx[@]}}"`)
     kx=`array_to_yamllist "${kx[*]}"`
     # overwrite
     sed -i -e "s;__DUMP_PATH__;$DUMP_PATH;g" param.yaml
@@ -188,7 +190,7 @@ do
     done
 
     ## 最後はlocalでrun, それ以外はqsub
-    if [ $c -eq $CORES ]; then
+    if [ $c -eq $CORES ] && [ $HAS_SELF_NODE == "true" ]; then
         echo run at `hostname`
         ./Scattering.o param.yaml > /dev/null &
     else
