@@ -120,7 +120,7 @@ done
 
 # prepare
 cwd=`pwd`
-mkdir -p results/data && cd results/data
+mkdir -p results/data && cd results/data && mkdir joined
 kx_all=(`linspace -$K $K $RESOLUTION float`)
 ky=(`reshape_for_ky "${kx_all[*]}"`)
 
@@ -128,6 +128,20 @@ ky=(`reshape_for_ky "${kx_all[*]}"`)
 idx=(`linspace 0 $RESOLUTION $(($CORES+1)) int`)
 RATIO=`array_to_yamllist "${RATIO[*]}"`
 ky=`array_to_yamllist "${ky[*]}"`
+
+## save kx, ky
+echo -n "" > kx.txt
+echo -n "" > ky.txt
+for i in `seq 1 ${#kx_all[@]}`
+do
+    echo -n "$kx_all[$(($i-1))] " >> kx.txt
+    echo "$kx_all[-$i]" >> ky.txt
+done
+ky_has_0="false"
+if [ `bc -l <<< "ky[-1] == 0.0"` -eq 1 ]; then
+    echo "DO NOT REMOVE ME" > ky_has_0
+    ky_has_0="true"
+fi
 
 ## cores
 CORES=0
@@ -181,5 +195,29 @@ do
     cd ..
 done
 
+# wait for all background processes
+wait
+
+# join all data
+## search LOG.*.out
+cd 1
+logfilenames=(`ls | grep "LOG.*.out"`)
+cd ..
+
+## join
+for f in ${logfilenames[@]}
+do
+    echo joining $f...
+    find . -name "$f"
+    paste `find . -name "$f"` -d "" > .tmp
+    tac .tmp > pmt.
+    if [ $ky_has_0 == "true" ]; then
+        mv pmt. pmt.bef
+        tail -n +2 pmt.bef > pmt. # 1行目だけskipして出力
+        rm pmt.bef
+    fi
+    cat .tmp pmt. > joined/$f
+    rm .tmp pmt.
+done
 
 exit 0
