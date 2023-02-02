@@ -12,9 +12,9 @@ M=512
 RATIO=(0 0.5 1.0)
 
 K=2
-RESOLUTION=101
+RESOLUTION=501
 
 declare -A NODES=(
-    ["ika1.q"]=4
-    ["tuna0.q"]=4
+    ["ika1.q"]=60
+    ["tuna0.q"]=120
 )

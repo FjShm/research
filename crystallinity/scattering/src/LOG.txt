@@ -1,0 +1,917 @@
+[ebi:src]$ ./AUTO.sh in.AUTO.sh 
+[2023-02-02 16:53:33] include in.AUTO.sh... done
+[2023-02-02 16:53:33] checking environments... done
+[2023-02-02 16:53:33] preparing some variables... done
+[2023-02-02 16:53:41] exporting 'results/data/kx.txt', and 'results/data/ky.txt'... done
+[2023-02-02 16:53:41] parallelizing...
+now 1/180...
+Your job 1099374 ("aris") has been submitted
+now 2/180...
+Your job 1099375 ("aris") has been submitted
+now 3/180...
+Your job 1099376 ("aris") has been submitted
+now 4/180...
+Your job 1099377 ("aris") has been submitted
+now 5/180...
+Your job 1099378 ("aris") has been submitted
+now 6/180...
+Your job 1099379 ("aris") has been submitted
+now 7/180...
+Your job 1099380 ("aris") has been submitted
+now 8/180...
+Your job 1099381 ("aris") has been submitted
+now 9/180...
+Your job 1099382 ("aris") has been submitted
+now 10/180...
+Your job 1099383 ("aris") has been submitted
+now 11/180...
+Your job 1099384 ("aris") has been submitted
+now 12/180...
+Your job 1099385 ("aris") has been submitted
+now 13/180...
+Your job 1099386 ("aris") has been submitted
+now 14/180...
+Your job 1099387 ("aris") has been submitted
+now 15/180...
+Your job 1099388 ("aris") has been submitted
+now 16/180...
+Your job 1099389 ("aris") has been submitted
+now 17/180...
+Your job 1099390 ("aris") has been submitted
+now 18/180...
+Your job 1099391 ("aris") has been submitted
+now 19/180...
+Your job 1099392 ("aris") has been submitted
+now 20/180...
+Your job 1099393 ("aris") has been submitted
+now 21/180...
+Your job 1099394 ("aris") has been submitted
+now 22/180...
+Your job 1099395 ("aris") has been submitted
+now 23/180...
+Your job 1099396 ("aris") has been submitted
+now 24/180...
+Your job 1099397 ("aris") has been submitted
+now 25/180...
+Your job 1099398 ("aris") has been submitted
+now 26/180...
+Your job 1099399 ("aris") has been submitted
+now 27/180...
+Your job 1099400 ("aris") has been submitted
+now 28/180...
+Your job 1099401 ("aris") has been submitted
+now 29/180...
+Your job 1099402 ("aris") has been submitted
+now 30/180...
+Your job 1099403 ("aris") has been submitted
+now 31/180...
+Your job 1099404 ("aris") has been submitted
+now 32/180...
+Your job 1099405 ("aris") has been submitted
+now 33/180...
+Your job 1099406 ("aris") has been submitted
+now 34/180...
+Your job 1099407 ("aris") has been submitted
+now 35/180...
+Your job 1099408 ("aris") has been submitted
+now 36/180...
+Your job 1099409 ("aris") has been submitted
+now 37/180...
+Your job 1099410 ("aris") has been submitted
+now 38/180...
+Your job 1099411 ("aris") has been submitted
+now 39/180...
+Your job 1099412 ("aris") has been submitted
+now 40/180...
+Your job 1099413 ("aris") has been submitted
+now 41/180...
+Your job 1099414 ("aris") has been submitted
+now 42/180...
+Your job 1099415 ("aris") has been submitted
+now 43/180...
+Your job 1099416 ("aris") has been submitted
+now 44/180...
+Your job 1099417 ("aris") has been submitted
+now 45/180...
+Your job 1099418 ("aris") has been submitted
+now 46/180...
+Your job 1099419 ("aris") has been submitted
+now 47/180...
+Your job 1099420 ("aris") has been submitted
+now 48/180...
+Your job 1099421 ("aris") has been submitted
+now 49/180...
+Your job 1099422 ("aris") has been submitted
+now 50/180...
+Your job 1099423 ("aris") has been submitted
+now 51/180...
+Your job 1099424 ("aris") has been submitted
+now 52/180...
+Your job 1099425 ("aris") has been submitted
+now 53/180...
+Your job 1099426 ("aris") has been submitted
+now 54/180...
+Your job 1099427 ("aris") has been submitted
+now 55/180...
+Your job 1099428 ("aris") has been submitted
+now 56/180...
+Your job 1099429 ("aris") has been submitted
+now 57/180...
+Your job 1099430 ("aris") has been submitted
+now 58/180...
+Your job 1099431 ("aris") has been submitted
+now 59/180...
+Your job 1099432 ("aris") has been submitted
+now 60/180...
+Your job 1099433 ("aris") has been submitted
+now 61/180...
+Your job 1099434 ("aris") has been submitted
+now 62/180...
+Your job 1099435 ("aris") has been submitted
+now 63/180...
+Your job 1099436 ("aris") has been submitted
+now 64/180...
+Your job 1099437 ("aris") has been submitted
+now 65/180...
+Your job 1099438 ("aris") has been submitted
+now 66/180...
+Your job 1099439 ("aris") has been submitted
+now 67/180...
+Your job 1099440 ("aris") has been submitted
+now 68/180...
+Your job 1099441 ("aris") has been submitted
+now 69/180...
+Your job 1099442 ("aris") has been submitted
+now 70/180...
+Your job 1099443 ("aris") has been submitted
+now 71/180...
+Your job 1099444 ("aris") has been submitted
+now 72/180...
+Your job 1099445 ("aris") has been submitted
+now 73/180...
+Your job 1099446 ("aris") has been submitted
+now 74/180...
+Your job 1099447 ("aris") has been submitted
+now 75/180...
+Your job 1099448 ("aris") has been submitted
+now 76/180...
+Your job 1099449 ("aris") has been submitted
+now 77/180...
+Your job 1099450 ("aris") has been submitted
+now 78/180...
+Your job 1099451 ("aris") has been submitted
+now 79/180...
+Your job 1099452 ("aris") has been submitted
+now 80/180...
+Your job 1099453 ("aris") has been submitted
+now 81/180...
+Your job 1099454 ("aris") has been submitted
+now 82/180...
+Your job 1099455 ("aris") has been submitted
+now 83/180...
+Your job 1099456 ("aris") has been submitted
+now 84/180...
+Your job 1099457 ("aris") has been submitted
+now 85/180...
+Your job 1099458 ("aris") has been submitted
+now 86/180...
+Your job 1099459 ("aris") has been submitted
+now 87/180...
+Your job 1099460 ("aris") has been submitted
+now 88/180...
+Your job 1099461 ("aris") has been submitted
+now 89/180...
+Your job 1099462 ("aris") has been submitted
+now 90/180...
+Your job 1099463 ("aris") has been submitted
+now 91/180...
+Your job 1099464 ("aris") has been submitted
+now 92/180...
+Your job 1099465 ("aris") has been submitted
+now 93/180...
+Your job 1099466 ("aris") has been submitted
+now 94/180...
+Your job 1099467 ("aris") has been submitted
+now 95/180...
+Your job 1099468 ("aris") has been submitted
+now 96/180...
+Your job 1099469 ("aris") has been submitted
+now 97/180...
+Your job 1099470 ("aris") has been submitted
+now 98/180...
+Your job 1099471 ("aris") has been submitted
+now 99/180...
+Your job 1099472 ("aris") has been submitted
+now 100/180...
+Your job 1099473 ("aris") has been submitted
+now 101/180...
+Your job 1099474 ("aris") has been submitted
+now 102/180...
+Your job 1099475 ("aris") has been submitted
+now 103/180...
+Your job 1099476 ("aris") has been submitted
+now 104/180...
+Your job 1099477 ("aris") has been submitted
+now 105/180...
+Your job 1099478 ("aris") has been submitted
+now 106/180...
+Your job 1099479 ("aris") has been submitted
+now 107/180...
+Your job 1099480 ("aris") has been submitted
+now 108/180...
+Your job 1099481 ("aris") has been submitted
+now 109/180...
+Your job 1099482 ("aris") has been submitted
+now 110/180...
+Your job 1099483 ("aris") has been submitted
+now 111/180...
+Your job 1099484 ("aris") has been submitted
+now 112/180...
+Your job 1099485 ("aris") has been submitted
+now 113/180...
+Your job 1099486 ("aris") has been submitted
+now 114/180...
+Your job 1099487 ("aris") has been submitted
+now 115/180...
+Your job 1099488 ("aris") has been submitted
+now 116/180...
+Your job 1099489 ("aris") has been submitted
+now 117/180...
+Your job 1099490 ("aris") has been submitted
+now 118/180...
+Your job 1099491 ("aris") has been submitted
+now 119/180...
+Your job 1099492 ("aris") has been submitted
+now 120/180...
+Your job 1099493 ("aris") has been submitted
+now 121/180...
+Your job 1099494 ("aris") has been submitted
+now 122/180...
+Your job 1099495 ("aris") has been submitted
+now 123/180...
+Your job 1099496 ("aris") has been submitted
+now 124/180...
+Your job 1099497 ("aris") has been submitted
+now 125/180...
+Your job 1099498 ("aris") has been submitted
+now 126/180...
+Your job 1099499 ("aris") has been submitted
+now 127/180...
+Your job 1099500 ("aris") has been submitted
+now 128/180...
+Your job 1099501 ("aris") has been submitted
+now 129/180...
+Your job 1099502 ("aris") has been submitted
+now 130/180...
+Your job 1099503 ("aris") has been submitted
+now 131/180...
+Your job 1099504 ("aris") has been submitted
+now 132/180...
+Your job 1099505 ("aris") has been submitted
+now 133/180...
+Your job 1099506 ("aris") has been submitted
+now 134/180...
+Your job 1099507 ("aris") has been submitted
+now 135/180...
+Your job 1099508 ("aris") has been submitted
+now 136/180...
+Your job 1099509 ("aris") has been submitted
+now 137/180...
+Your job 1099510 ("aris") has been submitted
+now 138/180...
+Your job 1099511 ("aris") has been submitted
+now 139/180...
+Your job 1099512 ("aris") has been submitted
+now 140/180...
+Your job 1099513 ("aris") has been submitted
+now 141/180...
+Your job 1099514 ("aris") has been submitted
+now 142/180...
+Your job 1099515 ("aris") has been submitted
+now 143/180...
+Your job 1099516 ("aris") has been submitted
+now 144/180...
+Your job 1099517 ("aris") has been submitted
+now 145/180...
+Your job 1099518 ("aris") has been submitted
+now 146/180...
+Your job 1099519 ("aris") has been submitted
+now 147/180...
+Your job 1099520 ("aris") has been submitted
+now 148/180...
+Your job 1099521 ("aris") has been submitted
+now 149/180...
+Your job 1099522 ("aris") has been submitted
+now 150/180...
+Your job 1099523 ("aris") has been submitted
+now 151/180...
+Your job 1099524 ("aris") has been submitted
+now 152/180...
+Your job 1099525 ("aris") has been submitted
+now 153/180...
+Your job 1099526 ("aris") has been submitted
+now 154/180...
+Your job 1099527 ("aris") has been submitted
+now 155/180...
+Your job 1099528 ("aris") has been submitted
+now 156/180...
+Your job 1099529 ("aris") has been submitted
+now 157/180...
+Your job 1099530 ("aris") has been submitted
+now 158/180...
+Your job 1099531 ("aris") has been submitted
+now 159/180...
+Your job 1099532 ("aris") has been submitted
+now 160/180...
+Your job 1099533 ("aris") has been submitted
+now 161/180...
+Your job 1099534 ("aris") has been submitted
+now 162/180...
+Your job 1099535 ("aris") has been submitted
+now 163/180...
+Your job 1099536 ("aris") has been submitted
+now 164/180...
+Your job 1099537 ("aris") has been submitted
+now 165/180...
+Your job 1099538 ("aris") has been submitted
+now 166/180...
+Your job 1099539 ("aris") has been submitted
+now 167/180...
+Your job 1099540 ("aris") has been submitted
+now 168/180...
+Your job 1099541 ("aris") has been submitted
+now 169/180...
+Your job 1099542 ("aris") has been submitted
+now 170/180...
+Your job 1099543 ("aris") has been submitted
+now 171/180...
+Your job 1099544 ("aris") has been submitted
+now 172/180...
+Your job 1099545 ("aris") has been submitted
+now 173/180...
+Your job 1099546 ("aris") has been submitted
+now 174/180...
+Your job 1099547 ("aris") has been submitted
+now 175/180...
+Your job 1099548 ("aris") has been submitted
+now 176/180...
+Your job 1099549 ("aris") has been submitted
+now 177/180...
+Your job 1099550 ("aris") has been submitted
+now 178/180...
+Your job 1099551 ("aris") has been submitted
+now 179/180...
+Your job 1099552 ("aris") has been submitted
+now 180/180...
+Your job 1099553 ("aris") has been submitted
+[2023-02-02 16:54:53] parallelizing... done
+[2023-02-02 16:54:53] wait for all processes... done
+[2023-02-02 16:56:13] start to join data...
+joining LOG.0.000000.out...
+./1/LOG.0.000000.out
+./2/LOG.0.000000.out
+./3/LOG.0.000000.out
+./4/LOG.0.000000.out
+./5/LOG.0.000000.out
+./6/LOG.0.000000.out
+./7/LOG.0.000000.out
+./8/LOG.0.000000.out
+./9/LOG.0.000000.out
+./10/LOG.0.000000.out
+./11/LOG.0.000000.out
+./12/LOG.0.000000.out
+./13/LOG.0.000000.out
+./14/LOG.0.000000.out
+./15/LOG.0.000000.out
+./16/LOG.0.000000.out
+./17/LOG.0.000000.out
+./18/LOG.0.000000.out
+./19/LOG.0.000000.out
+./20/LOG.0.000000.out
+./21/LOG.0.000000.out
+./22/LOG.0.000000.out
+./23/LOG.0.000000.out
+./24/LOG.0.000000.out
+./25/LOG.0.000000.out
+./26/LOG.0.000000.out
+./27/LOG.0.000000.out
+./28/LOG.0.000000.out
+./29/LOG.0.000000.out
+./30/LOG.0.000000.out
+./31/LOG.0.000000.out
+./32/LOG.0.000000.out
+./33/LOG.0.000000.out
+./34/LOG.0.000000.out
+./35/LOG.0.000000.out
+./36/LOG.0.000000.out
+./37/LOG.0.000000.out
+./38/LOG.0.000000.out
+./39/LOG.0.000000.out
+./40/LOG.0.000000.out
+./41/LOG.0.000000.out
+./42/LOG.0.000000.out
+./43/LOG.0.000000.out
+./44/LOG.0.000000.out
+./45/LOG.0.000000.out
+./46/LOG.0.000000.out
+./47/LOG.0.000000.out
+./48/LOG.0.000000.out
+./49/LOG.0.000000.out
+./50/LOG.0.000000.out
+./51/LOG.0.000000.out
+./52/LOG.0.000000.out
+./53/LOG.0.000000.out
+./54/LOG.0.000000.out
+./55/LOG.0.000000.out
+./56/LOG.0.000000.out
+./57/LOG.0.000000.out
+./58/LOG.0.000000.out
+./59/LOG.0.000000.out
+./60/LOG.0.000000.out
+./61/LOG.0.000000.out
+./62/LOG.0.000000.out
+./63/LOG.0.000000.out
+./64/LOG.0.000000.out
+./65/LOG.0.000000.out
+./66/LOG.0.000000.out
+./67/LOG.0.000000.out
+./68/LOG.0.000000.out
+./69/LOG.0.000000.out
+./70/LOG.0.000000.out
+./71/LOG.0.000000.out
+./72/LOG.0.000000.out
+./73/LOG.0.000000.out
+./74/LOG.0.000000.out
+./75/LOG.0.000000.out
+./76/LOG.0.000000.out
+./77/LOG.0.000000.out
+./78/LOG.0.000000.out
+./79/LOG.0.000000.out
+./80/LOG.0.000000.out
+./81/LOG.0.000000.out
+./82/LOG.0.000000.out
+./83/LOG.0.000000.out
+./84/LOG.0.000000.out
+./85/LOG.0.000000.out
+./86/LOG.0.000000.out
+./87/LOG.0.000000.out
+./88/LOG.0.000000.out
+./89/LOG.0.000000.out
+./90/LOG.0.000000.out
+./91/LOG.0.000000.out
+./92/LOG.0.000000.out
+./93/LOG.0.000000.out
+./94/LOG.0.000000.out
+./95/LOG.0.000000.out
+./96/LOG.0.000000.out
+./97/LOG.0.000000.out
+./98/LOG.0.000000.out
+./99/LOG.0.000000.out
+./100/LOG.0.000000.out
+./101/LOG.0.000000.out
+./102/LOG.0.000000.out
+./103/LOG.0.000000.out
+./104/LOG.0.000000.out
+./105/LOG.0.000000.out
+./106/LOG.0.000000.out
+./107/LOG.0.000000.out
+./108/LOG.0.000000.out
+./109/LOG.0.000000.out
+./110/LOG.0.000000.out
+./111/LOG.0.000000.out
+./112/LOG.0.000000.out
+./113/LOG.0.000000.out
+./114/LOG.0.000000.out
+./115/LOG.0.000000.out
+./116/LOG.0.000000.out
+./117/LOG.0.000000.out
+./118/LOG.0.000000.out
+./119/LOG.0.000000.out
+./120/LOG.0.000000.out
+./121/LOG.0.000000.out
+./122/LOG.0.000000.out
+./123/LOG.0.000000.out
+./124/LOG.0.000000.out
+./125/LOG.0.000000.out
+./126/LOG.0.000000.out
+./127/LOG.0.000000.out
+./128/LOG.0.000000.out
+./129/LOG.0.000000.out
+./130/LOG.0.000000.out
+./131/LOG.0.000000.out
+./132/LOG.0.000000.out
+./133/LOG.0.000000.out
+./134/LOG.0.000000.out
+./135/LOG.0.000000.out
+./136/LOG.0.000000.out
+./137/LOG.0.000000.out
+./138/LOG.0.000000.out
+./139/LOG.0.000000.out
+./140/LOG.0.000000.out
+./141/LOG.0.000000.out
+./142/LOG.0.000000.out
+./143/LOG.0.000000.out
+./144/LOG.0.000000.out
+./145/LOG.0.000000.out
+./146/LOG.0.000000.out
+./147/LOG.0.000000.out
+./148/LOG.0.000000.out
+./149/LOG.0.000000.out
+./150/LOG.0.000000.out
+./151/LOG.0.000000.out
+./152/LOG.0.000000.out
+./153/LOG.0.000000.out
+./154/LOG.0.000000.out
+./155/LOG.0.000000.out
+./156/LOG.0.000000.out
+./157/LOG.0.000000.out
+./158/LOG.0.000000.out
+./159/LOG.0.000000.out
+./160/LOG.0.000000.out
+./161/LOG.0.000000.out
+./162/LOG.0.000000.out
+./163/LOG.0.000000.out
+./164/LOG.0.000000.out
+./165/LOG.0.000000.out
+./166/LOG.0.000000.out
+./167/LOG.0.000000.out
+./168/LOG.0.000000.out
+./169/LOG.0.000000.out
+./170/LOG.0.000000.out
+./171/LOG.0.000000.out
+./172/LOG.0.000000.out
+./173/LOG.0.000000.out
+./174/LOG.0.000000.out
+./175/LOG.0.000000.out
+./176/LOG.0.000000.out
+./177/LOG.0.000000.out
+./178/LOG.0.000000.out
+./179/LOG.0.000000.out
+./180/LOG.0.000000.out
+joining LOG.0.500000.out...
+./1/LOG.0.500000.out
+./2/LOG.0.500000.out
+./3/LOG.0.500000.out
+./4/LOG.0.500000.out
+./5/LOG.0.500000.out
+./6/LOG.0.500000.out
+./7/LOG.0.500000.out
+./8/LOG.0.500000.out
+./9/LOG.0.500000.out
+./10/LOG.0.500000.out
+./11/LOG.0.500000.out
+./12/LOG.0.500000.out
+./13/LOG.0.500000.out
+./14/LOG.0.500000.out
+./15/LOG.0.500000.out
+./16/LOG.0.500000.out
+./17/LOG.0.500000.out
+./18/LOG.0.500000.out
+./19/LOG.0.500000.out
+./20/LOG.0.500000.out
+./21/LOG.0.500000.out
+./22/LOG.0.500000.out
+./23/LOG.0.500000.out
+./24/LOG.0.500000.out
+./25/LOG.0.500000.out
+./26/LOG.0.500000.out
+./27/LOG.0.500000.out
+./28/LOG.0.500000.out
+./29/LOG.0.500000.out
+./30/LOG.0.500000.out
+./31/LOG.0.500000.out
+./32/LOG.0.500000.out
+./33/LOG.0.500000.out
+./34/LOG.0.500000.out
+./35/LOG.0.500000.out
+./36/LOG.0.500000.out
+./37/LOG.0.500000.out
+./38/LOG.0.500000.out
+./39/LOG.0.500000.out
+./40/LOG.0.500000.out
+./41/LOG.0.500000.out
+./42/LOG.0.500000.out
+./43/LOG.0.500000.out
+./44/LOG.0.500000.out
+./45/LOG.0.500000.out
+./46/LOG.0.500000.out
+./47/LOG.0.500000.out
+./48/LOG.0.500000.out
+./49/LOG.0.500000.out
+./50/LOG.0.500000.out
+./51/LOG.0.500000.out
+./52/LOG.0.500000.out
+./53/LOG.0.500000.out
+./54/LOG.0.500000.out
+./55/LOG.0.500000.out
+./56/LOG.0.500000.out
+./57/LOG.0.500000.out
+./58/LOG.0.500000.out
+./59/LOG.0.500000.out
+./60/LOG.0.500000.out
+./61/LOG.0.500000.out
+./62/LOG.0.500000.out
+./63/LOG.0.500000.out
+./64/LOG.0.500000.out
+./65/LOG.0.500000.out
+./66/LOG.0.500000.out
+./67/LOG.0.500000.out
+./68/LOG.0.500000.out
+./69/LOG.0.500000.out
+./70/LOG.0.500000.out
+./71/LOG.0.500000.out
+./72/LOG.0.500000.out
+./73/LOG.0.500000.out
+./74/LOG.0.500000.out
+./75/LOG.0.500000.out
+./76/LOG.0.500000.out
+./77/LOG.0.500000.out
+./78/LOG.0.500000.out
+./79/LOG.0.500000.out
+./80/LOG.0.500000.out
+./81/LOG.0.500000.out
+./82/LOG.0.500000.out
+./83/LOG.0.500000.out
+./84/LOG.0.500000.out
+./85/LOG.0.500000.out
+./86/LOG.0.500000.out
+./87/LOG.0.500000.out
+./88/LOG.0.500000.out
+./89/LOG.0.500000.out
+./90/LOG.0.500000.out
+./91/LOG.0.500000.out
+./92/LOG.0.500000.out
+./93/LOG.0.500000.out
+./94/LOG.0.500000.out
+./95/LOG.0.500000.out
+./96/LOG.0.500000.out
+./97/LOG.0.500000.out
+./98/LOG.0.500000.out
+./99/LOG.0.500000.out
+./100/LOG.0.500000.out
+./101/LOG.0.500000.out
+./102/LOG.0.500000.out
+./103/LOG.0.500000.out
+./104/LOG.0.500000.out
+./105/LOG.0.500000.out
+./106/LOG.0.500000.out
+./107/LOG.0.500000.out
+./108/LOG.0.500000.out
+./109/LOG.0.500000.out
+./110/LOG.0.500000.out
+./111/LOG.0.500000.out
+./112/LOG.0.500000.out
+./113/LOG.0.500000.out
+./114/LOG.0.500000.out
+./115/LOG.0.500000.out
+./116/LOG.0.500000.out
+./117/LOG.0.500000.out
+./118/LOG.0.500000.out
+./119/LOG.0.500000.out
+./120/LOG.0.500000.out
+./121/LOG.0.500000.out
+./122/LOG.0.500000.out
+./123/LOG.0.500000.out
+./124/LOG.0.500000.out
+./125/LOG.0.500000.out
+./126/LOG.0.500000.out
+./127/LOG.0.500000.out
+./128/LOG.0.500000.out
+./129/LOG.0.500000.out
+./130/LOG.0.500000.out
+./131/LOG.0.500000.out
+./132/LOG.0.500000.out
+./133/LOG.0.500000.out
+./134/LOG.0.500000.out
+./135/LOG.0.500000.out
+./136/LOG.0.500000.out
+./137/LOG.0.500000.out
+./138/LOG.0.500000.out
+./139/LOG.0.500000.out
+./140/LOG.0.500000.out
+./141/LOG.0.500000.out
+./142/LOG.0.500000.out
+./143/LOG.0.500000.out
+./144/LOG.0.500000.out
+./145/LOG.0.500000.out
+./146/LOG.0.500000.out
+./147/LOG.0.500000.out
+./148/LOG.0.500000.out
+./149/LOG.0.500000.out
+./150/LOG.0.500000.out
+./151/LOG.0.500000.out
+./152/LOG.0.500000.out
+./153/LOG.0.500000.out
+./154/LOG.0.500000.out
+./155/LOG.0.500000.out
+./156/LOG.0.500000.out
+./157/LOG.0.500000.out
+./158/LOG.0.500000.out
+./159/LOG.0.500000.out
+./160/LOG.0.500000.out
+./161/LOG.0.500000.out
+./162/LOG.0.500000.out
+./163/LOG.0.500000.out
+./164/LOG.0.500000.out
+./165/LOG.0.500000.out
+./166/LOG.0.500000.out
+./167/LOG.0.500000.out
+./168/LOG.0.500000.out
+./169/LOG.0.500000.out
+./170/LOG.0.500000.out
+./171/LOG.0.500000.out
+./172/LOG.0.500000.out
+./173/LOG.0.500000.out
+./174/LOG.0.500000.out
+./175/LOG.0.500000.out
+./176/LOG.0.500000.out
+./177/LOG.0.500000.out
+./178/LOG.0.500000.out
+./179/LOG.0.500000.out
+./180/LOG.0.500000.out
+joining LOG.1.000000.out...
+./1/LOG.1.000000.out
+./2/LOG.1.000000.out
+./3/LOG.1.000000.out
+./4/LOG.1.000000.out
+./5/LOG.1.000000.out
+./6/LOG.1.000000.out
+./7/LOG.1.000000.out
+./8/LOG.1.000000.out
+./9/LOG.1.000000.out
+./10/LOG.1.000000.out
+./11/LOG.1.000000.out
+./12/LOG.1.000000.out
+./13/LOG.1.000000.out
+./14/LOG.1.000000.out
+./15/LOG.1.000000.out
+./16/LOG.1.000000.out
+./17/LOG.1.000000.out
+./18/LOG.1.000000.out
+./19/LOG.1.000000.out
+./20/LOG.1.000000.out
+./21/LOG.1.000000.out
+./22/LOG.1.000000.out
+./23/LOG.1.000000.out
+./24/LOG.1.000000.out
+./25/LOG.1.000000.out
+./26/LOG.1.000000.out
+./27/LOG.1.000000.out
+./28/LOG.1.000000.out
+./29/LOG.1.000000.out
+./30/LOG.1.000000.out
+./31/LOG.1.000000.out
+./32/LOG.1.000000.out
+./33/LOG.1.000000.out
+./34/LOG.1.000000.out
+./35/LOG.1.000000.out
+./36/LOG.1.000000.out
+./37/LOG.1.000000.out
+./38/LOG.1.000000.out
+./39/LOG.1.000000.out
+./40/LOG.1.000000.out
+./41/LOG.1.000000.out
+./42/LOG.1.000000.out
+./43/LOG.1.000000.out
+./44/LOG.1.000000.out
+./45/LOG.1.000000.out
+./46/LOG.1.000000.out
+./47/LOG.1.000000.out
+./48/LOG.1.000000.out
+./49/LOG.1.000000.out
+./50/LOG.1.000000.out
+./51/LOG.1.000000.out
+./52/LOG.1.000000.out
+./53/LOG.1.000000.out
+./54/LOG.1.000000.out
+./55/LOG.1.000000.out
+./56/LOG.1.000000.out
+./57/LOG.1.000000.out
+./58/LOG.1.000000.out
+./59/LOG.1.000000.out
+./60/LOG.1.000000.out
+./61/LOG.1.000000.out
+./62/LOG.1.000000.out
+./63/LOG.1.000000.out
+./64/LOG.1.000000.out
+./65/LOG.1.000000.out
+./66/LOG.1.000000.out
+./67/LOG.1.000000.out
+./68/LOG.1.000000.out
+./69/LOG.1.000000.out
+./70/LOG.1.000000.out
+./71/LOG.1.000000.out
+./72/LOG.1.000000.out
+./73/LOG.1.000000.out
+./74/LOG.1.000000.out
+./75/LOG.1.000000.out
+./76/LOG.1.000000.out
+./77/LOG.1.000000.out
+./78/LOG.1.000000.out
+./79/LOG.1.000000.out
+./80/LOG.1.000000.out
+./81/LOG.1.000000.out
+./82/LOG.1.000000.out
+./83/LOG.1.000000.out
+./84/LOG.1.000000.out
+./85/LOG.1.000000.out
+./86/LOG.1.000000.out
+./87/LOG.1.000000.out
+./88/LOG.1.000000.out
+./89/LOG.1.000000.out
+./90/LOG.1.000000.out
+./91/LOG.1.000000.out
+./92/LOG.1.000000.out
+./93/LOG.1.000000.out
+./94/LOG.1.000000.out
+./95/LOG.1.000000.out
+./96/LOG.1.000000.out
+./97/LOG.1.000000.out
+./98/LOG.1.000000.out
+./99/LOG.1.000000.out
+./100/LOG.1.000000.out
+./101/LOG.1.000000.out
+./102/LOG.1.000000.out
+./103/LOG.1.000000.out
+./104/LOG.1.000000.out
+./105/LOG.1.000000.out
+./106/LOG.1.000000.out
+./107/LOG.1.000000.out
+./108/LOG.1.000000.out
+./109/LOG.1.000000.out
+./110/LOG.1.000000.out
+./111/LOG.1.000000.out
+./112/LOG.1.000000.out
+./113/LOG.1.000000.out
+./114/LOG.1.000000.out
+./115/LOG.1.000000.out
+./116/LOG.1.000000.out
+./117/LOG.1.000000.out
+./118/LOG.1.000000.out
+./119/LOG.1.000000.out
+./120/LOG.1.000000.out
+./121/LOG.1.000000.out
+./122/LOG.1.000000.out
+./123/LOG.1.000000.out
+./124/LOG.1.000000.out
+./125/LOG.1.000000.out
+./126/LOG.1.000000.out
+./127/LOG.1.000000.out
+./128/LOG.1.000000.out
+./129/LOG.1.000000.out
+./130/LOG.1.000000.out
+./131/LOG.1.000000.out
+./132/LOG.1.000000.out
+./133/LOG.1.000000.out
+./134/LOG.1.000000.out
+./135/LOG.1.000000.out
+./136/LOG.1.000000.out
+./137/LOG.1.000000.out
+./138/LOG.1.000000.out
+./139/LOG.1.000000.out
+./140/LOG.1.000000.out
+./141/LOG.1.000000.out
+./142/LOG.1.000000.out
+./143/LOG.1.000000.out
+./144/LOG.1.000000.out
+./145/LOG.1.000000.out
+./146/LOG.1.000000.out
+./147/LOG.1.000000.out
+./148/LOG.1.000000.out
+./149/LOG.1.000000.out
+./150/LOG.1.000000.out
+./151/LOG.1.000000.out
+./152/LOG.1.000000.out
+./153/LOG.1.000000.out
+./154/LOG.1.000000.out
+./155/LOG.1.000000.out
+./156/LOG.1.000000.out
+./157/LOG.1.000000.out
+./158/LOG.1.000000.out
+./159/LOG.1.000000.out
+./160/LOG.1.000000.out
+./161/LOG.1.000000.out
+./162/LOG.1.000000.out
+./163/LOG.1.000000.out
+./164/LOG.1.000000.out
+./165/LOG.1.000000.out
+./166/LOG.1.000000.out
+./167/LOG.1.000000.out
+./168/LOG.1.000000.out
+./169/LOG.1.000000.out
+./170/LOG.1.000000.out
+./171/LOG.1.000000.out
+./172/LOG.1.000000.out
+./173/LOG.1.000000.out
+./174/LOG.1.000000.out
+./175/LOG.1.000000.out
+./176/LOG.1.000000.out
+./177/LOG.1.000000.out
+./178/LOG.1.000000.out
+./179/LOG.1.000000.out
+./180/LOG.1.000000.out
+[2023-02-02 16:56:14] All done!
+
+-------------------------------------------------
+Wall Time:  0:02:41
+
