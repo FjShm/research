@@ -93,7 +93,7 @@ for NODE in ${!NODES[@]}
 do
     qstat -f | grep $NODE@ > /dev/null
     if [ $? -eq 1 ]; then
-        echo Invalid node name: $NODE
+        echo -e "failed\nInvalid node name: $NODE"
         exit 1
     fi
 done
@@ -122,6 +122,13 @@ done
 idx=(`linspace 0 $RESOLUTION $(($CORES+1)) int`)
 RATIO=`array_to_yamllist "${RATIO[*]}"`
 ky=`array_to_yamllist "${ky[*]}"`
+
+## 自nodeが$NODESに含まれていれば-1しておく
+hostnode="`qstat -f | grep \`hostname\``"
+hostnode=(${hostnode// / })
+if [ -n ${NODES[${hostnode[0]%@*}]} ]; then
+    NODES[${hostnode[0]%@*}]=`bc <<< ${NODES[${hostnode[0]%@*}]}-1`
+fi
 echo " done"
 
 ## save kx, ky
@@ -164,13 +171,6 @@ do
     sed -i -e "s;__KY__;$ky;g" param.yaml
     sed -i -e "s;__IDX__;$kx_idx;g" param.yaml
     sed -i -e "s;__RATIO__;$RATIO;g" param.yaml
-
-    ## 自nodeが$NODESに含まれていれば-1しておく
-    hostnode="`qstat -f | grep \`hostname\``"
-    hostnode=(${hostnode// / })
-    if [ -n ${NODES[${hostnode[0]%@*}]} ]; then
-        NODES[${hostnode[0]%@*}]=`bc <<< ${NODES[${hostnode[0]%@*}]}-1`
-    fi
 
     ## select node
     for NODE in ${!NODES[@]}
