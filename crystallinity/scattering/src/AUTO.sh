@@ -1,7 +1,11 @@
 #!/bin/bash -eu
 
+SECONDS=0
+
 # input
-. in.AUTO.sh
+echo -n "[`date +\"%Y-%m-%d %H:%M:%S\"`] include $1..."
+. $1
+echo " done"
 
 # functions
 function round (){
@@ -76,13 +80,7 @@ function monitor_job (){
 
 
 # validation
-## cores
-if [ $CORES -gt $RESOLUTION ]; then
-    echo "CORES has to be smaller than RESOLUTION"
-    echo "fix CORES from $CORES to $RESOLUTION"
-    CORES=$RESOLUTION
-fi
-
+echo -n "[`date +\"%Y-%m-%d %H:%M:%S\"`] checking environments..."
 ## output directory
 if [ -d results/data ]; then
     echo "directory 'results/data' exists."
@@ -99,40 +97,50 @@ do
         exit 1
     fi
 done
-
+echo " done"
 
 # prepare
+echo -n "[`date +\"%Y-%m-%d %H:%M:%S\"`] preparing some variables..."
 cwd=`pwd`
 mkdir -p results/data && cd results/data && mkdir joined
 kx_all=(`linspace -$K $K $RESOLUTION float`)
 ky=(`reshape_for_ky "${kx_all[*]}"`)
-
-## core-n has jobs of idx[n] <= id < idx[n+1]
-idx=(`linspace 0 $RESOLUTION $(($CORES+1)) int`)
-RATIO=`array_to_yamllist "${RATIO[*]}"`
-ky=`array_to_yamllist "${ky[*]}"`
-
-## save kx, ky
-echo -n "" > kx.txt
-echo -n "" > ky.txt
-for i in `seq 1 ${#kx_all[@]}`
-do
-    echo -n "$kx_all[$(($i-1))] " >> kx.txt
-    echo "$kx_all[-$i]" >> ky.txt
-done
-ky_has_0=false
-if [ `bc -l <<< "ky[-1] == 0.0"` -eq 1 ]; then
-    ky_has_0=true
-fi
 
 ## cores
 CORES=0
 for CORE in ${NODES[@]}
 do
     CORES=`bc <<< $CORES+$CORE`
+    if [ $CORES -gt $RESOLUTION ]; then
+        echo "CORES has to be smaller than RESOLUTION"
+        echo "fix CORES from $CORES to $RESOLUTION"
+        CORES=$RESOLUTION
+    fi
 done
 
+## core-n has jobs of idx[n] <= id < idx[n+1]
+idx=(`linspace 0 $RESOLUTION $(($CORES+1)) int`)
+RATIO=`array_to_yamllist "${RATIO[*]}"`
+ky=`array_to_yamllist "${ky[*]}"`
+echo " done"
+
+## save kx, ky
+echo -n "[`date +\"%Y-%m-%d %H:%M:%S\"`] exporting 'results/data/kx.txt', and 'results/data/ky.txt'..."
+echo -n "" > kx.txt
+echo -n "" > ky.txt
+for i in `seq 1 ${#kx_all[@]}`
+do
+    echo -n "${kx_all[$(($i-1))]} " >> kx.txt
+    echo "${kx_all[-$i]}" >> ky.txt
+done
+ky_has_0=false
+if [ `bc -l <<< "${ky[-1]} == 0.0"` -eq 1 ]; then
+    ky_has_0=true
+fi
+echo " done"
+
 # make dir and copy files
+echo "[`date +\"%Y-%m-%d %H:%M:%S\"`] parallelizing..."
 for c in `seq 1 $CORES`
 do
     echo -e "\rnow $c/$CORES..."
@@ -156,6 +164,14 @@ do
     sed -i -e "s;__KY__;$ky;g" param.yaml
     sed -i -e "s;__IDX__;$kx_idx;g" param.yaml
     sed -i -e "s;__RATIO__;$RATIO;g" param.yaml
+
+    ## 自nodeが$NODESに含まれていれば-1しておく
+    hostnode="`qstat -f | grep \`hostname\``"
+    hostnode=(${hostnode// / })
+    if [ -n ${NODES[${hostnode[0]%@*}]} ]; then
+        NODES[${hostnode[0]%@*}]=`bc <<< ${NODES[${hostnode[0]%@*}]}-1`
+    fi
+
     ## select node
     for NODE in ${!NODES[@]}
     do
@@ -163,25 +179,33 @@ do
             continue
         fi
         sed -i -e "s;__NODE__;$NODE;g" run.sh
-        ${NODES[$NODE]}=`bc <<< ${NODES[$NODE]}-1`
+        NODES[$NODE]=`bc <<< ${NODES[$NODE]}-1`
+        break
     done
+
+    ## 最後はlocalでrun, それ以外はqsub
     if [ $c -eq $CORES ]; then
-        ./Scattering.o param.yaml &
+        echo run at `hostname`
+        ./Scattering.o param.yaml > /dev/null &
     else
-        echo qsub
         res=`qsub run.sh`
         res_splited=(${res// / })
         jobID=${res_splited[2]}
-        monitor_job jobID &
+        monitor_job $jobID &
+        echo $res
     fi
     cd ..
 done
+echo "[`date +\"%Y-%m-%d %H:%M:%S\"`] parallelizing... done"
 
 # wait for all background processes
+echo -n "[`date +\"%Y-%m-%d %H:%M:%S\"`] wait for all processes..."
 wait
+echo " done"
 
 # join all data
 ## search LOG.*.out
+echo "[`date +\"%Y-%m-%d %H:%M:%S\"`] start to join data..."
 cd 1
 logfilenames=(`ls | grep "LOG.*.out"`)
 cd ..
@@ -201,5 +225,14 @@ do
     cat .tmp pmt. > joined/$f
     rm .tmp pmt.
 done
+echo -e "[`date +\"%Y-%m-%d %H:%M:%S\"`] All done!\n\n"
+
+i=$SECONDS
+set +e
+((sec=i%60, min=(i%3600)/60, hrs=i/3600))
+set -e
+timestamp=$(printf "%d:%02d:%02d" "$hrs" "$min" "$sec")
+echo "-------------------------------------------------"
+echo "Processing time is $timestamp"
 
 exit 0
