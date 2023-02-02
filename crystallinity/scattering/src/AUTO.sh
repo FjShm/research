@@ -157,7 +157,7 @@ for c in `seq 1 $CORES`
 do
     echo -e "\rnow $c/$CORES..."
     mkdir $c
-    cp $cwd/Scattering.o $cwd/run.sh $c
+    cp $cwd/Scattering.o $cwd/qsub.sh $c
     cp $cwd/format_param.yaml $c/param.yaml
     cd $c
     kx_idx=(`seq ${idx[$(($c-1))]} $((${idx[$c]}-1))`)
@@ -183,7 +183,7 @@ do
         if [ ${NODES[$NODE]} -eq 0 ]; then
             continue
         fi
-        sed -i -e "s;__NODE__;$NODE;g" run.sh
+        sed -i -e "s;__NODE__;$NODE;g" qsub.sh
         NODES[$NODE]=`bc <<< ${NODES[$NODE]}-1`
         break
     done
@@ -193,7 +193,7 @@ do
         echo run at `hostname`
         ./Scattering.o param.yaml > /dev/null &
     else
-        res=`qsub run.sh`
+        res=`qsub qsub.sh`
         res_splited=(${res// / })
         jobID=${res_splited[2]}
         monitor_job $jobID &
