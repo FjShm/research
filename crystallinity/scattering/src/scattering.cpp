@@ -11,7 +11,7 @@ int main(int argc, char* argv[]){
     const int frames = param["dump_frames"].as<int>(-1);
     const std::vector<double> kx_all = param["kx"].as< std::vector<double> >();
     const std::vector<double> ky_all = param["ky"].as< std::vector<double> >();
-    const std::vector<double> ratio = param["ratio"].as< std::vector<double> >();
+    const std::vector<double> ratio = param["ratio"].as< std::vector<double> >(std::vector<double>(0));
     int N = param["N"].as<int>(-1);
     int M = param["M"].as<int>(-1);
 
@@ -70,11 +70,13 @@ int main(int argc, char* argv[]){
             std::exit(EXIT_FAILURE);
         }
 
-        double d_ratio = std::abs((double)loop_count++ / (double)frames - ratio[ratio_idx]);
-        double d_ratio_next = std::abs((double)loop_count / (double)frames - ratio[ratio_idx]);
-        if (d_ratio_next < d_ratio && loop_count < frames){
-            ++show_progress;
-            continue;
+        if (!ratio.empty()){
+            double d_ratio = std::abs((double)loop_count++ / (double)frames - ratio[ratio_idx]);
+            double d_ratio_next = std::abs((double)loop_count / (double)frames - ratio[ratio_idx]);
+            if (d_ratio_next < d_ratio && loop_count < frames){
+                ++show_progress;
+                continue;
+            }
         }
 
         // validation
