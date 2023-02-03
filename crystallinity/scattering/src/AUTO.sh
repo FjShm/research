@@ -143,9 +143,11 @@ rm -f extracted_`basename $DUMP_PATH` extracted_`basename $ROTATIONTXT_PATH`
 head -n 2 $ROTATIONTXT_PATH >> extracted_`basename $ROTATIONTXT_PATH`
 for fn in ${FRAME_NUMBERS[@]}
 do
-    if [ $fn > $DUMP_FRAMES ]; then
+    if [ $fn -gt $DUMP_FRAMES ]; then
         echo -e " failed\n Invalid 'FRAME_NUMBERS'"
         echo "1 <= 'FRAME_NUMBERS' <= DUMP_FRAMES"
+        echo "FRAME_NUMBERS: $fn"
+        echo "DUMP_FRAMES: $DUMP_FRAMES"
         exit 1
     fi
     sed -n $(($ROW_FRAMES*($fn-1)+1)),$(($ROW_FRAMES*$fn))p $DUMP_PATH >> extracted_`basename $DUMP_PATH`
