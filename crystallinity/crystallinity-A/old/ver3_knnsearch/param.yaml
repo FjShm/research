@@ -1,0 +1,11 @@
+input_dump_path: /home6/fujii/master/data/deform/lj-cis-lj/360K/24mer512chain/10eps/u/z_nvt/wi_1.0.1/dump.u.nvt.lammpstrj
+input_rotationtxt_path: /home6/fujii/master/data/deform/lj-cis-lj/360K/24mer512chain/10eps/u/z_nvt/wi_1.0.1/rotation.txt
+output_cry_dump_path: sample_data/cry_dump.lammpstrj
+output_cry_text_path: sample_data/cry.txt
+k: 16
+beta: 2
+lambda_threshold: 0.9
+k_nearest_neighbors: 10
+theta_deg_threshold: 5
+N: 49
+M: 512

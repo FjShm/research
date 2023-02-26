@@ -9,6 +9,8 @@ int main(){
     const std::string dir = "./";
     const std::string fname = "_dump.u.lammpstrj";
     const int N(49), M(512);
+    std::uniform_int_distribution<> dist(0, N*M-1);
+    const int id = dist(gen);
     ReadDump::ExtraReadDump rd(dir + fname);
 
     // test read_all_frames, or read_1frame
@@ -16,7 +18,8 @@ int main(){
         << dir + fname << "\n\n Y/[n]: ";
     char yn = std::cin.get();
     std::cout << std::endl;
-    if (yn == 'Y') rd.read_all_frames();
+    if (yn == 'Y') rd.read_all_frames(6);
+    //if (yn == 'Y') rd.read_all_frames();
 
     // test set_want_frames
     int mode;
@@ -57,8 +60,6 @@ int main(){
         }
 
         // test add_mol
-        std::uniform_int_distribution<> dist(0, N*M-1);
-        int id = dist(gen);
         rd.add_column_if_not_exist("mol", N, M);
         int mol = rd.header_map->at("mol");
         int mol_origin = rd.header_map->at("mol_origin");
@@ -103,6 +104,50 @@ int main(){
         std::cout << "min mol: " << minmol << std::endl;
         std::cout << "max xu (double): " << maxxu_d << std::endl;
         std::cout << "max xu (int): " << maxxu_i << std::endl;
+
+        // test append_column
+        std::cout << ">>> test append_column >>>\n";
+        Eigen::MatrixXd apcol(rd.num_atoms, 1);
+        for (size_t i = 0; i < apcol.rows(); i++)
+            apcol(i) = i;
+        rd.append_column(apcol, "apcol");
+        int apcolidx = rd.header_map->at("apcol");
+        for (const auto& [key, val] : *(rd.header_map))
+            std::cout << "  " << key << ": " << val << std::endl;
+        std::cout << rd.atoms_all_data->coeff(id, apcolidx) << std::endl;
+        // replace=false
+        for (size_t i = 0; i < apcol.rows(); i++)
+            apcol(i) = i*2.;
+        rd.append_column(apcol, "apcol", false);
+        for (const auto& [key, val] : *(rd.header_map))
+            std::cout << "  " << key << ": " << val << std::endl;
+        std::cout << rd.atoms_all_data->coeff(id, apcolidx) << std::endl;
+        // replace=true
+        double tmp = rd.atoms_all_data->coeff(id, apcolidx);
+        rd.append_column(apcol, "apcol", true);
+        for (const auto& [key, val] : *(rd.header_map))
+            std::cout << "  " << key << ": " << val << std::endl;
+        std::cout << rd.atoms_all_data->coeff(id, apcolidx) << std::endl;
+        std::cout << "(check if " << rd.atoms_all_data->coeff(id, apcolidx)
+            << " = 2 * " << tmp  << ")" << std::endl;
+        std::cout << " <<< test append_column over <<<\n";
+
+        // test append_columns
+        double abef = rd.atoms_all_data->coeff(id, apcolidx);
+        std::cout << abef << "*" << 3 << "=" << abef*3 << std::endl;
+        Eigen::MatrixXd apcols(apcol.rows(), 3);
+        apcols << apcol*3, apcol, apcol;
+        rd.append_columns(apcols, true, "apcol", "apcol2", "apcol3");
+        std::cout << rd.atoms_all_data->coeff(id, apcolidx) << std::endl;
+        int a2 = rd.header_map->at("apcol2");
+        int a3 = rd.header_map->at("apcol3");
+        std::cout << rd.atoms_all_data->coeff(id, a2) << std::endl;
+        std::cout << rd.atoms_all_data->coeff(id, a3) << std::endl;
     }
     std::cout << "num_frames: " << rd.num_frames << std::endl;
+
+    // test jump_frames]
+    rd.jump_frames(0, true);
+    int xu = rd.header_map->at("xu");
+    std::cout << rd.atoms_all_data->coeff(14920-1, xu) << std::endl;
 }

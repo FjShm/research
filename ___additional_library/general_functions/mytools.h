@@ -7,6 +7,8 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
+#include <algorithm>
+#include <numeric>
 
 
 
@@ -40,6 +42,40 @@ namespace std
             if (contains == "" || buf.find(contains) != std::string::npos)
                 counter++;
         return counter;
+    }
+
+    // max element of vector
+    template<typename T> T vec_max(std::vector<T> &vec){
+        typename std::vector<T>::iterator iter = std::max_element(vec.begin(), vec.end());
+        size_t idx = std::distance(vec.begin(), iter);
+        return vec[idx];
+    }
+
+    // idx of max element of vector
+    template<typename T> size_t vec_maxid(std::vector<T> &vec){
+        typename std::vector<T>::iterator iter = std::max_element(vec.begin(), vec.end());
+        size_t idx = std::distance(vec.begin(), iter);
+        return idx;
+    }
+
+    // min element of vector
+    template<typename T> T vec_min(std::vector<T> &vec){
+        typename std::vector<T>::iterator iter = std::min_element(vec.begin(), vec.end());
+        size_t idx = std::distance(vec.begin(), iter);
+        return vec[idx];
+    }
+
+    // idx of min element of vector
+    template<typename T> size_t vec_minid(std::vector<T> &vec){
+        typename std::vector<T>::iterator iter = std::min_element(vec.begin(), vec.end());
+        size_t idx = std::distance(vec.begin(), iter);
+        return idx;
+    }
+
+    // average vector
+    template<typename T> double vec_mean(std::vector<T> const& v) {
+        if (v.empty()) return 0.;
+        return std::accumulate(v.begin(), v.end(), 0.) / v.size();
     }
 }
 

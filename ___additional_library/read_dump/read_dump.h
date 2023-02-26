@@ -9,6 +9,7 @@
 #include <fstream>
 #include <sstream>
 #include <eigen3/Eigen/Dense>
+#include <general/mytools.h>
 
 
 namespace ReadDump
@@ -21,19 +22,25 @@ namespace ReadDump
             std::map<std::string, int> *header_map;
 
             ReadDump() {init();}
-            ReadDump(const std::string &arg_ipath) : ipath(arg_ipath){
-                fileopen(ipath);
+            ReadDump(const std::string &arg_ipath, bool _sort_id = true) : ipath(arg_ipath){
+                open(ipath, _sort_id);
                 init();
             }
             ~ReadDump() {clear();}
 
-            void fileopen(const std::string &arg_ipath){
+            void open(const std::string &arg_ipath, bool _sort_id = true){
                 dump.open(arg_ipath);
+                sort_id = _sort_id;
             }
 
             void clear(){
                 dump.close();
                 header_map->clear();
+                for (size_t i = 0; i < atoms_all_data_v.size(); i++){
+                    delete atoms_all_data_v[i], header_map_v[i];
+                }
+                header_map = nullptr;
+                atoms_all_data = nullptr;
             }
 
             void join_3columns(
@@ -51,17 +58,14 @@ namespace ReadDump
             }
 
             bool read_1frame(){
-                if (!all_frames_loaded){
-                    return _read_1frame();
-                } else {
-                    return change_now_frame(1);
-                }
+                return all_frames_loaded ? change_now_frame(1) : _read_1frame();
             }
 
-            void read_all_frames(){
+            void read_all_frames(const int &total = -1){
+                int counter = 0;
                 std::cout << ipath << " : now loading...\n";
+                if (total > 0) std::cout << "\r>>> 0 %";
                 while(_read_1frame()){
-                    std::cout << "\r>>> timestep: " + std::to_string(timestep);
                     timestep_v.push_back(timestep);
                     num_atoms_v.push_back(num_atoms);
                     ca_v.push_back(cellbox_a);
@@ -70,6 +74,9 @@ namespace ReadDump
                     co_v.push_back(cellbox_origin);
                     atoms_all_data_v.push_back(atoms_all_data);
                     header_map_v.push_back(header_map);
+                    total > 0 ?
+                        std::cout << "\r>>> "<< 100*(++counter)/total << " %":
+                        std::cout << "\r>>> timestep: " + std::to_string(timestep);
                 }
                 std::cout << std::endl << "done" << std::endl;
                 all_frames_loaded = true;
@@ -118,11 +125,11 @@ namespace ReadDump
                         << "search_nearest_timestep (read_dump.h)\n";
                     std::exit(EXIT_FAILURE);
                 }
-                int timestep_max = vec_max(timestep_v);
+                int timestep_max = std::vec_max(timestep_v);
                 std::vector<double> diffs(timestep_v.size());
                 for (size_t i = 0; i < diffs.size(); i++)
                     diffs[i] = std::abs((double)timestep_v[i]/(double)timestep_max - ratio);
-                return timestep_v[vec_minid(diffs)];
+                return timestep_v[std::vec_minid(diffs)];
             }
 
             bool check_if_wanted_frame(){
@@ -130,21 +137,36 @@ namespace ReadDump
                 if (want_timesteps.size() == 0) return true;
                 std::vector<int>::iterator itr
                     = std::find(want_timesteps.begin(), want_timesteps.end(), timestep);
-                if (itr == want_timesteps.end()){
-                    return false;
-                } else {
-                    return true;
-                }
+                return itr != want_timesteps.end();
             }
 
 
 
+        protected:
+            bool all_frames_loaded, sort_id;
+            int now_frame;
+
+            bool change_now_frame(int frame, bool absolute = false){
+                absolute?
+                    now_frame = frame:
+                    now_frame += frame;
+                if (now_frame < 0 || num_frames <= now_frame) return false;
+                timestep = timestep_v[now_frame];
+                num_atoms = num_atoms_v[now_frame];
+                cellbox_a = ca_v[now_frame];
+                cellbox_b = cb_v[now_frame];
+                cellbox_c = cc_v[now_frame];
+                cellbox_origin = co_v[now_frame];
+                atoms_all_data = atoms_all_data_v[now_frame];
+                header_map = header_map_v[now_frame];
+                return true;
+            }
+
+
         private:
-            int line_number = 0;
-            int now_frame = -1;
+            int line_number;
             std::string ipath, tmp;
             std::ifstream dump;
-            bool all_frames_loaded = false;
 
             // 全frameのデータを格納するvector
             std::vector<int> timestep_v, num_atoms_v, want_timesteps;
@@ -152,46 +174,11 @@ namespace ReadDump
             std::vector<Eigen::MatrixXd*> atoms_all_data_v;
             std::vector< std::map<std::string, int>* > header_map_v;
 
-            // 汎用関数 -------------------------------------------------------------------
-            std::vector<std::string> split(const std::string &s, char delim){
-                std::vector<std::string> elems;
-                std::stringstream ss(s);
-                std::string item;
-                while (std::getline(ss, item, delim)) {
-                    if (!item.empty()) {
-                        elems.push_back(item);
-                    }
-                }
-                return elems;
-            }
-
-            template<typename T> T vec_max(std::vector<T> &vec){
-                typename std::vector<T>::iterator iter = std::max_element(vec.begin(), vec.end());
-                size_t idx = std::distance(vec.begin(), iter);
-                return vec[idx];
-            }
-
-            template<typename T> size_t vec_maxid(std::vector<T> &vec){
-                typename std::vector<T>::iterator iter = std::max_element(vec.begin(), vec.end());
-                size_t idx = std::distance(vec.begin(), iter);
-                return idx;
-            }
-
-            template<typename T> T vec_min(std::vector<T> &vec){
-                typename std::vector<T>::iterator iter = std::min_element(vec.begin(), vec.end());
-                size_t idx = std::distance(vec.begin(), iter);
-                return vec[idx];
-            }
-
-            template<typename T> size_t vec_minid(std::vector<T> &vec){
-                typename std::vector<T>::iterator iter = std::min_element(vec.begin(), vec.end());
-                size_t idx = std::distance(vec.begin(), iter);
-                return idx;
-            }
-            // ----------------------------------------------------------------------------
-
             void init(){
                 num_frames = 0;
+                line_number = 0;
+                now_frame = -1;
+                all_frames_loaded = false;
             }
 
             void read_timestep(){
@@ -233,7 +220,7 @@ namespace ReadDump
             }
 
             void read_atoms(int num_column){
-                if (header_map->count("id") == 0){
+                if (header_map->count("id") == 0 || sort_id == false){
                     for (int r = 0; r < num_atoms; r++){
                         for (int c = 0; c < num_column; c++){
                             dump >> (*atoms_all_data)(r, c);
@@ -278,7 +265,7 @@ namespace ReadDump
                 header_map = new std::map<std::string, int>;
                 while(std::getline(dump, row)){
                     line_number++;
-                    std::vector<std::string> splited_row = split(row, ':');
+                    std::vector<std::string> splited_row = std::split(row, ':');
                     if (splited_row[0] != "ITEM"){
                         std::cout << "Error: Invalid dumpfile format.\n"
                             << "line " << line_number << ": " << row << std::endl;
@@ -290,6 +277,8 @@ namespace ReadDump
                         num_frames++;
                     } else if (splited_row[1] == " NUMBER OF ATOMS"){
                         read_number_of_atoms();
+                    } else if (splited_row[1] == " NUMBER OF ENTRIES"){
+                        read_number_of_atoms();
                     } else if (splited_row[1] == " BOX BOUNDS xy xz yz pp pp pp"){
                         read_box("triclinic");
                     } else if (splited_row[1] == " BOX BOUNDS xx yy zz pp pp pp"){
@@ -297,19 +286,19 @@ namespace ReadDump
                     } else if (splited_row[1] == " BOX BOUNDS pp pp pp"){
                         read_box("orthogonal");
                     } else {
-                        std::vector<std::string> atoms_header = split(splited_row[1], ' ');
-                        if (atoms_header[0] != "ATOMS"){
+                        std::vector<std::string> atoms_header = std::split(splited_row[1], ' ');
+                        if (atoms_header[0] != "ATOMS" && atoms_header[0] != "ENTRIES"){
                             std::cout << "Error: Invalid dumpfile format.\n"
                                 << "ITEM: ATOMS must be come\n"
                                 << "line " << line_number << ": " << row << std::endl;
                             std::exit(EXIT_FAILURE);
                         }
 
-                        // header index をマッピング
+                        // map 'header index'
                         for (size_t i = 1; i < atoms_header.size(); i++)
                             header_map->insert(std::make_pair(atoms_header[i], i-1));
 
-                        // ATOMS 読み込み
+                        // read 'ATOMS' here
                         int num_column = atoms_header.size() - 1;
                         atoms_all_data->conservativeResize(num_atoms, num_column);
                         read_atoms(num_column);
@@ -319,25 +308,6 @@ namespace ReadDump
                 }
                 return false; // ファイル末尾の場合はここ
             }
-
-            bool change_now_frame(int frame, bool absolute = false){
-                if (absolute){
-                    now_frame = frame;
-                } else {
-                    now_frame += frame;
-                }
-                if (now_frame < 0 || num_frames <= now_frame) return false;
-                timestep = timestep_v[now_frame];
-                num_atoms = num_atoms_v[now_frame];
-                cellbox_a = ca_v[now_frame];
-                cellbox_b = cb_v[now_frame];
-                cellbox_c = cc_v[now_frame];
-                cellbox_origin = co_v[now_frame];
-                atoms_all_data = atoms_all_data_v[now_frame];
-                header_map = header_map_v[now_frame];
-                return true;
-            }
-
     }; // class ReadDump
 
 
@@ -347,12 +317,53 @@ namespace ReadDump
 
         public:
             template<class... T> void add_column_if_not_exist(std::string colname, T... args){
+                if (header_map->count(colname) != 0) return;
                 if (colname == "mol"){
-                    add_mol(args...);
+                    Eigen::VectorXd molcol(atoms_all_data->rows());
+                    calc_mol(molcol, args...);
+                    append_column(molcol, "mol");
                 } else {
                     std::cout << "Invalid column name: " << colname << std::endl
                         << "This message can be ignored but may cause an error.\n"
                         << "(add_column_if_not_exist, read_dump.h)\n";
+                }
+            }
+
+            void append_column(
+                    const Eigen::VectorXd &apcol,
+                    const std::string& colname,
+                    bool replace=false)
+            {
+                int col;
+                if (header_map->count(colname) != 0){
+                    if (!replace) return;
+                    col = header_map->at(colname);
+                } else {
+                    col = atoms_all_data->cols();
+                    header_map->insert(std::make_pair(colname, col));
+                    atoms_all_data->conservativeResize(num_atoms, col+1);
+                }
+                for (size_t i = 0; i < atoms_all_data->rows(); i++)
+                    (*atoms_all_data)(i, col) = apcol(i);
+            }
+
+            template<typename... T> void append_columns(
+                    const Eigen::MatrixXd &apcol,
+                    bool replace_all=false,
+                    const T &...colnames_arg)
+            {
+                std::vector<std::string> colnames;
+                for (std::string s : std::initializer_list<std::string>{colnames_arg...})
+                    colnames.push_back(s);
+                if (apcol.cols() != colnames.size()){
+                    std::cout << "# of columns and # of colnames must be same.\n"
+                        << "ReadDump::ExtraReadDump.append_columns()\n";
+                    std::exit(EXIT_FAILURE);
+                }
+                for (size_t i = 0; i < colnames.size(); i++){
+                    Eigen::VectorXd col(apcol.rows());
+                    col << apcol.col(i);
+                    append_column(col, colnames[i], replace_all);
                 }
             }
 
@@ -368,26 +379,41 @@ namespace ReadDump
                 return val;
             }
 
-        private:
-            void add_mol(int N, int M){
-                if (header_map->count("mol") == 0){
-                    int id = header_map->at("id");
-                    int mol = atoms_all_data->cols();
-                    header_map->insert(std::make_pair("mol", mol));
-                    atoms_all_data->conservativeResize(num_atoms, mol+1);
-                    if (N != -1){
-                        for (int i = 0; i < num_atoms; i++)
-                            (*atoms_all_data)(i, mol) = ((int)atoms_all_data->coeff(i, id) - 1) / N + 1;
-                    } else if (M != -1){
-                        N = num_atoms / M;
-                        for (int i = 0; i < num_atoms; i++)
-                            (*atoms_all_data)(i, mol) = ((int)atoms_all_data->coeff(i, id) - 1) / N + 1;
-                    } else {
-                        std::cout << "Since there is no 'mol' in ATOMS in the dump file,"
-                            << " it is necessary to write N or M in the input file.\n";
-                        std::exit(EXIT_FAILURE);
-                    }
+            void jump_frames(int fn, bool absolute=false){
+                if (!all_frames_loaded){
+                    std::cout << "method 'read_all_frames' must be called "
+                        << "before call 'jump_frames'\n";
+                    std::exit(EXIT_FAILURE);
                 }
+                if (!change_now_frame(fn, absolute)){
+                    std::cout << "Invalid frame number: " << fn
+                        << "\n(jump_frames())" << std::endl;
+                    std::exit(EXIT_FAILURE);
+                }
+            }
+
+            std::string ref_private_vars(const std::string &name){
+                if (name == "now_frame"){
+                    return std::to_string(now_frame);
+                } else {
+                    std::cout << "variable '" << name << "' is not exist.\n"
+                        << "(ref_private_vars)\n";
+                    return "";
+                }
+            }
+
+
+        private:
+            void calc_mol(Eigen::VectorXd &molcol, int N, int M){
+                int id = header_map->at("id");
+                N = N != -1 ? N : num_atoms/M;
+                if (N < 0){
+                    std::cout << "Since there is no 'mol' in ATOMS in the dump file,"
+                        << " it is necessary to write N or M in the input file.\n";
+                    std::exit(EXIT_FAILURE);
+                }
+                for (int i = 0; i < num_atoms; i++)
+                    molcol(i) = ((int)atoms_all_data->coeff(i, id) - 1) / N + 1;
             }
     }; // class ExtraReadDump
 }

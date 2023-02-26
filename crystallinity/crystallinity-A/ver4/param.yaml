@@ -1,0 +1,16 @@
+input_dump_path: path/to/*.lammpstrj
+input_rotationtxt_path: path/to/rotation.txt
+output_cry_dump_path: cry_dump.lammpstrj
+output_cry_text_path: cry.txt
+k: 16
+beta: 2
+lambda_threshold: 0.9
+neighbor_stem_distance_threshold: 8
+theta_deg_threshold: 5
+N: 49
+M: 512
+special_bonds:
+  - false # 同一鎖内, 1つ隣のstemを計算から除外する場合はfalse
+  - true  # 同一鎖内, 2つ隣のstemを計算に含める場合はtrue
+  - true  # 3つ隣のstem (以下同様)
+dump_frames: 1001
