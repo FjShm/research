@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("cannot read input file.")
-        eixt()
+        exit()
     dat = np.loadtxt(sys.argv[1])
     fig = plt.figure(dpi=300)
     ax = fig.add_subplot(
@@ -20,4 +20,4 @@ if __name__ == "__main__":
         yticks=np.arange(0.06, 0.21, 0.02),
     )
     ax.plot(dat[:,0], dat[:,1]*0.01, "r-")
-    fig.savefig(os.path.splitext(sys.argv[1])[0], bbox_inches="tight")
+    fig.savefig(f"{os.path.splitext(sys.argv[1])[0]}.eps", bbox_inches="tight")
