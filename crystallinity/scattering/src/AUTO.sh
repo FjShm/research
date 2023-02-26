@@ -100,6 +100,8 @@ echo " done"
 # prepare
 echo -n "[`date +\"%Y-%m-%d %H:%M:%S\"`] preparing some variables..."
 cwd=`pwd`
+DUMP_PATH=$(cd $(dirname $DUMP_PATH) && pwd)/$(basename $DUMP_PATH)
+ROTATIONTXT_PATH=$(cd $(dirname $ROTATIONTXT_PATH) && pwd)/$(basename $ROTATIONTXT_PATH)
 mkdir -p results/data && cd results/data && mkdir joined
 kx_all=(`linspace -$K $K $RESOLUTION float`)
 ky=(`reshape_for_ky "${kx_all[*]}"`)
@@ -118,7 +120,6 @@ done
 
 ## core-n has jobs of idx[n] <= id < idx[n+1]
 idx=(`linspace 0 $RESOLUTION $(($CORES+1)) int`)
-RATIO=`array_to_yamllist "${RATIO[*]}"`
 ky=`array_to_yamllist "${ky[*]}"`
 
 ## 自nodeが$NODESに含まれていれば-1しておく
@@ -133,6 +134,27 @@ if [ -n "$hostnode" ]; then # hostnodeが空文字でない場合
         HAS_SELF_NODE=true
     fi
 fi
+echo " done"
+
+## copy only required frames of dump and rotation.txt
+echo -n "[`date +\"%Y-%m-%d %H:%M:%S\"`] copying `basename $DUMP_PATH`, `basename $ROTATIONTXT_PATH`..."
+ROW_FRAMES=$(($N*$M+$HEADER))
+rm -f extracted_`basename $DUMP_PATH` extracted_`basename $ROTATIONTXT_PATH`
+head -n 2 $ROTATIONTXT_PATH >> extracted_`basename $ROTATIONTXT_PATH`
+for fn in ${FRAME_NUMBERS[@]}
+do
+    if [ $fn -gt $DUMP_FRAMES ]; then
+        echo -e " failed\n Invalid 'FRAME_NUMBERS'"
+        echo "1 <= 'FRAME_NUMBERS' <= DUMP_FRAMES"
+        echo "FRAME_NUMBERS: $fn"
+        echo "DUMP_FRAMES: $DUMP_FRAMES"
+        exit 1
+    fi
+    sed -n $(($ROW_FRAMES*($fn-1)+1)),$(($ROW_FRAMES*$fn))p $DUMP_PATH >> extracted_`basename $DUMP_PATH`
+    sed -n $((2+$fn)),$((2+$fn))p $ROTATIONTXT_PATH >> extracted_`basename $ROTATIONTXT_PATH`
+done
+DUMP_PATH=`pwd`/extracted_`basename $DUMP_PATH`
+ROTATIONTXT_PATH=`pwd`/extracted_`basename $ROTATIONTXT_PATH`
 echo " done"
 
 ## save kx, ky
@@ -175,7 +197,6 @@ do
     sed -i -e "s;__KX__;$kx;g" param.yaml
     sed -i -e "s;__KY__;$ky;g" param.yaml
     sed -i -e "s;__IDX__;$kx_idx;g" param.yaml
-    sed -i -e "s;__RATIO__;$RATIO;g" param.yaml
 
     ## select node
     for NODE in ${!NODES[@]}

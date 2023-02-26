@@ -6,12 +6,12 @@ int main(int argc, char* argv[]){
     YAML::Node param = YAML::LoadFile(argv[1]);
     const std::string dump_path = param["input_dump_path"].as<std::string>();
     const std::string rot_path = param["input_rotationtxt_path"].as<std::string>();
-    const std::string out_dir = param["output_dir"].as<std::string>("LOG.out");
+    const std::string out_dir = param["output_dir"].as<std::string>(".");
     const std::string aspect = param["aspect"].as<std::string>("xz");
     const int frames = param["dump_frames"].as<int>(-1);
     const std::vector<double> kx_all = param["kx"].as< std::vector<double> >();
     const std::vector<double> ky_all = param["ky"].as< std::vector<double> >();
-    const std::vector<double> ratio = param["ratio"].as< std::vector<double> >();
+    const std::vector<double> ratio = param["ratio"].as< std::vector<double> >(std::vector<double>(0));
     int N = param["N"].as<int>(-1);
     int M = param["M"].as<int>(-1);
 
@@ -70,11 +70,13 @@ int main(int argc, char* argv[]){
             std::exit(EXIT_FAILURE);
         }
 
-        double d_ratio = std::abs((double)loop_count++ / (double)frames - ratio[ratio_idx]);
-        double d_ratio_next = std::abs((double)loop_count / (double)frames - ratio[ratio_idx]);
-        if (d_ratio_next < d_ratio && loop_count < frames){
-            ++show_progress;
-            continue;
+        if (!ratio.empty()){
+            double d_ratio = std::abs((double)loop_count++ / (double)frames - ratio[ratio_idx]);
+            double d_ratio_next = std::abs((double)loop_count / (double)frames - ratio[ratio_idx]);
+            if (d_ratio_next < d_ratio && loop_count < frames){
+                ++show_progress;
+                continue;
+            }
         }
 
         // validation
@@ -93,7 +95,7 @@ int main(int argc, char* argv[]){
             w_coordinations[i] = w_coordinations[i].transpose() * rot;
 
         // calculate scattering function
-        std::string path = out_dir + "/LOG." + std::to_string(ratio[ratio_idx]) + ".out";
+        std::string path = out_dir + "/LOG." + std::to_string(rd.timestep) + ".out";
         std::ofstream out{path, std::ios::out | std::ios::trunc};
         double Sk, kr;
         for (double ky : ky_all){
