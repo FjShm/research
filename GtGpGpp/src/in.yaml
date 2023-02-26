@@ -1,0 +1,42 @@
+corr_txt_path: sample_data/corr.dat
+
+# column indexes of each values in 'corr_txt_path'
+header:
+  t: 0
+  pxy: 1
+  pxz: 2
+  pyz: 3
+  pxxyy: 4
+  pxxzz: 5
+  pyyzz: 6
+
+# ratio of normal stress difference
+r: 0.4
+
+unit_conversion:
+  # convert pressure unit from 'corr_txt_path' to [Pa]
+  pressure: 101325.
+  # convert time
+  time: 1.e-6
+
+# system volume [m3]
+V: 1.66239337109736e-24
+
+# temperature [K]
+T: 360.
+
+# x-range using for calculating G', G'' (time unit)
+using_data_range:
+  - 0.
+  - 1000.
+
+# Whether to exclude G < 0 when calculating G',G''
+drop_minusGt: true
+
+# x-range using for calculating fitting line of G', G'' (time unit)
+gpgpp_fitting_range:
+  - 0.001
+  - 0.008
+
+# if this is true, datetime is appended to all exported files
+file_version: true
