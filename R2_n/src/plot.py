@@ -2,15 +2,14 @@ import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("cannot read input file.")
         eixt()
-    df = pd.read_csv(sys.argv[1], sep="\s+", header=None)
-    fig = plt.figure(dpi=500)
+    dat = np.loadtxt(sys.argv[1])
+    fig = plt.figure(dpi=300)
     ax = fig.add_subplot(
         111,
         xlabel=r"$n$",
@@ -20,5 +19,5 @@ if __name__ == "__main__":
         xticks=np.arange(0, 51, 5),
         yticks=np.arange(0.06, 0.21, 0.02),
     )
-    ax.plot(list(df[0]), list(df[1] / 100), "r-")
+    ax.plot(dat[:,0], dat[:,1]*0.01, "r-")
     fig.savefig(os.path.splitext(sys.argv[1])[0], bbox_inches="tight")
