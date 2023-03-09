@@ -39,6 +39,7 @@ class CalcUip1TableFacade:
                 Max=Max,
                 Maxy_fixed=Maxy_fixed,
                 Maxd_fixed=Maxd_fixed,
+                spacing=True,
             )
             print("extrapolate Max")
         if Min < x[0]:
@@ -49,6 +50,7 @@ class CalcUip1TableFacade:
                 Min=Min,
                 Miny_fixed=Miny_fixed,
                 Mind_fixed=Mind_fixed,
+                spacing=True,
             )
             print("extrapolate Min")
 
