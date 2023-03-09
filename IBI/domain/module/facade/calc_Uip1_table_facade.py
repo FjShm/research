@@ -42,6 +42,18 @@ class CalcUip1TableFacade:
         x_sp, Uip1_sp = b_spline_scipy(x_sp, Uip1_sp, num=500, spacing=True)
         F_sp = list(-np.array(self.__deriv(x_sp, Uip1_sp)))
 
+        # shift
+        if Uip1_adapter.shift is not None:
+            if Uip1_adapter.shift == "min":
+                diff = min(Uip1_sp)
+            elif Uip1_adapter.shift == "right":
+                diff = Uip1_sp[-1]
+            elif Uip1_adapter.shift == "left":
+                diff = Uip1_sp[0]
+            else:
+                exit(f"Invalid 'shift_U_min_to_zero': '{shift}'")
+            Uip1_sp = list(np.array(Uip1_sp) - diff)
+            
         # create LAMMPS table
         table = LAMMPSPotentialTableIO("", Uip1_adapter.section_name)
         table.x = x_sp
