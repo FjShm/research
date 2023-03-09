@@ -27,7 +27,11 @@ class CalcUip1Adapter:
         dist: GetDistribution,
         Ui: GetUi,
         Min: float,
+        Miny_fixed: float,
+        Mind_fixed: float,
         Max: float,
+        Maxy_fixed: float,
+        Maxd_fixed: float,
         num: int,
         ibi_accelerator: float = 1,
         shift: bool = False,
@@ -42,7 +46,11 @@ class CalcUip1Adapter:
         self.x_Ui = Ui.x
         self.bounds = bounds
         self.Min = Min
+        self.Miny_fixed = Miny_fixed
+        self.Mind_fixed = Mind_fixed
         self.Max = Max
+        self.Maxy_fixed = Maxy_fixed
+        self.Maxd_fixed = Maxd_fixed
         self.num = num
         self.ibi_accelerator = ibi_accelerator
         self.shift = shift
