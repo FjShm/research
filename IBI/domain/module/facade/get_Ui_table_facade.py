@@ -6,7 +6,7 @@ class GetUiTableFacade:
         previous_params_filepath = Ui_adapter.previous_params_filepath
         with open(previous_params_filepath, mode="r") as f:
             for line in f:
-                coeff = line.split(" ")
+                coeff = line.split()
                 break
         table_path = coeff[0]
         section_name = coeff[1]
