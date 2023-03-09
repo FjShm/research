@@ -38,7 +38,7 @@ def default_input_data():
         "output_dir": "step_ip1",
         "num_table": 0,
         "ibi_accelerator": 1,
-        "shift_U_min_to_zero" : False,
+        "shift_U_min_to_zero" : None,
     }
     return InputData
 
