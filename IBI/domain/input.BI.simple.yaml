@@ -1,0 +1,57 @@
+"b_AA":
+  "type": "bond"
+  "function_type": "table"
+  "P_target_path": "target_distribution/bond_simple.dat"
+  "min": 2
+  "max": 5
+  "ratio": 0.01
+  "output_dir": "step_ip1_simple"
+  "shift_U_min_to_zero": true
+
+"b_AAA":
+  "type": "angle"
+  "function_type": "table"
+  "P_target_path": "target_distribution/angle_simple.dat"
+  "min": 0
+  "max": 180
+  "ratio": 0.01
+  "output_dir": "step_ip1_simple"
+  "shift_U_min_to_zero": true
+
+"b_AAAA":
+  "type": "dihedral"
+  "function_type": "table"
+  "P_target_path": "target_distribution/dihed_simple.dat"
+  "min": -180.0
+  "max": 180.0
+  "ratio": 0.01
+  "output_dir": "step_ip1_simple"
+  "shift_U_min_to_zero": true
+
+    #"AA":
+    #  "type": "pair"
+    #  "function_type": "table"
+    #  "eval_type": "non_bonded"
+    #  "P_target_path": "target_distribution/rdf.AA"
+    #  "min": 0.1
+    #  "max": 15
+    #  "ratio": 0.01
+    #  "output_dir": "step_ip1"
+    #
+    #"AB":
+    #  "type": "pair"
+    #  "function_type": "table"
+    #  "eval_type": "non_bonded"
+    #  "P_target_path": "target_distribution/rdf.AB"
+    #  "min": 0.1
+    #  "max": 15
+    #  "ratio": 0.01
+    #
+    #"BB":
+    #  "type": "pair"
+    #  "function_type": "table"
+    #  "eval_type": "non_bonded"
+    #  "P_target_path": "target_distribution/rdf.BB"
+    #  "min": 0.1
+    #  "max": 15
+    #  "ratio": 0.01
