@@ -32,13 +32,14 @@ class CalcUip1:
             dist=self.__dist,
             Ui=self.__Ui,
             Min=self.__InputData["min"],
-            Miny_fixed=self.__InputData["miny_fixed"],
-            Mind_fixed=self.__InputData["mind_fixed"],
+            Min_parabola_axis=self.__InputData["min_parabola_axis"],
             Max=self.__InputData["max"],
-            Maxy_fixed=self.__InputData["maxy_fixed"],
-            Maxd_fixed=self.__InputData["maxd_fixed"],
+            Max_parabola_axis=self.__InputData["max_parabola_axis"],
             num=self.__InputData["num_table"],
             ibi_accelerator=self.__InputData["ibi_accelerator"],
+            Mind_coeff=self.__InputData["mind_coeff"],
+            Maxd_coeff=self.__InputData["maxd_coeff"],
+            extrapolate_type=self.__InputData["extrapolate_type"],
             shift=self.__InputData["shift_U_min_to_zero"],
         ).request()
         return self
