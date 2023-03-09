@@ -1,0 +1,88 @@
+"b_AB":
+  "type": "bond"
+  "function_type": "harmonic_bond"
+  "P_target_path": "target_distribution/bond_1.dat"
+  "min": 2
+  "max": 5
+  "ratio": 0.01
+  "bounds": [[95, 2.4], [105, 2.5]]
+  "output_dir": "step_ip1"
+  "shift_U_min_to_zero": true
+
+"b_BA":
+  "type": "bond"
+  "function_type": "harmonic_bond"
+  "P_target_path": "target_distribution/bond_2.dat"
+  "min": 2
+  "max": 5
+  "ratio": 0.01
+  "bounds": [[56, 2.9], [62, 3.1]]
+  "output_dir": "step_ip1"
+  "shift_U_min_to_zero": true
+
+"b_ABA":
+  "type": "angle"
+  "function_type": "harmonic_angle"
+  "P_target_path": "target_distribution/angle_1.dat"
+  "min": 50
+  "max": 180
+  "ratio": 0.01
+  "bounds": [[26, 92], [27, 93]]
+  "output_dir": "step_ip1"
+  "shift_U_min_to_zero": true
+
+"b_BAB":
+  "type": "angle"
+  "function_type": "gaussian"
+  "P_target_path": "target_distribution/angle_2.dat"
+  "min": 0
+  "max": 180
+  "ratio": 0.01
+  "bounds": [[0.05, 0.25, 105, 1.1, 0.5, 195], [0.06, 0.27, 110, 1.2, 0.6, 197]]
+  "output_dir": "step_ip1"
+
+"b_ABAB":
+  "type": "dihedral"
+  "function_type": "nharmonic7"
+  "P_target_path": "target_distribution/dihed_1.dat"
+  "min": -180
+  "max": 180
+  "ratio": 0.01
+  "output_dir": "step_ip1"
+
+"b_BABA":
+  "type": "dihedral"
+  "function_type": "nharmonic7"
+  "P_target_path": "target_distribution/dihed_2.dat"
+  "min": -180
+  "max": 180
+  "ratio": 0.01
+  "output_dir": "step_ip1"
+
+"AA":
+  "type": "pair"
+  "function_type": "table"
+  "eval_type": "non_bonded"
+  "P_target_path": "target_distribution/rdf.AA"
+  "min": 0.1
+  "max": 15
+  "ratio": 0.01
+  "output_dir": "step_ip1"
+
+"AB":
+  "type": "pair"
+  "function_type": "table"
+  "eval_type": "non_bonded"
+  "P_target_path": "target_distribution/rdf.AB"
+  "min": 0.1
+  "max": 15
+  "ratio": 0.01
+
+"BB":
+  "type": "pair"
+  "function_type": "table"
+  "eval_type": "non_bonded"
+  "P_target_path": "target_distribution/rdf.BB"
+  "min": 0.1
+  "max": 15
+  "ratio": 0.01
