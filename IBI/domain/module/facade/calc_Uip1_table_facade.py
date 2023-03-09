@@ -18,10 +18,8 @@ class CalcUip1TableFacade:
 
         # Array length tuning
         len_sp = len_origin = len(x)
-        Min = Uip1_adapter.Min  # xの定義域の最小
         Miny_fixed = Uip1_adapter.Miny_fixed  # (外挿時に使用)x=Minにおけるyの値
         Mind_fixed = Uip1_adapter.Mind_fixed  # (外挿時に使用)x=Minにおけるdの値
-        Max = Uip1_adapter.Max  # xの定義域の最大
         Maxy_fixed = Uip1_adapter.Maxy_fixed  # (外挿時に使用)x=Maxにおけるyの値
         Maxd_fixed = Uip1_adapter.Maxd_fixed  # (外挿時に使用)x=Maxにおけるdの値
 
@@ -31,28 +29,18 @@ class CalcUip1TableFacade:
         F_sp = list(-np.array(self.__deriv(x, Uip1_sp)))
 
         # extrapolation
-        if x[-1] < Max:
-            x_sp, Uip1_sp, F_sp = self.__extrapolate(
-                x_sp,
-                Uip1_sp,
-                F_sp,
-                Max=Max,
-                Maxy_fixed=Maxy_fixed,
-                Maxd_fixed=Maxd_fixed,
-                spacing=True,
-            )
-            print("extrapolate Max")
-        if Min < x[0]:
-            x_sp, Uip1_sp, F_sp = self.__extrapolate(
-                x_sp,
-                Uip1_sp,
-                F_sp,
-                Min=Min,
-                Miny_fixed=Miny_fixed,
-                Mind_fixed=Mind_fixed,
-                spacing=True,
-            )
-            print("extrapolate Min")
+        x_sp, Uip1_sp, F_sp = self.__extrapolate(
+            x_sp,
+            Uip1_sp,
+            F_sp,
+            Max=Uip1_adapter.Max,  # xの定義域の最大
+            Min=Uip1_adapter.Min,  # xの定義域の最小
+            extrapolate_type=Uip1_adapter.extrapolate_type,  # 外挿の関数型
+            Maxd_coeff=Uip1_adapter.Maxd_coeff,  # (外挿時に使用)x=Maxにおけるdに掛ける値
+            Mind_coeff=Uip1_adapter.Mind_coeff,  # (外挿時に使用)x=Minにおけるdに掛ける値
+            Max_parabola_axis=Uip1_adapter.Max_parabola_axis,  # (harmonic外挿時に使用)Max外挿時の放物線の軸
+            Min_parabola_axis=Uip1_adapter.Min_parabola_axis,  # (harmonic外挿時に使用)Min外挿時の放物線の軸
+        )
 
         # spacing
         x_sp, Uip1_sp = b_spline_scipy(x_sp, Uip1_sp, num=500, spacing=True)
@@ -97,42 +85,66 @@ class CalcUip1TableFacade:
         d: list,
         Min: float = None,
         Max: float = None,
-        Miny_fixed: float = None,
-        Maxy_fixed: float = None,
-        Mind_fixed: float = None,
-        Maxd_fixed: float = None,
-        spacing: bool = False,
+        extrapolate_type: str = "linear",  # linear, harmonic
+        Mind_coeff: float = 1.0,
+        Maxd_coeff: float = 1.0,
+        Min_parabola_axis: float = None,
+        Max_parabola_axis: float = None,
     ) -> tuple:
         # dはtiltと符号が逆であることに注意して外挿
-        if Min is None:
+        # linear: y = ax + b
+        # harmonic: y = p(x - a)^2 + q
+        x_rhs, x_lhs = [], []
+        y_rhs, y_lhs = [], []
+        lenx = len(x)
+        if Max is not None and x[-1] < Max:
             # 右側へ外挿
-            if Maxd_fixed is None:
-                d_ex = d[-1]
+            print("extrapolate Max")
+            x_rhs = np.linspace(x[-1], Max, num=len(x) * 10)[1:]
+            if extrapolate_type == "linear":
+                a = -d[-1] * Maxd_coeff
+                b = y[-1] - a * x[-1]
+                y_rhs = a * x_rhs + b
+            elif extrapolate_type == "harmonic":
+                m = -d[-1] * Maxd_coeff
+                a = (
+                    np.mean([x[0], x[-1]])
+                    if Max_parabola_axis is None
+                    else Max_parabola_axis
+                )
+                p = 0.5 * m / (x[-1] - a)
+                q = y[-1] - 0.5 * m * (x[-1] - a)
+                y_rhs = p * (x_rhs - a) ** 2 + q
             else:
-                d_ex = Maxd_fixed
-            d[-1] = d_ex
-            if Maxy_fixed is None:
-                y[-1] = y[-1] - d_ex * (Max - x[-1])
-            else:
-                y[-1] = Maxy_fixed
-            x[-1] = Max
-        else:
+                exit(f"Invalid 'extrapolate_type': '{extrapolate_type}'")
+        elif Min is not None and Min < x[0]:
             # 左側へ外挿
-            if Mind_fixed is None:
-                d_ex = d[0]
+            print("extrapolate Min")
+            x_lhs = np.linspace(Min, x[0], num=len(x) * 10)[:-1]
+            if extrapolate_type == "linear":
+                a = -d[0] * Maxd_coeff
+                b = y[0] - a * x[0]
+                y_lhs = a * x_lhs + b
+            elif extrapolate_type == "harmonic":
+                m = -d[0] * Maxd_coeff
+                a = (
+                    np.mean([x[0], x[-1]])
+                    if Max_parabola_axis is None
+                    else Max_parabola_axis
+                )
+                p = 0.5 * m / (x[0] - a)
+                q = y[0] - 0.5 * m * (x[0] - a)
+                y_lhs = p * (x_lhs - a) ** 2 + q
             else:
-                d_ex = Mind_fixed
-            d[0] = d_ex
-            if Miny_fixed is None:
-                y[0] = y[0] + d_ex * (x[0] - Min)
-            else:
-                y[0] = Miny_fixed
-            x[0] = Min
+                exit(f"Invalid 'extrapolate_type': '{extrapolate_type}'")
+
+        x = list(x_lhs) + list(x) + list(x_rhs)
+        y = list(y_lhs) + list(y) + list(y_rhs)
+
         # spacing
-        if spacing is True:
-            f = interp1d(x, y)
-            x = np.linspace(x[0], x[-1], num=len(x))
-            y = f(x)
-            x = list(x)
-            d = list(-np.array(self.__deriv(x, y)))
+        f = interp1d(x, y)
+        x = np.linspace(x[0], x[-1], num=lenx)
+        y = f(x)
+        x = list(x)
+        d = list(-np.array(self.__deriv(x, y)))
         return x, y, d
