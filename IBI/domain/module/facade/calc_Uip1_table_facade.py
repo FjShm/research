@@ -41,7 +41,6 @@ class CalcUip1TableFacade:
         # spacing
         x_sp, Uip1_sp = b_spline_scipy(x_sp, Uip1_sp, num=500, spacing=True)
         F_sp = list(-np.array(self.__deriv(x_sp, Uip1_sp)))
-        F_sp[-1] = 0
 
         # create LAMMPS table
         table = LAMMPSPotentialTableIO("", Uip1_adapter.section_name)
