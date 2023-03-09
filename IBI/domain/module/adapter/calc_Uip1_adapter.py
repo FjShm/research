@@ -35,7 +35,7 @@ class CalcUip1Adapter:
         Mind_coeff: float = 1.0,
         Maxd_coeff: float = 1.0,
         extrapolate_type: str = "linear",
-        shift: bool = False,
+        shift: str = None,
     ) -> None:
         self.function_type = function_type
         self.section_name = section_name
