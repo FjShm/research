@@ -18,10 +18,6 @@ class CalcUip1TableFacade:
 
         # Array length tuning
         len_sp = len_origin = len(x)
-        Miny_fixed = Uip1_adapter.Miny_fixed  # (外挿時に使用)x=Minにおけるyの値
-        Mind_fixed = Uip1_adapter.Mind_fixed  # (外挿時に使用)x=Minにおけるdの値
-        Maxy_fixed = Uip1_adapter.Maxy_fixed  # (外挿時に使用)x=Maxにおけるyの値
-        Maxd_fixed = Uip1_adapter.Maxd_fixed  # (外挿時に使用)x=Maxにおけるdの値
 
         # smooth Uip1 by B-spline
         x_sp = x
