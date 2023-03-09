@@ -115,11 +115,10 @@ class CalcUip1TableFacade:
                 y_rhs = a * x_rhs + b
             elif extrapolate_type == "harmonic":
                 m = -d[-1] * Maxd_coeff
-                a = (
-                    np.mean([x[0], x[-1]])
-                    if Max_parabola_axis is None
-                    else Max_parabola_axis
-                )
+                if Max_parabola_axis is None:
+                    a = np.mean([x[0], x[-1]])
+                else:
+                    a = Max_parabola_axis
                 p = 0.5 * m / (x[-1] - a)
                 q = y[-1] - 0.5 * m * (x[-1] - a)
                 y_rhs = p * (x_rhs - a) ** 2 + q
@@ -130,16 +129,15 @@ class CalcUip1TableFacade:
             print("extrapolate Min")
             x_lhs = np.linspace(Min, x[0], num=len(x) * 10)[:-1]
             if extrapolate_type == "linear":
-                a = -d[0] * Maxd_coeff
+                a = -d[0] * Mind_coeff
                 b = y[0] - a * x[0]
                 y_lhs = a * x_lhs + b
             elif extrapolate_type == "harmonic":
-                m = -d[0] * Maxd_coeff
-                a = (
-                    np.mean([x[0], x[-1]])
-                    if Max_parabola_axis is None
-                    else Max_parabola_axis
-                )
+                m = -d[0] * Mind_coeff
+                if Min_parabola_axis is None:
+                    a = np.mean([x[0], x[-1]])
+                else:
+                    a = Min_parabola_axis
                 p = 0.5 * m / (x[0] - a)
                 q = y[0] - 0.5 * m * (x[0] - a)
                 y_lhs = p * (x_lhs - a) ** 2 + q
