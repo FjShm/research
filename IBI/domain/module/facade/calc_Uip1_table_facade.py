@@ -113,7 +113,7 @@ class CalcUip1TableFacade:
                 y_rhs = p * (x_rhs - a) ** 2 + q
             else:
                 exit(f"Invalid 'extrapolate_type': '{extrapolate_type}'")
-        elif Min is not None and Min < x[0]:
+        if Min is not None and Min < x[0]:
             # 左側へ外挿
             print("extrapolate Min")
             x_lhs = np.linspace(Min, x[0], num=len(x) * 10)[:-1]
