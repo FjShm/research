@@ -51,7 +51,7 @@ class CalcUip1TableFacade:
             )
             print("extrapolate Min")
 
-        # spaceing
+        # spacing
         x_sp, Uip1_sp = b_spline_scipy(x_sp, Uip1_sp, num=500, spacing=True)
         F_sp = list(-np.array(self.__deriv(x_sp, Uip1_sp)))
         F_sp[-1] = 0
@@ -98,6 +98,7 @@ class CalcUip1TableFacade:
         Maxy_fixed: float = None,
         Mind_fixed: float = None,
         Maxd_fixed: float = None,
+        spacing: 
     ) -> tuple:
         # dはtiltと符号が逆であることに注意して外挿
         if Min is None:
