@@ -17,8 +17,12 @@ class CalcUip1TableFacade:
 
         # Array length tuning
         len_sp = len_origin = len(x)
-        Min = Uip1_adapter.Min
-        Max = Uip1_adapter.Max
+        Min = Uip1_adapter.Min  # xの定義域の最小
+        Miny_fixed = Uip1_adapter.Miny_fixed  # (外挿時に使用)x=Minにおけるyの値
+        Mind_fixed = Uip1_adapter.Mind_fixed  # (外挿時に使用)x=Minにおけるdの値
+        Max = Uip1_adapter.Max  # xの定義域の最大
+        Maxy_fixed = Uip1_adapter.Maxy_fixed  # (外挿時に使用)x=Maxにおけるyの値
+        Maxd_fixed = Uip1_adapter.Maxd_fixed  # (外挿時に使用)x=Maxにおけるdの値
 
         # smooth Uip1 by B-spline
         x_sp = x
@@ -27,10 +31,24 @@ class CalcUip1TableFacade:
 
         # extrapolation
         if x[-1] < Max:
-            x_sp, Uip1_sp, F_sp = self.__extrapolate(x_sp, Uip1_sp, F_sp, Max=Max)
+            x_sp, Uip1_sp, F_sp = self.__extrapolate(
+                x_sp,
+                Uip1_sp,
+                F_sp,
+                Max=Max,
+                Maxy_fixed=Maxy_fixed,
+                Maxd_fixed=Maxd_fixed,
+            )
             print("extrapolate Max")
         if Min < x[0]:
-            x_sp, Uip1_sp, F_sp = self.__extrapolate(x_sp, Uip1_sp, F_sp, Min=Min)
+            x_sp, Uip1_sp, F_sp = self.__extrapolate(
+                x_sp,
+                Uip1_sp,
+                F_sp,
+                Min=Min,
+                Miny_fixed=Miny_fixed,
+                Mind_fixed=Mind_fixed,
+            )
             print("extrapolate Min")
 
         # spaceing
@@ -70,21 +88,40 @@ class CalcUip1TableFacade:
         return d
 
     def __extrapolate(
-        self, x: list, y: list, d: list, Min: float = None, Max: float = None,
+        self,
+        x: list,
+        y: list,
+        d: list,
+        Min: float = None,
+        Max: float = None,
+        Miny_fixed: float = None,
+        Maxy_fixed: float = None,
+        Mind_fixed: float = None,
+        Maxd_fixed: float = None,
     ) -> tuple:
+        # dはtiltと符号が逆であることに注意して外挿
         if Min is None:
-            # d[-1] = y[-1] / (Max - x[-1])
-            d[-1] = 0
+            # 右側へ外挿
+            if Maxd_fixed is None:
+                d_ex = d[-1]
+            else:
+                d_ex = Maxd_fixed
+            d[-1] = d_ex
+            if Maxy_fixed is None:
+                y[-1] = y[-1] - d_ex * (Max - x[-1])
+            else:
+                y[-1] = Maxy_fixed
             x[-1] = Max
-            y[-1] = 0
         else:
-            # 最大傾きを用いて線形外挿
-            # dmax = d[0]
-            dmax = 3000
-            for d_ in d[1:]:
-                if dmax < d_:
-                    dmax = d_
-            d[0] = dmax
-            y[0] = y[0] + dmax * (x[0] - Min)
+            # 左側へ外挿
+            if Mind_fixed is None:
+                d_ex = d[0]
+            else:
+                d_ex = Mind_fixed
+            d[0] = d_ex
+            if Miny_fixed is None:
+                y[0] = y[0] + d_ex * (x[0] - Min)
+            else:
+                y[0] = Miny_fixed
             x[0] = Min
         return x, y, d
