@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.interpolate import interp1d
 from module.common.LAMMPS_potential_table_IO import LAMMPSPotentialTableIO
 from module.contents.parameters import PRM
 from module.contents.functions.b_spline_scipy import b_spline_scipy
@@ -98,7 +99,7 @@ class CalcUip1TableFacade:
         Maxy_fixed: float = None,
         Mind_fixed: float = None,
         Maxd_fixed: float = None,
-        spacing: 
+        spacing: bool = False,
     ) -> tuple:
         # dはtiltと符号が逆であることに注意して外挿
         if Min is None:
@@ -125,4 +126,11 @@ class CalcUip1TableFacade:
             else:
                 y[0] = Miny_fixed
             x[0] = Min
+        # spacing
+        if spacing is True:
+            f = interp1d(x, y)
+            x = np.linspace(x[0], x[-1], num=len(x))
+            y = f(x)
+            x = list(x)
+            d = list(-np.array(self.__deriv(x, y)))
         return x, y, d
