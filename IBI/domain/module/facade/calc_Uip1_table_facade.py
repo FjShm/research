@@ -53,6 +53,7 @@ class CalcUip1TableFacade:
             else:
                 exit(f"Invalid 'shift_U_min_to_zero': '{shift}'")
             Uip1_sp = list(np.array(Uip1_sp) - diff)
+            Uip1 = list(np.array(Uip1) - diff)
             
         # create LAMMPS table
         table = LAMMPSPotentialTableIO("", Uip1_adapter.section_name)
