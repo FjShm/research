@@ -1,0 +1,61 @@
+b_AA:
+  type: bond
+  function_type: table
+  P_target_path: target_distribution/bond_simple.dat
+  min: 2
+  max: 7
+  ratio: 0.01
+  output_dir: step_ip1_simple
+  shift_U_min_to_zero: min
+  mind_coeff: 1.
+  maxd_coeff: 1.
+  min_parabola_axis: 3.3
+  max_parabola_axis: 4.8
+  extrapolate_type: harmonic
+  num_table: 2000
+
+b_AAA:
+  type: angle
+  function_type: table
+  P_target_path: target_distribution/angle_simple.dat
+  min: 0
+  max: 180
+  ratio: 0.01
+  output_dir: step_ip1_simple
+  shift_U_min_to_zero: min
+  mind_coeff: 1.
+  maxd_coeff: 1.
+  min_parabola_axis: 65.0
+  extrapolate_type: harmonic
+  num_table: 2000
+
+b_AAAA:
+  type: dihedral
+  function_type: table
+  P_target_path: target_distribution/dihed_simple.dat
+  min: -180.0
+  max: 179.5
+  ratio: 0.01
+  output_dir: step_ip1_simple
+  mind_coeff: 0.00001
+  maxd_coeff: 0.00001
+  extrapolate_type: harmonic
+  num_table: 2000
+
+AA:
+  type: pair
+  function_type: table
+  eval_type: non_bonded
+  P_target_path: target_distribution/rdf.simple.AA
+  shift_U_min_to_zero: right
+  min: 0.1
+  max: 15
+  ratio: 0.01
+  output_dir: step_ip1_simple
+  mind_coeff: 1.0
+  maxd_coeff: 0.00000001
+  extrapolate_type: harmonic
+  num_table: 2000
+  min_parabola_axis: 3.9
+  max_parabola_axis: 5.0
+

@@ -26,14 +26,19 @@ def default_input_data():
         "P_target_path": None,
         "P_CG_path": None,
         "previous_params_filepath": None,
+        "extrapolate_type": "linear",
         "min": None,
+        "mind_coeff": 1.0,
+        "min_parabola_axis": None,
         "max": None,
+        "maxd_coeff": 1.0,
+        "max_parabola_axis": None,
         "ratio": 0.01,
         "bounds": (-np.inf, np.inf),
         "output_dir": "step_ip1",
         "num_table": 0,
         "ibi_accelerator": 1,
-        "shift_U_min_to_zero" : False,
+        "shift_U_min_to_zero" : None,
     }
     return InputData
 

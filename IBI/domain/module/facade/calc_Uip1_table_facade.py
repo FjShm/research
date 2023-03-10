@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.interpolate import interp1d
 from module.common.LAMMPS_potential_table_IO import LAMMPSPotentialTableIO
 from module.contents.parameters import PRM
 from module.contents.functions.b_spline_scipy import b_spline_scipy
@@ -17,8 +18,6 @@ class CalcUip1TableFacade:
 
         # Array length tuning
         len_sp = len_origin = len(x)
-        Min = Uip1_adapter.Min
-        Max = Uip1_adapter.Max
 
         # smooth Uip1 by B-spline
         x_sp = x
@@ -26,18 +25,36 @@ class CalcUip1TableFacade:
         F_sp = list(-np.array(self.__deriv(x, Uip1_sp)))
 
         # extrapolation
-        if x[-1] < Max:
-            x_sp, Uip1_sp, F_sp = self.__extrapolate(x_sp, Uip1_sp, F_sp, Max=Max)
-            print("extrapolate Max")
-        if Min < x[0]:
-            x_sp, Uip1_sp, F_sp = self.__extrapolate(x_sp, Uip1_sp, F_sp, Min=Min)
-            print("extrapolate Min")
+        x_sp, Uip1_sp, F_sp = self.__extrapolate(
+            x_sp,
+            Uip1_sp,
+            F_sp,
+            Max=Uip1_adapter.Max,  # xの定義域の最大
+            Min=Uip1_adapter.Min,  # xの定義域の最小
+            extrapolate_type=Uip1_adapter.extrapolate_type,  # 外挿の関数型
+            Maxd_coeff=Uip1_adapter.Maxd_coeff,  # (外挿時に使用)x=Maxにおけるdに掛ける値
+            Mind_coeff=Uip1_adapter.Mind_coeff,  # (外挿時に使用)x=Minにおけるdに掛ける値
+            Max_parabola_axis=Uip1_adapter.Max_parabola_axis,  # (harmonic外挿時に使用)Max外挿時の放物線の軸
+            Min_parabola_axis=Uip1_adapter.Min_parabola_axis,  # (harmonic外挿時に使用)Min外挿時の放物線の軸
+        )
 
-        # spaceing
+        # spacing
         x_sp, Uip1_sp = b_spline_scipy(x_sp, Uip1_sp, num=500, spacing=True)
         F_sp = list(-np.array(self.__deriv(x_sp, Uip1_sp)))
-        F_sp[-1] = 0
 
+        # shift
+        if Uip1_adapter.shift is not None:
+            if Uip1_adapter.shift == "min":
+                diff = min(Uip1_sp)
+            elif Uip1_adapter.shift == "right":
+                diff = Uip1_sp[-1]
+            elif Uip1_adapter.shift == "left":
+                diff = Uip1_sp[0]
+            else:
+                exit(f"Invalid 'shift_U_min_to_zero': '{shift}'")
+            Uip1_sp = list(np.array(Uip1_sp) - diff)
+            Uip1 = list(np.array(Uip1) - diff)
+            
         # create LAMMPS table
         table = LAMMPSPotentialTableIO("", Uip1_adapter.section_name)
         table.x = x_sp
@@ -70,21 +87,70 @@ class CalcUip1TableFacade:
         return d
 
     def __extrapolate(
-        self, x: list, y: list, d: list, Min: float = None, Max: float = None,
+        self,
+        x: list,
+        y: list,
+        d: list,
+        Min: float = None,
+        Max: float = None,
+        extrapolate_type: str = "linear",  # linear, harmonic
+        Mind_coeff: float = 1.0,
+        Maxd_coeff: float = 1.0,
+        Min_parabola_axis: float = None,
+        Max_parabola_axis: float = None,
     ) -> tuple:
-        if Min is None:
-            # d[-1] = y[-1] / (Max - x[-1])
-            d[-1] = 0
-            x[-1] = Max
-            y[-1] = 0
-        else:
-            # 最大傾きを用いて線形外挿
-            # dmax = d[0]
-            dmax = 3000
-            for d_ in d[1:]:
-                if dmax < d_:
-                    dmax = d_
-            d[0] = dmax
-            y[0] = y[0] + dmax * (x[0] - Min)
-            x[0] = Min
+        # dはtiltと符号が逆であることに注意して外挿
+        # linear: y = ax + b
+        # harmonic: y = p(x - a)^2 + q
+        x_rhs, x_lhs = [], []
+        y_rhs, y_lhs = [], []
+        lenx = len(x)
+        if Max is not None and x[-1] < Max:
+            # 右側へ外挿
+            print("extrapolate Max")
+            x_rhs = np.linspace(x[-1], Max, num=len(x) * 10)[1:]
+            if extrapolate_type == "linear":
+                a = -d[-1] * Maxd_coeff
+                b = y[-1] - a * x[-1]
+                y_rhs = a * x_rhs + b
+            elif extrapolate_type == "harmonic":
+                m = -d[-1] * Maxd_coeff
+                if Max_parabola_axis is None:
+                    a = np.mean([x[0], x[-1]])
+                else:
+                    a = Max_parabola_axis
+                p = 0.5 * m / (x[-1] - a)
+                q = y[-1] - 0.5 * m * (x[-1] - a)
+                y_rhs = p * (x_rhs - a) ** 2 + q
+            else:
+                exit(f"Invalid 'extrapolate_type': '{extrapolate_type}'")
+        if Min is not None and Min < x[0]:
+            # 左側へ外挿
+            print("extrapolate Min")
+            x_lhs = np.linspace(Min, x[0], num=len(x) * 10)[:-1]
+            if extrapolate_type == "linear":
+                a = -d[0] * Mind_coeff
+                b = y[0] - a * x[0]
+                y_lhs = a * x_lhs + b
+            elif extrapolate_type == "harmonic":
+                m = -d[0] * Mind_coeff
+                if Min_parabola_axis is None:
+                    a = np.mean([x[0], x[-1]])
+                else:
+                    a = Min_parabola_axis
+                p = 0.5 * m / (x[0] - a)
+                q = y[0] - 0.5 * m * (x[0] - a)
+                y_lhs = p * (x_lhs - a) ** 2 + q
+            else:
+                exit(f"Invalid 'extrapolate_type': '{extrapolate_type}'")
+
+        x = list(x_lhs) + list(x) + list(x_rhs)
+        y = list(y_lhs) + list(y) + list(y_rhs)
+
+        # spacing
+        f = interp1d(x, y)
+        x = np.linspace(x[0], x[-1], num=lenx)
+        y = f(x)
+        x = list(x)
+        d = list(-np.array(self.__deriv(x, y)))
         return x, y, d

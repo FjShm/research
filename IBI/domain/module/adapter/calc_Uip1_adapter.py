@@ -27,10 +27,15 @@ class CalcUip1Adapter:
         dist: GetDistribution,
         Ui: GetUi,
         Min: float,
+        Min_parabola_axis: float,
         Max: float,
+        Max_parabola_axis: float,
         num: int,
-        ibi_accelerator: float = 1,
-        shift: bool = False,
+        ibi_accelerator: float = 1.0,
+        Mind_coeff: float = 1.0,
+        Maxd_coeff: float = 1.0,
+        extrapolate_type: str = "linear",
+        shift: str = None,
     ) -> None:
         self.function_type = function_type
         self.section_name = section_name
@@ -42,7 +47,12 @@ class CalcUip1Adapter:
         self.x_Ui = Ui.x
         self.bounds = bounds
         self.Min = Min
+        self.Mind_coeff = Mind_coeff
+        self.Min_parabola_axis = Min_parabola_axis
         self.Max = Max
+        self.Maxd_coeff = Maxd_coeff
+        self.Max_parabola_axis = Max_parabola_axis
+        self.extrapolate_type = extrapolate_type
         self.num = num
         self.ibi_accelerator = ibi_accelerator
         self.shift = shift
