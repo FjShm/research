@@ -54,8 +54,8 @@ double calc_auto_corr(
     std::vector<std::vector<Eigen::Vector3d>*> &Xp,
     const int &fp,
     const double &df,
-    const int &num_use_frames,
     const int &p,
+    const int &num_use_frames,
     const int &N,
     const int &M
 ){
